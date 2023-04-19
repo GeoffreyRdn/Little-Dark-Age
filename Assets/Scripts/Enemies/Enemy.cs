@@ -96,7 +96,12 @@ namespace Enemies
 
         private void Chase()
         {
-            if (target != null) agent.SetDestination(target.position);
+            if (target != null)
+            {
+                Vector3 enemyPosition = target.position;
+                Vector3 targetPosition = new Vector3(enemyPosition.x, transform.position.y, enemyPosition.z);
+                agent.SetDestination(targetPosition);
+            }
         }
 
         #region DEBUG
