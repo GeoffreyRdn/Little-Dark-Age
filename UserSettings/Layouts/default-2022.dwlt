@@ -119,7 +119,7 @@ MonoBehaviour:
   m_MinSize: {x: 300, y: 100}
   m_MaxSize: {x: 24288, y: 16192}
   vertical: 0
-  controlID: 38
+  controlID: 104
 --- !u!114 &6
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -187,10 +187,10 @@ MonoBehaviour:
     serializedVersion: 2
     x: 0
     y: 0
-    width: 280
+    width: 286.4
     height: 432
-  m_MinSize: {x: 201, y: 221}
-  m_MaxSize: {x: 4001, y: 4021}
+  m_MinSize: {x: 200, y: 200}
+  m_MaxSize: {x: 4000, y: 4000}
   m_ActualView: {fileID: 13}
   m_Panes:
   - {fileID: 13}
@@ -211,9 +211,9 @@ MonoBehaviour:
   m_Children: []
   m_Position:
     serializedVersion: 2
-    x: 280
+    x: 286.4
     y: 0
-    width: 891.19995
+    width: 884.7999
     height: 432
   m_MinSize: {x: 200, y: 200}
   m_MaxSize: {x: 4000, y: 4000}
@@ -396,7 +396,7 @@ MonoBehaviour:
     serializedVersion: 2
     x: 0
     y: 73.6
-    width: 279
+    width: 285.4
     height: 411
   m_SerializedDataModeController:
     m_DataMode: 0
@@ -410,9 +410,9 @@ MonoBehaviour:
   m_SceneHierarchy:
     m_TreeViewState:
       scrollPos: {x: 0, y: 0}
-      m_SelectedIDs: 
+      m_SelectedIDs: 30880000
       m_LastClickedID: 0
-      m_ExpandedIDs: 60b8ffff12baffff66baffff7addfffff4eeffff46f1ffff
+      m_ExpandedIDs: 02a9d6ffc8aed6fff2afd6ff18d0ffff56f9ffff
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -456,9 +456,9 @@ MonoBehaviour:
     m_Tooltip: 
   m_Pos:
     serializedVersion: 2
-    x: 280
+    x: 286.4
     y: 73.6
-    width: 889.19995
+    width: 882.7999
     height: 411
   m_SerializedDataModeController:
     m_DataMode: 0
@@ -843,9 +843,9 @@ MonoBehaviour:
   m_PlayAudio: 0
   m_AudioPlay: 0
   m_Position:
-    m_Target: {x: 0, y: 0, z: 0}
+    m_Target: {x: 0.32621157, y: 1.6693949, z: -1.8352535}
     speed: 2
-    m_Value: {x: 0, y: 0, z: 0}
+    m_Value: {x: 0.32621157, y: 1.6693949, z: -1.8352535}
   m_RenderMode: 0
   m_CameraMode:
     drawMode: 0
@@ -891,13 +891,13 @@ MonoBehaviour:
     m_GridAxis: 1
     m_gridOpacity: 0.5
   m_Rotation:
-    m_Target: {x: -0.08717229, y: 0.89959055, z: -0.21045254, w: -0.3726226}
+    m_Target: {x: -0.035703044, y: 0.96287614, z: -0.16063796, w: -0.21400312}
     speed: 2
-    m_Value: {x: -0.08717229, y: 0.89959055, z: -0.21045254, w: -0.3726226}
+    m_Value: {x: -0.03570292, y: 0.9628728, z: -0.16063741, w: -0.21400237}
   m_Size:
-    m_Target: 532.08936
+    m_Target: 6.6495323
     speed: 2
-    m_Value: 532.08936
+    m_Value: 6.6495323
   m_Ortho:
     m_Target: 0
     speed: 2
@@ -968,23 +968,23 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 1
     m_Folders:
-    - Assets/Scenes
+    - Assets/Scripts/Enemies
     m_Globs: []
     m_OriginalText: 
     m_ImportLogFlags: 0
   m_ViewMode: 1
   m_StartGridSize: 64
   m_LastFolders:
-  - Assets/Scenes
+  - Assets/Scripts/Enemies
   m_LastFoldersGridSize: -1
   m_LastProjectPath: C:\Users\geoff\Documents\CSUMB\Game Dev\Little-Dark-Age
   m_LockTracker:
     m_IsLocked: 0
   m_FolderTreeState:
-    scrollPos: {x: 0, y: 326.2}
-    m_SelectedIDs: d8620000
-    m_LastClickedID: 25304
-    m_ExpandedIDs: 00000000ae620000d6620000ec6300001c6400003064000050640000dc660000386700004e6700005667000000ca9a3b
+    scrollPos: {x: 0, y: 134.20001}
+    m_SelectedIDs: 96250000
+    m_LastClickedID: 9622
+    m_ExpandedIDs: 00000000862500008a250000c061000000ca9a3b
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -1012,7 +1012,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 00000000ae620000
+    m_ExpandedIDs: 00000000c0610000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
