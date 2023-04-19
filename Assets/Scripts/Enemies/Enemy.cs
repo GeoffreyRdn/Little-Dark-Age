@@ -10,19 +10,24 @@ namespace Enemies
 
         [BoxGroup("Mask")] [SerializeField] private LayerMask playerMask;
         [BoxGroup("Mask")] [SerializeField] private LayerMask obstacleMask;
+        [BoxGroup("Mask")] [SerializeField] private LayerMask wallMask;
         
-        private NavMeshAgent agent;
-        private GameObject[] players;
 
-        [BoxGroup("Debug")] [SerializeField] Transform target;
 
         [BoxGroup("Settings")] [SerializeField] private float attackRange;
         [BoxGroup("Settings")] [SerializeField] private float hearRange;
         [BoxGroup("Settings")] [SerializeField] private float sightRange;
         [BoxGroup("Settings")] [SerializeField] private float destinationRange;
-
+        [BoxGroup("Settings")] [SerializeField] private float abandonRange;
         [BoxGroup("Settings")] [SerializeField] private float sightAngle;
+        
+        [BoxGroup("Debug")] [SerializeField] Transform target;
 
+        private NavMeshAgent agent;
+        private GameObject[] players;
+        
+        private Vector3 destination;
+        private bool hasDestination;
         
         private void Start()
         {
@@ -33,9 +38,10 @@ namespace Enemies
         private void Update()
         {
             UpdateTarget();
-            Chase();
-        }
 
+            if (target != null) Chase();
+            else Patrol();
+        }
 
         private bool InDetectionRange(Transform player)
         {
@@ -62,11 +68,13 @@ namespace Enemies
             return inRange;
         }
         
+        private bool InFollowRange() 
+            => Physics.CheckSphere(transform.position, abandonRange, playerMask);
         
         private void UpdateTarget()
         {
             // the AI is already following a player
-            // if (target != null) return;
+            if (target != null && InFollowRange()) return;
 
             (GameObject playerInRange, float distance) = (null, 0);
             
@@ -89,19 +97,40 @@ namespace Enemies
         }
 
 
+        private void SearchForDestination()
+        {
+            Vector3 position = transform.position;
+            Vector3 route;
+            
+            do
+            {
+                float rndX = Random.Range(-destinationRange, destinationRange);
+                float rndZ = Random.Range(-destinationRange, destinationRange);
+                destination = new Vector3(position.x + rndX, position.y, position.z + rndZ);
+                route = destination - position;
+            } // ensure it does not cross any wall (to avoid pointing outside) and not pointing to an obstacle
+            while (Physics.Raycast(position, route.normalized, route.magnitude, wallMask) ||
+                   Physics.CheckSphere(destination, 0.5f, obstacleMask));
+
+            hasDestination = true;
+        }
+
         private void Patrol()
         {
-            return;
+            Debug.Log("PATROL");
+            if (!hasDestination) SearchForDestination();
+            if (hasDestination) agent.SetDestination(destination);
+
+            // AI has reached the destination
+            if (agent.pathStatus == NavMeshPathStatus.PathComplete && agent.remainingDistance == 0) hasDestination = false;
         }
 
         private void Chase()
         {
-            if (target != null)
-            {
-                Vector3 enemyPosition = target.position;
-                Vector3 targetPosition = new Vector3(enemyPosition.x, transform.position.y, enemyPosition.z);
-                agent.SetDestination(targetPosition);
-            }
+            Debug.Log("CHASING");
+            Vector3 enemyPosition = target.position;
+            Vector3 targetPosition = new Vector3(enemyPosition.x, transform.position.y, enemyPosition.z);
+            agent.SetDestination(targetPosition);
         }
 
         #region DEBUG
@@ -122,6 +151,9 @@ namespace Enemies
 
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere(position, attackRange);
+            
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(position, abandonRange);
 
             Gizmos.color = Color.blue;
             float angleInDegL = yAngle + (sightAngle / 2);
