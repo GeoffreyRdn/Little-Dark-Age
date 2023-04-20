@@ -1,5 +1,13 @@
 using UnityEngine;
 
+public enum ArmorType {
+	Default,
+	Helmet,
+	Chestplate,
+	Leggings,
+	Boots
+}
+
 namespace Items {
 	[CreateAssetMenu(fileName = "NewArmor", menuName = "Item/Armor", order = 0)]
 	public class ItemArmor: Item {
@@ -13,7 +21,8 @@ namespace Items {
 		}
 
 		public override string GetStats() {
-			string stats = "";
+			string stats = $"Health: {Health} - ";
+			stats += $"Armor: {Armor}";
 			return stats;
 		}
 	}
