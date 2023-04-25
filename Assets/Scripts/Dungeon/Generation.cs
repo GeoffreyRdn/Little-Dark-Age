@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using NaughtyAttributes;
 using UnityEngine;
@@ -75,6 +76,44 @@ namespace Dungeon
             }
         }
 
+        private void InstantiateWall(int i, int j)
+        {
+
+            // ROOM UP
+            if (DungeonBoard[i, j + 1] == TileType.Hallway || DungeonBoard[i, j + 1] == TileType.Room)
+            {
+                Instantiate(wall, new Vector3(i*4,0, (j+1)*4), Quaternion.identity, parent);
+            }
+
+            // ROOM DOWN
+            if (DungeonBoard[i, j - 1] == TileType.Hallway || DungeonBoard[i, j - 1] == TileType.Room)
+            {
+                Instantiate(wall, new Vector3(i*4,0, (j-1)*4), Quaternion.Euler(0,180,0), parent);
+            }
+            
+            // LEFT ROOM
+            if (DungeonBoard[i - 1, j] == TileType.Hallway || DungeonBoard[i - 1, j] == TileType.Room)
+            {
+                Instantiate(wall, new Vector3((i-1)*4,0, j*4), Quaternion.Euler(0,-90,0), parent);
+            }
+
+            // ROOM RIGHT
+            if (DungeonBoard[i + 1, j] == TileType.Hallway || DungeonBoard[i + 1, j] == TileType.Room)
+            {
+                Instantiate(wall, new Vector3((i+1)*4,0, j*4), Quaternion.Euler(0,90,0), parent);
+            }
+        }
+        
+        private void InstantiateFloor(int i, int j)
+        {
+            Instantiate(floorRoom, new Vector3(i*4,0, j*4), Quaternion.identity, parent);
+        }
+        
+        private void InstantiateCorridor(int i, int j)
+        {
+            Instantiate(floorHallway, new Vector3(i*4,0, j*4), Quaternion.identity, parent);
+        }
+
         private void DrawBoard()
         {
             for (int i = 0; i < boardWidth; i++)
@@ -84,13 +123,13 @@ namespace Dungeon
                     switch (DungeonBoard[i, j])
                     {
                         case TileType.Wall:
-                            Instantiate(wall, new Vector3(i,0, j), Quaternion.identity, parent);
+                            InstantiateWall(i,j);
                             break;
                         case TileType.Room:
-                            Instantiate(floorRoom, new Vector3(i,0, j), Quaternion.identity, parent);
+                            InstantiateFloor(i, j);
                             break;
                         case TileType.Hallway:
-                            Instantiate(floorHallway, new Vector3(i,0, j), Quaternion.identity, parent);
+                            InstantiateCorridor(i, j);
                             break;
                     }
                 }
