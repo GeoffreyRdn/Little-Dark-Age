@@ -6,15 +6,17 @@ TagManager:
   tags:
   - Bullet
   - player
+  - Enemy
+  - CanBeDeleted
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Player
   - Water
   - UI
-  - 
-  - 
+  - Environment
+  - Wall
   - 
   - 
   - 
