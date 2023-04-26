@@ -4,16 +4,17 @@
 TagManager:
   serializedVersion: 2
   tags:
+  - Enemy
   - CanBeDeleted
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Player
   - Water
   - UI
-  - 
-  - 
+  - Environment
+  - Wall
   - 
   - 
   - 
