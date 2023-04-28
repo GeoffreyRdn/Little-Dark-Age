@@ -37,7 +37,8 @@ namespace Dungeon
                         }
                     }
                 }
-                generation.AddRoom(dungeon.Rectangle);
+                
+                generation.AddRoom(dungeon.Room);
             }
             else
             {

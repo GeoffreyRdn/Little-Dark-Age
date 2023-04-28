@@ -29,7 +29,7 @@ namespace Dungeon
         internal TileType[,] DungeonBoard;
 
         // getting all the rooms for the AI
-        private List<Rect> rooms;
+        public List<Rect> rooms;
 
         #endregion
 
@@ -43,7 +43,7 @@ namespace Dungeon
         #region Methods
         
         [Button]
-        private void GenerateDungeon()
+        public void GenerateDungeon()
         {
             DungeonBoard = new TileType[boardWidth, boardHeight];
             rooms = new List<Rect>();
@@ -114,7 +114,7 @@ namespace Dungeon
             Instantiate(floorHallway, new Vector3(i*4,0, j*4), Quaternion.identity, parent);
         }
 
-        private void DrawBoard()
+        public void DrawBoard()
         {
             for (int i = 0; i < boardWidth; i++)
             {
