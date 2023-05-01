@@ -1,4 +1,5 @@
 using System;
+using Health;
 using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.AI;
@@ -57,6 +58,7 @@ namespace Enemies
 
         private NavMeshAgent agent;
         private GameObject[] players;
+        private DamageBehavior damageBehavior;
         
         private Vector3 destination;
         private bool hasDestination;
@@ -67,6 +69,7 @@ namespace Enemies
 
         private void Start()
         {
+            damageBehavior = GetComponentInChildren<DamageBehavior>();
             animator = GetComponentInChildren<Animator>();
             agent = GetComponent<NavMeshAgent>();
             players = GameObject.FindGameObjectsWithTag(playerTag);
@@ -96,7 +99,22 @@ namespace Enemies
 
         #endregion
 
-        #region Methods Anim
+        #region Events
+
+        private void OnEnable()
+        {
+            HealthController.onPlayerDeath += HandlePlayerDeath;
+        }
+
+        private void OnDisable()
+        {
+            HealthController.onPlayerDeath -= HandlePlayerDeath;
+
+        }
+
+        #endregion
+
+        #region Methods Animations
 
         private int GetState()
         {
@@ -120,6 +138,12 @@ namespace Enemies
                 return s;
             }
         }
+        
+        public void StartDealingDamage()
+            => damageBehavior?.StartDealingDamage();
+        
+        public void StopDealingDamage()
+            => damageBehavior?.StopDealingDamage();
         
         #endregion
 
@@ -236,6 +260,31 @@ namespace Enemies
             if (collision.transform.CompareTag("Player")) isHit = true;
         }
         
+        #endregion
+
+        #region Methods
+
+        private void HandlePlayerDeath(GameObject playerDead)
+        {
+            if (target != null && target.gameObject == playerDead)
+            {
+                GameObject[] remainingPlayers = new GameObject[players.Length - 1];
+                int index = 0;
+                
+                foreach (var player in players)
+                {
+                    if (player != playerDead)
+                    {
+                        remainingPlayers[index] = player;
+                        index++;
+                    }
+                }
+                
+                target = null;
+                players = remainingPlayers;
+            }
+        }
+
         #endregion
 
         #region DEBUG

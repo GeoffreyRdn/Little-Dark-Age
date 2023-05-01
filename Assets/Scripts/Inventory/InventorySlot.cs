@@ -118,7 +118,9 @@ namespace Inventory {
 			image.color = color;
 		}
 
-		public void OnPointerClick(PointerEventData eventData) {
+		public void OnPointerClick(PointerEventData eventData)
+		{
+			Debug.Log("ON POINTER CLICKED");
 			if (eventData.button == PointerEventData.InputButton.Left) {
 				OnLeftClick();
 			}

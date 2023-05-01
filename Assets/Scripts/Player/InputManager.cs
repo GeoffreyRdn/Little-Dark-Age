@@ -49,4 +49,22 @@ public class InputManager : MonoBehaviourPunCallbacks
 
     public bool PlayerIsRunning()
         => playerControls.Ground.Run.IsPressed();
+
+    public bool PlayerOpenInventory()
+        => playerControls.Ground.OpenInventory.triggered;
+    
+    public bool PlayerCloseInventory()
+        => playerControls.Inventory.CloseInventory.triggered;
+
+    public void OpenInventory()
+    {
+        playerControls.Ground.Disable();
+        playerControls.Inventory.Enable();
+    }
+
+    public void CloseInventory()
+    {
+        playerControls.Inventory.Disable();
+        playerControls.Ground.Enable();
+    }
 }

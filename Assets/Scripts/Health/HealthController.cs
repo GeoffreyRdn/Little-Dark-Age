@@ -1,7 +1,7 @@
 using System;
 using NaughtyAttributes;
-using Photon.Pun;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace Health {
 	public class HealthController: MonoBehaviour {
@@ -10,30 +10,16 @@ namespace Health {
 		[BoxGroup("Health"), SerializeField] private float armor          = 0f;
 		[BoxGroup("Health"), SerializeField] private float healMultiplier = 1f;
 
+		[SerializeField] [Tag] private string playerTag;
+
+		public delegate void OnPlayerDeath(GameObject player);
+
+		public static OnPlayerDeath onPlayerDeath;
+
 		public float Health         => health;
 		public float MaxHealth      => maxHealth;
 		public float Armor          => armor;
 		public float HealMultiplier => healMultiplier;
-
-		private void Update() {
-			if (Input.GetKeyDown(KeyCode.S)) {
-				Damage(1);
-			}
-
-			if (Input.GetKeyDown(KeyCode.W)) {
-				Heal(1);
-			}
-
-			if (Input.GetKeyDown(KeyCode.D)) {
-				AddArmor(1);
-				Debug.Log($"Armor: {armor}");
-			}
-
-			if (Input.GetKeyDown(KeyCode.A)) {
-				AddArmor(-1);
-				Debug.Log($"Armor: {armor}");
-			}
-		}
 
 		public void AddArmor(float amount) {
 			armor += amount;
@@ -59,9 +45,9 @@ namespace Health {
 			Debug.Log($"Health after heal: {health}");
 		}
 
-		public void Kill() {
-			Debug.Log("Kill player");
-			Destroy(gameObject);
+		private void Kill() {
+			Debug.Log("Kill target");
+			if (gameObject.CompareTag(playerTag)) onPlayerDeath?.Invoke(gameObject);
 		}
 	}
 }

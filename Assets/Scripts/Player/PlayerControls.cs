@@ -98,6 +98,15 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""OpenInventory"",
+                    ""type"": ""Button"",
+                    ""id"": ""8d821789-8da8-409d-a4ba-3e7bc428a04a"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -232,6 +241,45 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                     ""action"": ""Attack"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a63d903a-d5a6-4a78-8222-1ce835ea4a14"",
+                    ""path"": ""<Keyboard>/i"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""OpenInventory"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
+        },
+        {
+            ""name"": ""Inventory"",
+            ""id"": ""16df0a4d-66d6-4c9b-9a94-e0cbee57c27b"",
+            ""actions"": [
+                {
+                    ""name"": ""CloseInventory"",
+                    ""type"": ""Button"",
+                    ""id"": ""0d4a73bf-c213-42c3-ad7e-146eda5f7085"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""e46d8e7c-4a6e-49a0-bb10-c03e045b1f0b"",
+                    ""path"": ""<Keyboard>/i"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""CloseInventory"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -248,6 +296,10 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
         m_Ground_Rotate = m_Ground.FindAction("Rotate", throwIfNotFound: true);
         m_Ground_Shield = m_Ground.FindAction("Shield", throwIfNotFound: true);
         m_Ground_Attack = m_Ground.FindAction("Attack", throwIfNotFound: true);
+        m_Ground_OpenInventory = m_Ground.FindAction("OpenInventory", throwIfNotFound: true);
+        // Inventory
+        m_Inventory = asset.FindActionMap("Inventory", throwIfNotFound: true);
+        m_Inventory_CloseInventory = m_Inventory.FindAction("CloseInventory", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -315,6 +367,7 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
     private readonly InputAction m_Ground_Rotate;
     private readonly InputAction m_Ground_Shield;
     private readonly InputAction m_Ground_Attack;
+    private readonly InputAction m_Ground_OpenInventory;
     public struct GroundActions
     {
         private @PlayerControls m_Wrapper;
@@ -327,6 +380,7 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
         public InputAction @Rotate => m_Wrapper.m_Ground_Rotate;
         public InputAction @Shield => m_Wrapper.m_Ground_Shield;
         public InputAction @Attack => m_Wrapper.m_Ground_Attack;
+        public InputAction @OpenInventory => m_Wrapper.m_Ground_OpenInventory;
         public InputActionMap Get() { return m_Wrapper.m_Ground; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -360,6 +414,9 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                 @Attack.started -= m_Wrapper.m_GroundActionsCallbackInterface.OnAttack;
                 @Attack.performed -= m_Wrapper.m_GroundActionsCallbackInterface.OnAttack;
                 @Attack.canceled -= m_Wrapper.m_GroundActionsCallbackInterface.OnAttack;
+                @OpenInventory.started -= m_Wrapper.m_GroundActionsCallbackInterface.OnOpenInventory;
+                @OpenInventory.performed -= m_Wrapper.m_GroundActionsCallbackInterface.OnOpenInventory;
+                @OpenInventory.canceled -= m_Wrapper.m_GroundActionsCallbackInterface.OnOpenInventory;
             }
             m_Wrapper.m_GroundActionsCallbackInterface = instance;
             if (instance != null)
@@ -388,10 +445,46 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                 @Attack.started += instance.OnAttack;
                 @Attack.performed += instance.OnAttack;
                 @Attack.canceled += instance.OnAttack;
+                @OpenInventory.started += instance.OnOpenInventory;
+                @OpenInventory.performed += instance.OnOpenInventory;
+                @OpenInventory.canceled += instance.OnOpenInventory;
             }
         }
     }
     public GroundActions @Ground => new GroundActions(this);
+
+    // Inventory
+    private readonly InputActionMap m_Inventory;
+    private IInventoryActions m_InventoryActionsCallbackInterface;
+    private readonly InputAction m_Inventory_CloseInventory;
+    public struct InventoryActions
+    {
+        private @PlayerControls m_Wrapper;
+        public InventoryActions(@PlayerControls wrapper) { m_Wrapper = wrapper; }
+        public InputAction @CloseInventory => m_Wrapper.m_Inventory_CloseInventory;
+        public InputActionMap Get() { return m_Wrapper.m_Inventory; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(InventoryActions set) { return set.Get(); }
+        public void SetCallbacks(IInventoryActions instance)
+        {
+            if (m_Wrapper.m_InventoryActionsCallbackInterface != null)
+            {
+                @CloseInventory.started -= m_Wrapper.m_InventoryActionsCallbackInterface.OnCloseInventory;
+                @CloseInventory.performed -= m_Wrapper.m_InventoryActionsCallbackInterface.OnCloseInventory;
+                @CloseInventory.canceled -= m_Wrapper.m_InventoryActionsCallbackInterface.OnCloseInventory;
+            }
+            m_Wrapper.m_InventoryActionsCallbackInterface = instance;
+            if (instance != null)
+            {
+                @CloseInventory.started += instance.OnCloseInventory;
+                @CloseInventory.performed += instance.OnCloseInventory;
+                @CloseInventory.canceled += instance.OnCloseInventory;
+            }
+        }
+    }
+    public InventoryActions @Inventory => new InventoryActions(this);
     public interface IGroundActions
     {
         void OnMovement(InputAction.CallbackContext context);
@@ -402,5 +495,10 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
         void OnRotate(InputAction.CallbackContext context);
         void OnShield(InputAction.CallbackContext context);
         void OnAttack(InputAction.CallbackContext context);
+        void OnOpenInventory(InputAction.CallbackContext context);
+    }
+    public interface IInventoryActions
+    {
+        void OnCloseInventory(InputAction.CallbackContext context);
     }
 }

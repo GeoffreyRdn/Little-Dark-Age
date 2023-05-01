@@ -1,4 +1,6 @@
-using Cinemachine;
+using System;
+using Health;
+using Inventory;
 using Photon.Pun;
 using UnityEngine;
 
@@ -12,15 +14,19 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     
     [SerializeField] private float jumpHeight = 1.0f;
     [SerializeField] private float gravityValue = -10;
+    [SerializeField] private InventoryController inventory;
 
     private float mouseYVelocity;
 
+    private DamageBehavior damageBehavior;
     private CharacterController controller;
     private Transform playerTransform;
     private PhotonView pv;
     private Vector3 playerVelocity;
     private bool groundedPlayer;
 
+    private bool isInInventory;
+    
     public static bool isLoadingScene = false;
     public static bool applyGravity = true;
     
@@ -55,6 +61,8 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     private bool isCrouching;
     private bool isShielding;
     private bool isJumping;
+
+    public bool IsShielding => isShielding;
     
     private float lockedUntil;
     private int currentState;
@@ -62,13 +70,30 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     private Animator animator;
 
     #endregion
+    
+    #region Events
+
+    private void OnEnable()
+    {
+        HealthController.onPlayerDeath += HandlePlayerDeath;
+    }
+
+    private void OnDisable()
+    {
+        HealthController.onPlayerDeath -= HandlePlayerDeath;
+    }
+
+    #endregion
+
+    #region Start - Update
 
     private void Start()
     {
         pv = GetComponent<PhotonView>();
         if (!pv.IsMine) return;
-
-        animator = GetComponentInChildren<Animator>();
+        
+        damageBehavior = GetComponentInChildren<DamageBehavior>();  
+        animator = GetComponent<Animator>();
         controller = GetComponent<CharacterController>();
         pv = GetComponent<PhotonView>();
         playerTransform = controller.gameObject.transform;
@@ -79,6 +104,24 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     void Update()
     {
         if (!pv.IsMine || isLoadingScene) return;
+
+        if (isInInventory)
+        {
+            HandleInventory();
+            return;
+        }
+
+        if (InputManager.Instance.PlayerOpenInventory())
+        {
+            // change action maps
+            InputManager.Instance.OpenInventory();
+            // open inventory
+            inventory.OpenOrCloseInventory();
+            
+            Cursor.visible = true;
+            isInInventory = true;
+        }
+
         
         groundedPlayer = controller.isGrounded;
         mouseYVelocity = InputManager.Instance.OnRotate();
@@ -91,20 +134,21 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
         
         var state = GetState();
         
-        UpdateOrientation();
-        MovePlayer();
-        
-        // if (InputManager.Instance.PlayerJumpedThisFrame() && groundedPlayer)
-        // {
-        //     playerVelocity.y += Mathf.Sqrt(jumpHeight * -3.0f * gravityValue) + gravityValue * Time.deltaTime;
-        //     controller.Move(playerVelocity * Time.deltaTime);
-        // }
+        if (!isAttacking)
+        {
+            UpdateOrientation();
+            MovePlayer();
+        }
 
         if (state == currentState) return;
 
         animator.CrossFade(state, 0, 0);
         currentState = state;
     }
+    
+    #endregion
+    
+    #region Animations
     
     private int GetState()
     {
@@ -157,6 +201,10 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
             return s;
         }
     }
+    
+    #endregion
+    
+    #region Methods
 
     private float Speed()
     {
@@ -183,7 +231,39 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
         Vector3 move = new Vector3(movement.x, 0f, movement.y);
         controller.Move(Speed() * Time.deltaTime * playerTransform.TransformDirection(move));
     }
+
+    private void HandlePlayerDeath(GameObject playerDead)
+    {
+        Debug.Log("A player is dead");
+        if (playerDead == gameObject) gameObject.SetActive(false);
+    }
+
+
+    private void HandleInventory()
+    {
+        if (InputManager.Instance.PlayerCloseInventory())
+        {
+            // change action map
+            InputManager.Instance.CloseInventory();
+            // close inventory
+            inventory.OpenOrCloseInventory();
+            
+            Cursor.visible = false;
+            isInInventory = false;
+        }
+    }
     
+    public void StartDealingDamage()
+        => damageBehavior?.StartDealingDamage();
+        
+    public void StopDealingDamage()
+        => damageBehavior?.StopDealingDamage();
+
+    #endregion
+    
+    #region Multiplayer
     public void OnPhotonInstantiate(PhotonMessageInfo info)
         => info.Sender.TagObject = gameObject;
+    
+    #endregion
 }

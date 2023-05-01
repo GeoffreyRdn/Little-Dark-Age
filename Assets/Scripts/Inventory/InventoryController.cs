@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Items;
+﻿using Items;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -88,6 +87,12 @@ namespace Inventory {
 
 			// itemGo.transform.localPosition = Input.mousePosition - transform.localPosition;
 			itemGo.transform.position = Mouse.current.position.ReadValue();
+		}
+
+		public void OpenOrCloseInventory()
+		{
+			Debug.Log("Opening inventory -> " + !gameObject.activeSelf);
+			gameObject.SetActive(!gameObject.activeInHierarchy);
 		}
 	}
 }
