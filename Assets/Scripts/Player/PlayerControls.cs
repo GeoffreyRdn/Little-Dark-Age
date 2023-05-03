@@ -107,6 +107,15 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""BossTP"",
+                    ""type"": ""Button"",
+                    ""id"": ""d0de9d36-3525-4306-b79f-6c58145bd898"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -252,6 +261,17 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                     ""action"": ""OpenInventory"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""dcbe1c08-5872-4c5a-92d9-74b9b4f3ce38"",
+                    ""path"": ""<Keyboard>/downArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""BossTP"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -297,6 +317,7 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
         m_Ground_Shield = m_Ground.FindAction("Shield", throwIfNotFound: true);
         m_Ground_Attack = m_Ground.FindAction("Attack", throwIfNotFound: true);
         m_Ground_OpenInventory = m_Ground.FindAction("OpenInventory", throwIfNotFound: true);
+        m_Ground_BossTP = m_Ground.FindAction("BossTP", throwIfNotFound: true);
         // Inventory
         m_Inventory = asset.FindActionMap("Inventory", throwIfNotFound: true);
         m_Inventory_CloseInventory = m_Inventory.FindAction("CloseInventory", throwIfNotFound: true);
@@ -368,6 +389,7 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
     private readonly InputAction m_Ground_Shield;
     private readonly InputAction m_Ground_Attack;
     private readonly InputAction m_Ground_OpenInventory;
+    private readonly InputAction m_Ground_BossTP;
     public struct GroundActions
     {
         private @PlayerControls m_Wrapper;
@@ -381,6 +403,7 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
         public InputAction @Shield => m_Wrapper.m_Ground_Shield;
         public InputAction @Attack => m_Wrapper.m_Ground_Attack;
         public InputAction @OpenInventory => m_Wrapper.m_Ground_OpenInventory;
+        public InputAction @BossTP => m_Wrapper.m_Ground_BossTP;
         public InputActionMap Get() { return m_Wrapper.m_Ground; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -417,6 +440,9 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                 @OpenInventory.started -= m_Wrapper.m_GroundActionsCallbackInterface.OnOpenInventory;
                 @OpenInventory.performed -= m_Wrapper.m_GroundActionsCallbackInterface.OnOpenInventory;
                 @OpenInventory.canceled -= m_Wrapper.m_GroundActionsCallbackInterface.OnOpenInventory;
+                @BossTP.started -= m_Wrapper.m_GroundActionsCallbackInterface.OnBossTP;
+                @BossTP.performed -= m_Wrapper.m_GroundActionsCallbackInterface.OnBossTP;
+                @BossTP.canceled -= m_Wrapper.m_GroundActionsCallbackInterface.OnBossTP;
             }
             m_Wrapper.m_GroundActionsCallbackInterface = instance;
             if (instance != null)
@@ -448,6 +474,9 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                 @OpenInventory.started += instance.OnOpenInventory;
                 @OpenInventory.performed += instance.OnOpenInventory;
                 @OpenInventory.canceled += instance.OnOpenInventory;
+                @BossTP.started += instance.OnBossTP;
+                @BossTP.performed += instance.OnBossTP;
+                @BossTP.canceled += instance.OnBossTP;
             }
         }
     }
@@ -496,6 +525,7 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
         void OnShield(InputAction.CallbackContext context);
         void OnAttack(InputAction.CallbackContext context);
         void OnOpenInventory(InputAction.CallbackContext context);
+        void OnBossTP(InputAction.CallbackContext context);
     }
     public interface IInventoryActions
     {

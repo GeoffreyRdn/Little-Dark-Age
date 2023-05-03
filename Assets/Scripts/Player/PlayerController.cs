@@ -15,6 +15,8 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     [SerializeField] private float jumpHeight = 1.0f;
     [SerializeField] private float gravityValue = -10;
     [SerializeField] private InventoryController inventory;
+    [SerializeField] private string bossScene;
+
 
     private float mouseYVelocity;
 
@@ -109,6 +111,11 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
         {
             HandleInventory();
             return;
+        }
+
+        if (InputManager.Instance.BossTeleport())
+        {
+            LoadBossScene();
         }
 
         if (InputManager.Instance.PlayerOpenInventory())
@@ -214,6 +221,11 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
                 ? runSpeed
                 : walkSpeed;
         return Mathf.Clamp(moveSpeed, 0, maxSpeed);
+    }
+    
+    public void LoadBossScene()
+    {
+        PhotonNetwork.LoadLevel(bossScene);
     }
 
     private void UpdateOrientation()
