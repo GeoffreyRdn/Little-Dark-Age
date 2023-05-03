@@ -16,6 +16,7 @@ namespace Dungeon
         
         private Generation generation;
         private PhotonView photonView;
+        private Vector3 spawnPoint;
         
         private NavMeshSurface surface;
 
@@ -27,10 +28,15 @@ namespace Dungeon
 
         private void Start()
         {
+            PlayerController.isLoadingScene = true;
+
             if (PhotonNetwork.IsMasterClient)
             {
                 generation.GenerateDungeon();
-                Debug.Log("Generation DONE");   
+                Debug.Log("Generation DONE");  
+                
+                Rect room = generation.rooms.OrderByDescending(x => x.height * x.width).ToList()[^1];
+                spawnPoint = new Vector3(room.center.x * 4, 1, room.center.y * 4);
                 
                 // create the navMesh for enemies / spawn enemies
                 surface = GameObject.Find("Dungeon").GetComponent<NavMeshSurface>();
@@ -40,30 +46,12 @@ namespace Dungeon
                 enemiesHolder.GetComponent<EnemyInstantiation>().SpawnEnemies(roomsOrdered);
                 Debug.Log("Enemies SPAWNED");
                 
-                // RemoveGravity();
-                photonView.RPC(nameof(RemoveGravity), RpcTarget.AllBuffered);
                 StartCoroutine(TransmitGeneration(.5f));
             }
         }
 
         #region RPC
-
-        [PunRPC]
-        private void RemoveGravity()
-        {
-            var currentPlayer = PhotonNetwork.LocalPlayer.TagObject as GameObject;
-            if (currentPlayer == null) return;
-            
-            PlayerController.isLoadingScene = true;
-            PlayerController.applyGravity = false;
-        }
         
-        [PunRPC]
-        private void GetAllRooms(object[] rooms)
-        {
-            List<Rect> allRooms = rooms.Cast<Rect>().ToList();
-            generation.rooms = allRooms;
-        }
 
         [PunRPC]
         private void SetMapData(int[][] mapData)
@@ -73,29 +61,28 @@ namespace Dungeon
             generation.DrawBoard();
         }
 
+        
         [PunRPC]
-        private void TpPlayersToDungeon(float x, float z)
+        private void TpPlayersToDungeon()
         {
             Debug.Log("Moving Players");
             var currentPlayer = PhotonNetwork.LocalPlayer.TagObject as GameObject;
-
-            if (currentPlayer == null)
-            {
-                Debug.Log("No player");
-                return;
-            }
             
-            Vector3 tpPosition = new Vector3(x, 1.5f, z);
-            currentPlayer.transform.position = tpPosition;
-            Debug.Log("Players moved");
-
+            if (currentPlayer == null) return;
             
-            PlayerController.applyGravity = true;
+            var controller = currentPlayer.GetComponent<CharacterController>();
+            controller.enabled = false;
+            controller.gameObject.transform.position = spawnPoint;
+            controller.enabled = true;
+            
+            Debug.Log("Player " + currentPlayer.name + " moved to : " + spawnPoint + " - actual position : " + currentPlayer.transform.position);
 
-            Collider[] hitColliders = Physics.OverlapSphere(currentPlayer.transform.GetChild(0).transform.position, 1);
-            foreach (var collider in hitColliders.Where(col => col.CompareTag(environmentTag))) Destroy(collider.gameObject);
+            // Collider[] hitColliders = Physics.OverlapSphere(currentPlayer.transform.GetChild(0).transform.position, 1);
+            // foreach (var collider in hitColliders.Where(col => col.CompareTag(environmentTag))) Destroy(collider.gameObject);
+            //
             
             PlayerController.isLoadingScene = false;
+            // // TODO : remove loading screen
         }
 
         #endregion
@@ -109,15 +96,13 @@ namespace Dungeon
 
             Debug.Log("SetMapData");
             photonView.RPC(nameof(SetMapData), RpcTarget.OthersBuffered, generation.DungeonBoard.Array2dToArrayArray());
-            
-            MovePlayers();
+            StartCoroutine(MovePlayers());
         }
 
-        private void MovePlayers()
+        private IEnumerator MovePlayers()
         {
-            Rect room = generation.rooms.OrderByDescending(x => x.height * x.width).ToList()[^1];
-            Vector2 center = room.center * 4;
-            photonView.RPC(nameof(TpPlayersToDungeon), RpcTarget.AllBuffered, center.x, center.y);
+            yield return new WaitForSeconds(.2f);
+            photonView.RPC(nameof(TpPlayersToDungeon), RpcTarget.AllBuffered);
         }
 
         #endregion

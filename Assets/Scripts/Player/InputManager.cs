@@ -68,6 +68,25 @@ public class InputManager : MonoBehaviourPunCallbacks
         playerControls.Ground.Enable();
     }
 
+
+    public bool PlayerOpenPauseMenu()
+        => playerControls.Ground.OpenPauseMenu.triggered;
+    
+    public bool PlayerClosePauseMenu()
+        => playerControls.PauseMenu.Resume.triggered;
+    
+    public void OpenPauseMenu()
+    {
+        playerControls.Ground.Disable();
+        playerControls.PauseMenu.Enable();
+    }
+
+    public void ClosePauseMenu()
+    {
+        playerControls.PauseMenu.Disable();
+        playerControls.Ground.Enable();
+    }
+
     public bool BossTeleport()
     {
         return playerControls.Ground.BossTP.triggered;

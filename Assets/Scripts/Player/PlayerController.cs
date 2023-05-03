@@ -14,8 +14,10 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     [SerializeField] private float runSpeed = 12f;
     [SerializeField] private float maxSpeed = 15f;
     
-    [SerializeField] private InventoryController inventory;
     [SerializeField] private string bossScene;
+    
+    [SerializeField] private InventoryController inventory;
+    [SerializeField] private PauseMenu pauseMenu;
 
 
     private float mouseYVelocity;
@@ -26,7 +28,9 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     private PhotonView pv;
     private Vector3 playerVelocity;
 
-    private bool isInInventory;
+
+    public static bool isInInventory = false;
+    public static bool isInPauseMenu = false;
     
     public static bool isLoadingScene = false;
     public static bool applyGravity = true;
@@ -84,6 +88,7 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     
     private float lockedUntil;
     private int currentState;
+    private float delay;
 
     private Animator animator;
 
@@ -121,6 +126,7 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
             AttackAnimation
         };
 
+        delay = 0;
         damageBehavior = GetComponentInChildren<DamageBehavior>();  
         animator = GetComponent<Animator>();
         controller = GetComponent<CharacterController>();
@@ -132,17 +138,25 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
 
     void Update()
     {
-        if (!pv.IsMine || isLoadingScene) return;
+        if (!pv.IsMine) return;
+        if (isLoadingScene) delay = 1f;
 
-        if (isInInventory)
+        if (isInInventory && InputManager.Instance.PlayerCloseInventory())
         {
-            HandleInventory();
+            CloseInventory();
             return;
         }
+        if (InputManager.Instance.PlayerOpenInventory()) OpenInventory();
+        
+        if (isInPauseMenu && InputManager.Instance.PlayerClosePauseMenu())
+        {
+            ClosePauseMenu();
+            return;
+        }
+        if (InputManager.Instance.PlayerOpenPauseMenu()) OpenPauseMenu();
 
         if (InputManager.Instance.BossTeleport()) LoadBossScene();
-            
-        if (InputManager.Instance.PlayerOpenInventory()) OpenInventory();
+        
         
         mouseYVelocity = InputManager.Instance.OnRotate();
         isRunning = InputManager.Instance.PlayerIsRunning();
@@ -324,18 +338,15 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     }
 
 
-    private void HandleInventory()
+    private void CloseInventory()
     {
-        if (InputManager.Instance.PlayerCloseInventory())
-        {
-            // change action map
-            InputManager.Instance.CloseInventory();
-            // close inventory
-            inventory.OpenOrCloseInventory();
-            
-            Cursor.visible = false;
-            isInInventory = false;
-        }
+        // change action map
+        InputManager.Instance.CloseInventory();
+        // close inventory
+        inventory.OpenOrCloseInventory();
+        
+        Cursor.visible = false;
+        isInInventory = false;
     }
 
     private void OpenInventory()
@@ -347,6 +358,28 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
             
         Cursor.visible = true;
         isInInventory = true;
+    }
+
+    private void OpenPauseMenu()
+    {
+        // change action maps
+        InputManager.Instance.OpenPauseMenu();
+        // open inventory
+        pauseMenu.OpenOrClosePauseMenu();
+            
+        Cursor.visible = true;
+        isInPauseMenu = true;
+    }
+
+    private void ClosePauseMenu()
+    {
+        // change action maps
+        InputManager.Instance.ClosePauseMenu();
+        // open inventory
+        pauseMenu.OpenOrClosePauseMenu();
+            
+        Cursor.visible = false;
+        isInPauseMenu = false;
     }
     
     public void StartDealingDamage()

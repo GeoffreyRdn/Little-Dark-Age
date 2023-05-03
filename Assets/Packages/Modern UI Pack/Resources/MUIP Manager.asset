@@ -16,7 +16,7 @@ MonoBehaviour:
   enableExtendedColorPicker: 0
   editorHints: 0
   changeRootFolder: 1
-  rootFolder: 3rd Party/Modern UI Pack/Prefabs/
+  rootFolder: Packages/Modern UI Pack/Prefabs/
   animatedIconColor: {r: 1, g: 1, b: 1, a: 1}
   contextBackgroundColor: {r: 0.2784314, g: 0.2784314, b: 0.2784314, a: 1}
   buttonThemeType: 0

@@ -91,7 +91,7 @@ namespace Inventory {
 
 		public void OpenOrCloseInventory()
 		{
-			Debug.Log("Opening inventory -> " + !gameObject.activeSelf);
+			Debug.Log("Opening inventory -> " + !gameObject.activeInHierarchy);
 			gameObject.SetActive(!gameObject.activeInHierarchy);
 		}
 	}
