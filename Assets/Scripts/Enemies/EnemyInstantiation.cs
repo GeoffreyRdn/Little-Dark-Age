@@ -12,7 +12,7 @@ namespace Enemies
 
         public void SpawnEnemies(List<Rect> rooms)
         {
-            for (var index = 1; index < rooms.Count; index++)
+            for (var index = 0; index < rooms.Count - 1; index++)
             {
                 var room = rooms[index];
                 var (x, z) = (room.center.x * 4, room.center.y * 4);

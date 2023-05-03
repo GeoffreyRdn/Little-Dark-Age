@@ -1500,10 +1500,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   walkSpeed: 8
   crouchSpeed: 4
+  animationSpeed: 2
   runSpeed: 12
   maxSpeed: 15
-  jumpHeight: 1.2
-  gravityValue: -15
   inventory: {fileID: 4656913899444013357}
 --- !u!114 &4413672764995520110
 MonoBehaviour:

@@ -33,7 +33,7 @@ public class InputManager : MonoBehaviourPunCallbacks
         => playerControls.Ground.Attack.triggered;
 
     public bool PlayerIsShield()
-        => playerControls.Ground.Shield.IsPressed();
+        => playerControls.Ground.Shield.IsPressed() || playerControls.Ground.Shield.IsInProgress();
 
     public Vector2 GetPlayerMovement()
         => playerControls.Ground.Movement.ReadValue<Vector2>().normalized;

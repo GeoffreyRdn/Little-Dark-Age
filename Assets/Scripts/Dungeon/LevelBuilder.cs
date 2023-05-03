@@ -36,12 +36,13 @@ namespace Dungeon
                 surface = GameObject.Find("Dungeon").GetComponent<NavMeshSurface>();
                 surface.BuildNavMesh();
                 
-                enemiesHolder.GetComponent<EnemyInstantiation>().SpawnEnemies(generation.rooms);
+                List<Rect> roomsOrdered = generation.rooms.OrderByDescending(x=> x.width * x.height).ToList();
+                enemiesHolder.GetComponent<EnemyInstantiation>().SpawnEnemies(roomsOrdered);
                 Debug.Log("Enemies SPAWNED");
                 
                 // RemoveGravity();
                 photonView.RPC(nameof(RemoveGravity), RpcTarget.AllBuffered);
-                StartCoroutine(TransmitGeneration(1));
+                StartCoroutine(TransmitGeneration(.5f));
             }
         }
 
@@ -67,6 +68,7 @@ namespace Dungeon
         [PunRPC]
         private void SetMapData(int[][] mapData)
         {
+            Debug.Log("Setting map data");
             generation.DungeonBoard = mapData.ArrayArrayToArray2d();
             generation.DrawBoard();
         }
@@ -85,6 +87,8 @@ namespace Dungeon
             
             Vector3 tpPosition = new Vector3(x, 1.5f, z);
             currentPlayer.transform.position = tpPosition;
+            Debug.Log("Players moved");
+
             
             PlayerController.applyGravity = true;
 
@@ -103,25 +107,16 @@ namespace Dungeon
         {
             yield return new WaitForSeconds(delay);
 
-            // object[] roomsObjects = new object[generation.rooms.Count];
-            //
-            // for (int i = 0; i < generation.rooms.Count; i++)
-            // {
-            //     roomsObjects[i] = generation.rooms[i];
-            // }
-            
-            // Debug.Log("GetAllRooms");
-            // photonView.RPC(nameof(GetAllRooms), RpcTarget.OthersBuffered, roomsObjects);
-            // Debug.Log("SetMapData");
-            // photonView.RPC(nameof(SetMapData), RpcTarget.OthersBuffered, generation.DungeonBoard.Array2dToArrayArray());
+            Debug.Log("SetMapData");
+            photonView.RPC(nameof(SetMapData), RpcTarget.OthersBuffered, generation.DungeonBoard.Array2dToArrayArray());
             
             MovePlayers();
         }
 
         private void MovePlayers()
         {
-            var room = generation.rooms[0];
-            var center = room.center * 4;
+            Rect room = generation.rooms.OrderByDescending(x => x.height * x.width).ToList()[^1];
+            Vector2 center = room.center * 4;
             photonView.RPC(nameof(TpPlayersToDungeon), RpcTarget.AllBuffered, center.x, center.y);
         }
 

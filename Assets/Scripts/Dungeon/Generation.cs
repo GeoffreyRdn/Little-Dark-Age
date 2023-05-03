@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using NaughtyAttributes;
 using UnityEngine;
 
@@ -21,6 +22,48 @@ namespace Dungeon
         [BoxGroup("Prefabs")] [SerializeField] private GameObject wall;
         [BoxGroup("Prefabs")] [SerializeField] private GameObject floorRoom;
         [BoxGroup("Prefabs")] [SerializeField] private GameObject floorHallway;
+
+        #region Throne room
+        
+        [BoxGroup("Throne Room"), SerializeField] private GameObject throneGO;
+        
+        #endregion
+        
+        #region Buffet room
+        
+        [BoxGroup("Buffet Room"), SerializeField] private GameObject buffetGO;
+        
+        #endregion
+        
+        #region Wine Cellar Room
+        
+        [BoxGroup("Wine Cellar Room"), SerializeField] private GameObject wineGO;
+        
+        #endregion
+        
+        #region Office Room
+        
+        [BoxGroup("Office Room"), SerializeField] private GameObject officeGO;
+        
+        #endregion
+        
+        #region Bedroom
+        
+        [BoxGroup("Bedroom Room"), SerializeField] private GameObject bedroomGO;
+        
+        #endregion
+        
+        #region Spawn Room
+        
+        [BoxGroup("Spawn Room"), SerializeField] private GameObject spawnGO;
+        
+        #endregion
+        
+        #region Generic Room
+        
+        [BoxGroup("Generic Room"), SerializeField] private GameObject genericGO;
+        
+        #endregion
         
         [BoxGroup("Parents")] [SerializeField] private Transform parent;
         
@@ -65,10 +108,11 @@ namespace Dungeon
 
             // instantiating the dungeon
             DrawBoard();
+            DrawObjects();
         }
         
         [Button]
-        private void ClearDungeon()
+        public void ClearDungeon()
         {
             foreach (GameObject go in GameObject.FindGameObjectsWithTag(deletionTag))
             {
@@ -133,6 +177,159 @@ namespace Dungeon
                             break;
                     }
                 }
+            }
+        }
+        
+        #region Draw Rooms
+        
+        private void DrawBossRoom(Rect room)
+        {
+            // Debug.Log("Boss room : " + room.x + " - " + room.y + " - " + room.width * room.height);
+        }
+
+        private void DrawSpawnRoom(Rect room)
+        {
+            // Debug.Log("Spawn : " + room.x + " - " + room.y + " - " + room.width * room.height);
+            
+            for (int i = (int) room.xMin + 1; i < room.xMax - 1; i++)
+            {
+                for (int j = (int) room.yMin + 1; j < room.yMax - 1; j++)
+                {
+                    // Instantiate(spawnGO, new Vector3(i * 4, 0,j * 4), Quaternion.identity, parent);
+                }
+            }
+        }
+
+        private void DrawThroneRoom(Rect room)
+        {
+            // Debug.Log("Throne : " + room.x + " - " + room.y + " - " + room.width * room.height);
+            
+            for (int i = (int) room.xMin + 1; i < room.xMax - 1; i++)
+            {
+                for (int j = (int) room.yMin + 1; j < room.yMax - 1; j++)
+                {
+                    // Instantiate(throneGO, new Vector3(i * 4, 0,j * 4), Quaternion.identity, parent);
+                }
+            }
+        }
+
+
+        private void DrawBuffet(Rect room)
+        {
+            // Debug.Log("Buffet : " + room.x + " - " + room.y + " - " + room.width * room.height);
+            
+            for (int i = (int) room.xMin + 1; i < room.xMax - 1; i++)
+            {
+                for (int j = (int) room.yMin + 1; j < room.yMax - 1; j++)
+                {
+                    // Instantiate(buffetGO, new Vector3(i * 4, 0,j * 4), Quaternion.identity, parent);
+                }
+            }
+        }
+
+
+        private void DrawBedroom(Rect room)
+        {
+            // Debug.Log("Bedroom : " + room.x + " - " + room.y + " - " + room.width * room.height);
+            
+            for (int i = (int) room.xMin + 1; i < room.xMax - 1; i++)
+            {
+                for (int j = (int) room.yMin + 1; j < room.yMax - 1; j++)
+                {
+                    // Instantiate(bedroomGO, new Vector3(i * 4, 0,j * 4), Quaternion.identity, parent);
+                }
+            }
+        }
+
+
+        private void DrawOffice(Rect room)
+        {
+            // Debug.Log("Office : " + room.x + " - " + room.y + " - " + room.width * room.height);
+            
+            for (int i = (int) room.xMin + 1; i < room.xMax - 1; i++)
+            {
+                for (int j = (int) room.yMin + 1; j < room.yMax - 1; j++)
+                {
+                    // Instantiate(officeGO, new Vector3(i * 4, 0,j * 4), Quaternion.identity, parent);
+                }
+            }
+        }
+
+        private void DrawWineCellar(Rect room)
+        {
+            // Debug.Log("Wine cellar : " + room.x + " - " + room.y + " - " + room.width * room.height);
+            
+            for (int i = (int) room.xMin + 1; i < room.xMax - 1; i++)
+            {
+                for (int j = (int) room.yMin + 1; j < room.yMax - 1; j++)
+                {
+                    // Instantiate(wineGO, new Vector3(i * 4, 0,j * 4), Quaternion.identity, parent);
+                }
+            }
+        }
+
+        private void DrawGenericRoom(Rect room)
+        {
+            // Debug.Log("Generic room : " + room.x + " - " + room.y + " - " + room.width * room.height);
+            
+            for (int i = (int) room.xMin + 1; i < room.xMax - 1; i++)
+            {
+                for (int j = (int) room.yMin + 1; j < room.yMax - 1; j++)
+                {
+                    // Instantiate(genericGO, new Vector3(i * 4, 0,j * 4), Quaternion.identity, parent);
+                }
+            }
+        }
+        
+        #endregion
+
+        public void DrawObjects()
+        {
+            List<Rect> roomsOrdered = rooms.OrderByDescending(x=> x.width * x.height).ToList();
+
+            if (roomsOrdered.Count == 1)
+            {
+                DrawBossRoom(roomsOrdered[0]);
+                roomsOrdered.RemoveAt(0);
+                return;
+            }
+            
+            // spawn
+            Rect spawnRoom = roomsOrdered[^1];
+            DrawSpawnRoom(spawnRoom);
+            roomsOrdered.Remove(spawnRoom);
+            
+            if (roomsOrdered.Count > 5)
+            {
+                // biggest (throne)
+                Rect throneRoom = roomsOrdered[0];
+                DrawThroneRoom(throneRoom);
+                roomsOrdered.Remove(throneRoom);
+
+                // 2nd biggest (buffet)
+                Rect buffetRoom = roomsOrdered[0];
+                DrawBuffet(buffetRoom);
+                roomsOrdered.Remove(buffetRoom);
+
+                // 3rd biggest (wine cellar)
+                Rect kitchen = roomsOrdered[0];
+                DrawWineCellar(kitchen);
+                roomsOrdered.Remove(kitchen);
+
+                // smallest room (office)
+                Rect officeRoom = roomsOrdered[^1];
+                DrawOffice(officeRoom);
+                roomsOrdered.Remove(officeRoom);
+
+                // 2nd smallest room (bedroom)
+                Rect bedroom = roomsOrdered[^1];
+                DrawBedroom(bedroom);
+                roomsOrdered.Remove(bedroom);
+            }
+
+            foreach (var room in roomsOrdered)
+            {
+                DrawGenericRoom(room);
             }
         }
         
