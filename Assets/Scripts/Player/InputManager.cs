@@ -67,4 +67,9 @@ public class InputManager : MonoBehaviourPunCallbacks
         playerControls.Inventory.Disable();
         playerControls.Ground.Enable();
     }
+
+    public bool BossTeleport()
+    {
+        return playerControls.Ground.BossTP.triggered;
+    }
 }

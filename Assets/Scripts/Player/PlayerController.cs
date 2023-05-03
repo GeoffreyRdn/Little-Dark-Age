@@ -15,6 +15,8 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     [SerializeField] private float maxSpeed = 15f;
     
     [SerializeField] private InventoryController inventory;
+    [SerializeField] private string bossScene;
+
 
     private float mouseYVelocity;
 
@@ -138,6 +140,8 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
             return;
         }
 
+        if (InputManager.Instance.BossTeleport()) LoadBossScene();
+            
         if (InputManager.Instance.PlayerOpenInventory()) OpenInventory();
         
         mouseYVelocity = InputManager.Instance.OnRotate();
@@ -290,6 +294,11 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
                     : walkSpeed;
 
         return Mathf.Clamp(moveSpeed, 0, maxSpeed);
+    }
+    
+    public void LoadBossScene()
+    {
+        PhotonNetwork.LoadLevel(bossScene);
     }
 
     private void UpdateOrientation()

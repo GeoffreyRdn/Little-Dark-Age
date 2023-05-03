@@ -1504,6 +1504,7 @@ MonoBehaviour:
   runSpeed: 12
   maxSpeed: 15
   inventory: {fileID: 4656913899444013357}
+  bossScene: Boss Room
 --- !u!114 &4413672764995520110
 MonoBehaviour:
   m_ObjectHideFlags: 0
