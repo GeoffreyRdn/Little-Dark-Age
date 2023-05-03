@@ -164,6 +164,13 @@ MonoBehaviour:
   wall: {fileID: 2121542299643369026, guid: e42893b29e2746748b2c2215aad8952e, type: 3}
   floorRoom: {fileID: 5122338818818721925, guid: 895d58724abcf624ca1c6d4e8d1a0ad4, type: 3}
   floorHallway: {fileID: 5122338818818721925, guid: 895d58724abcf624ca1c6d4e8d1a0ad4, type: 3}
+  throneGO: {fileID: 0}
+  buffetGO: {fileID: 0}
+  wineGO: {fileID: 0}
+  officeGO: {fileID: 0}
+  bedroomGO: {fileID: 0}
+  spawnGO: {fileID: 0}
+  genericGO: {fileID: 0}
   parent: {fileID: 903032346}
   deletionTag: CanBeDeleted
   rooms: []
@@ -568,8 +575,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1806319254}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 6.37, y: 3.5, z: 0}
+  m_LocalRotation: {x: 0.17364816, y: 0, z: 0, w: 0.9848078}
+  m_LocalPosition: {x: 7.72, y: 4.0871267, z: -4.531599}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -620,4 +627,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5c51c59f83f529458525d27923f40f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemyPath: Prefabs/Characters/Enemy
+  enemyPath: Prefabs/Characters/Skeleton
