@@ -9,16 +9,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3a3b9fc98e084aec8b3b267018182c1e, type: 3}
-  m_Name: Sword
+  m_Script: {fileID: 11500000, guid: aab97bf24c2d4aa9a785330899989c22, type: 3}
+  m_Name: Helmet
   m_EditorClassIdentifier: 
-  BuyCost: 50
-  Name: Sword
-  Id: 5
-  Description: A beautiful sword
+  BuyCost: 100
+  Name: Helmet
+  Id: 3
+  Description: Nice hat
   Icon: {fileID: 21300000, guid: dd6a4f1b48fdfa24795480dd2bce1661, type: 3}
-  ItemType: 1
-  Damage: 15
-  MaxAmmo: 0
-  ReloadTime: 0
-  FireRate: 0
+  ItemType: 2
+  Health: 75
+  Armor: 10
+  ArmorType: 1

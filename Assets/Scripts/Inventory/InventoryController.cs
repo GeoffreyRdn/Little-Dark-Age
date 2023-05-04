@@ -35,7 +35,7 @@ namespace Inventory {
 		public Item GetEquippedConsumable() {
 			return ConsumableSlot.HasItem ? ConsumableSlot.Item : null;
 		}
-		
+
 		public float GetTotalBonusArmor() {
 			float total = 0;
 			total += HelmetSlot.HasItem ? (HelmetSlot.Item as ItemArmor).Armor : 0;

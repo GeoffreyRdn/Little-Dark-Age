@@ -12,9 +12,10 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     [SerializeField] private float runSpeed = 12f;
     [SerializeField] private float maxSpeed = 15f;
     
-    [SerializeField] private float jumpHeight = 1.0f;
-    [SerializeField] private float gravityValue = -10;
+    [SerializeField] private float               jumpHeight   = 1.0f;
+    [SerializeField] private float               gravityValue = -10;
     [SerializeField] private InventoryController inventory;
+    [SerializeField] private ShopController shop;
 
     private float mouseYVelocity;
 
@@ -120,6 +121,17 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
             
             Cursor.visible = true;
             isInInventory = true;
+        }
+        
+        if (InputManager.Instance.PlayerOpenShop())
+        {
+            // change action maps
+            InputManager.Instance.OpenShop();
+            // open inventory
+            shop.OpenOrCloseInventory();
+            
+            Cursor.visible = true;
+            isInInventory  = true;
         }
 
         
@@ -251,8 +263,19 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
             Cursor.visible = false;
             isInInventory = false;
         }
+        
+        if (InputManager.Instance.PlayerCloseShop())
+        {
+            // change action map
+            InputManager.Instance.CloseShop();
+            // close inventory
+            shop.OpenOrCloseInventory();
+            
+            Cursor.visible = false;
+            isInInventory  = false;
+        }
     }
-    
+
     public void StartDealingDamage()
         => damageBehavior?.StartDealingDamage();
         

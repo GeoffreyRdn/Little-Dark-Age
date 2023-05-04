@@ -96,7 +96,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &557570707138120533
 RectTransform:
   m_ObjectHideFlags: 0
@@ -112,7 +112,7 @@ RectTransform:
   - {fileID: 557570707534744111}
   - {fileID: 557570707066551013}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -196,7 +196,19 @@ MonoBehaviour:
   ItemDescriptionGo: {fileID: 557570707066551012}
   ItemDescriptionText: {fileID: 557570708475142759}
   Inventory: {fileID: 557570707534744110}
-  StartingItems: []
+  StartingItems:
+  - Item: {fileID: 11400000, guid: dff2d19ca99252d4790aabb2c35206f6, type: 2}
+    Count: 1
+  - Item: {fileID: 11400000, guid: 9a696ea00fde96f459b65b3343e65488, type: 2}
+    Count: 1
+  - Item: {fileID: 11400000, guid: 920618df017a299418072e02d386ea93, type: 2}
+    Count: 1
+  - Item: {fileID: 11400000, guid: 6a16218d6897add409a721af30356a7d, type: 2}
+    Count: 1
+  - Item: {fileID: 11400000, guid: ae877c91e62c75944a2b5ff08dc19ddf, type: 2}
+    Count: 1
+  - Item: {fileID: 11400000, guid: 3dc365c8e67118d4c9d823c323c09b40, type: 2}
+    Count: 3
   SlotPrefab: {fileID: 3377772969785061912, guid: 8d16c2a2f7f6429458034c4c7e56e0ee, type: 3}
 --- !u!1 &557570707534744110
 GameObject:
@@ -367,7 +379,7 @@ MonoBehaviour:
       m_Calls: []
   m_text: This is an item description
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 56d52a6c3f6abe8419fe5c6b0a7f805e, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -431,6 +443,6 @@ MonoBehaviour:
   m_margin: {x: 2.622383, y: 0.8707428, z: 0.9182205, w: 1.1700287}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
-  m_hasFontAssetChanged: 0
+  m_hasFontAssetChanged: 1
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}

@@ -33,6 +33,7 @@ namespace Inventory {
 				HasItem      = true;
 				Item         = stack.Item;
 				image.sprite = stack.Item.Icon;
+				CountText.gameObject.SetActive(false);
 				if (Count > 1) {
 					CountText.text = Count.ToString();
 					CountText.gameObject.SetActive(true);
@@ -80,9 +81,11 @@ namespace Inventory {
 			Count   = stack.Count;
 			HasItem = true;
 			// image          = GetComponent<Image>();
-			image.sprite   = stack.Item.Icon;
-			CountText.text = Count.ToString();
-			CountText.gameObject.SetActive(true);
+			image.sprite = stack.Item.Icon;
+			if (Count > 1) {
+				CountText.text = Count.ToString();
+				CountText.gameObject.SetActive(true);
+			}
 
 			Color color = image.color;
 			color.a     = 1f;
