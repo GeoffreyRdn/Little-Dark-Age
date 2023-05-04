@@ -164,16 +164,101 @@ MonoBehaviour:
   wall: {fileID: 2121542299643369026, guid: e42893b29e2746748b2c2215aad8952e, type: 3}
   floorRoom: {fileID: 5122338818818721925, guid: 895d58724abcf624ca1c6d4e8d1a0ad4, type: 3}
   floorHallway: {fileID: 5122338818818721925, guid: 895d58724abcf624ca1c6d4e8d1a0ad4, type: 3}
-  throneGO: {fileID: 0}
-  buffetGO: {fileID: 0}
-  wineGO: {fileID: 0}
-  officeGO: {fileID: 0}
-  bedroomGO: {fileID: 0}
-  spawnGO: {fileID: 0}
-  genericGO: {fileID: 0}
+  kitchenRoom: []
+  bedroomRoom: []
+  chestRoom: []
+  skeletonRoom:
+  - gameObject: {fileID: 3506935191967020088, guid: 67932966a8af198498e0c52b26d7372c, type: 3}
+    count: 0
+    radius: 0
+    position: 2
+  - gameObject: {fileID: 4086085499139853773, guid: 7e9b09746ef882b41ac57db072b3fed0, type: 3}
+    count: 0
+    radius: 1
+    position: 5
   parent: {fileID: 903032346}
   deletionTag: CanBeDeleted
-  rooms: []
+  rooms:
+  - serializedVersion: 2
+    x: 4
+    y: 4
+    width: 63
+    height: 5
+  - serializedVersion: 2
+    x: 9
+    y: 14
+    width: 15
+    height: 5
+  - serializedVersion: 2
+    x: 5
+    y: 24
+    width: 14
+    height: 6
+  - serializedVersion: 2
+    x: 8
+    y: 36
+    width: 12
+    height: 5
+  - serializedVersion: 2
+    x: 1
+    y: 46
+    width: 17
+    height: 5
+  - serializedVersion: 2
+    x: 5
+    y: 59
+    width: 17
+    height: 7
+  - serializedVersion: 2
+    x: 5
+    y: 72
+    width: 13
+    height: 6
+  - serializedVersion: 2
+    x: 28
+    y: 15
+    width: 6
+    height: 34
+  - serializedVersion: 2
+    x: 39
+    y: 13
+    width: 5
+    height: 16
+  - serializedVersion: 2
+    x: 50
+    y: 13
+    width: 7
+    height: 15
+  - serializedVersion: 2
+    x: 68
+    y: 13
+    width: 11
+    height: 20
+  - serializedVersion: 2
+    x: 51
+    y: 40
+    width: 26
+    height: 7
+  - serializedVersion: 2
+    x: 28
+    y: 56
+    width: 7
+    height: 14
+  - serializedVersion: 2
+    x: 40
+    y: 56
+    width: 8
+    height: 19
+  - serializedVersion: 2
+    x: 58
+    y: 58
+    width: 14
+    height: 6
+  - serializedVersion: 2
+    x: 58
+    y: 71
+    width: 16
+    height: 7
 --- !u!4 &841107531
 Transform:
   m_ObjectHideFlags: 0
