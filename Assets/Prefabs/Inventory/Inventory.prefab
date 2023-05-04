@@ -458,6 +458,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ItemDescriptionGo: {fileID: 5490187757627173511}
   ItemDescriptionText: {fileID: 5490187756353057284}
+  Inventory: {fileID: 5490187757291051597}
   HelmetSlot: {fileID: 489642800570592215}
   ChestplateSlot: {fileID: 489642799761882304}
   LeggingsSlot: {fileID: 489642799571129870}
