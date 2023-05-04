@@ -1,32 +1,46 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using Health;
 using Inventory;
+using NaughtyAttributes;
 using Photon.Pun;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 //[RequireComponent(typeof(CharacterController))]
 public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
 {
-    [SerializeField] private float walkSpeed = 8.0f;
-    [SerializeField] private float crouchSpeed = 4.0f;
-    [SerializeField] private float runSpeed = 12f;
-    [SerializeField] private float maxSpeed = 15f;
+    [BoxGroup("Player")] [SerializeField] private float walkSpeed = 8.0f;
+    [BoxGroup("Player")] [SerializeField] private float crouchSpeed = 4.0f;
+    [BoxGroup("Player")] [SerializeField] private float animationSpeed = 2.0f;
+    [BoxGroup("Player")] [SerializeField] private float runSpeed = 12f;
+    [BoxGroup("Player")] [SerializeField] private float maxSpeed = 15f;
     
-    [SerializeField] private float               jumpHeight   = 1.0f;
-    [SerializeField] private float               gravityValue = -10;
+    [SerializeField] private string bossScene;
+    
     [SerializeField] private InventoryController inventory;
     [SerializeField] private ShopController shop;
+    [SerializeField] private PauseMenu pauseMenu;
+    
+    [BoxGroup("Camera")] [SerializeField] Camera cam;
+    // [BoxGroup("Camera")] [SerializeField] GameObject displayCamera;
+    
+
 
     private float mouseYVelocity;
-
-    private DamageBehavior damageBehavior;
+    
     private CharacterController controller;
     private Transform playerTransform;
     private PhotonView pv;
     private Vector3 playerVelocity;
-    private bool groundedPlayer;
 
-    private bool isInInventory;
+
+    public static bool isInInventory = false;
+    public static bool isInPauseMenu = false;
+    public static bool isInShop = false;
     
     public static bool isLoadingScene = false;
     public static bool applyGravity = true;
@@ -34,10 +48,25 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     #region Animations
 
     private static readonly int IdleAnimation = Animator.StringToHash("idle");
+    
     private static readonly int FrontWalkAnimation = Animator.StringToHash("walk");
-    private static readonly int BackWalkAnimation = Animator.StringToHash("back_walk");
     private static readonly int FrontRunAnimation = Animator.StringToHash("front_run");
+    
+    private static readonly int BackWalkAnimation = Animator.StringToHash("back_walk");
     private static readonly int BackRunAnimation = Animator.StringToHash("back_run");
+    
+    private static readonly int BackRightWalkAnimation = Animator.StringToHash("back_right_walk");
+    private static readonly int BackRightRunAnimation = Animator.StringToHash("back_right_run");
+    
+    private static readonly int BackLeftWalkAnimation = Animator.StringToHash("back_left_walk");
+    private static readonly int BackLeftRunAnimation = Animator.StringToHash("back_left_run");
+    
+    private static readonly int FrontRightWalkAnimation = Animator.StringToHash("front_right_walk");
+    private static readonly int FrontRightRunAnimation = Animator.StringToHash("front_right_run");
+    
+    private static readonly int FrontLeftWalkAnimation = Animator.StringToHash("front_left_walk");
+    private static readonly int FrontLeftRunAnimation = Animator.StringToHash("front_left_run");
+    
     
     private static readonly int AttackAnimation = Animator.StringToHash("attack");
     private static readonly int HitAnimation = Animator.StringToHash("hit");
@@ -56,6 +85,8 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     private static readonly int ShieldHitAnimation = Animator.StringToHash("shield_hit");
     private static readonly int ShieldLeaveAnimation = Animator.StringToHash("shield_leave");
 
+    private List<int> lowerSpeedAnimation;
+
     private bool isAttacking;
     private bool isHit;
     private bool isRunning;
@@ -67,6 +98,7 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     
     private float lockedUntil;
     private int currentState;
+    private float delay;
 
     private Animator animator;
 
@@ -77,11 +109,15 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     private void OnEnable()
     {
         HealthController.onPlayerDeath += HandlePlayerDeath;
+        HealthController.onDungeonComplete += HandleDungeonComplete;
+        SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
     private void OnDisable()
     {
         HealthController.onPlayerDeath -= HandlePlayerDeath;
+        HealthController.onDungeonComplete -= HandleDungeonComplete;
+        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
     #endregion
@@ -91,10 +127,28 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     private void Start()
     {
         pv = GetComponent<PhotonView>();
-        if (!pv.IsMine) return;
         
-        damageBehavior = GetComponentInChildren<DamageBehavior>();  
-        animator = GetComponent<Animator>();
+        if (PhotonNetwork.IsConnectedAndReady && !pv.IsMine)
+        {
+            cam.gameObject.SetActive(false);
+            gameObject.GetComponent<PlayerInput>().enabled = false;
+            enabled = false;
+            return;
+        }
+
+        lowerSpeedAnimation = new List<int>
+        {
+            ShieldEnterAnimation,
+            ShieldHitAnimation,
+            ShieldLeaveAnimation,
+            ShieldStayAnimation,
+            CrouchShieldAnimation,
+            CrouchAttackAnimation,
+            AttackAnimation
+        };
+
+        delay = 0;
+        animator = GetComponentInChildren<Animator>();
         controller = GetComponent<CharacterController>();
         pv = GetComponent<PhotonView>();
         playerTransform = controller.gameObject.transform;
@@ -104,40 +158,34 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
 
     void Update()
     {
-        if (!pv.IsMine || isLoadingScene) return;
+        if (!pv.IsMine) return;
+        if (isLoadingScene) delay = 1f;
 
-        if (isInInventory)
+        if (isInInventory && InputManager.Instance.PlayerCloseInventory())
         {
-            HandleInventory();
+            CloseInventory();
             return;
         }
-
-        if (InputManager.Instance.PlayerOpenInventory())
-        {
-            // change action maps
-            InputManager.Instance.OpenInventory();
-            // open inventory
-            inventory.OpenOrCloseInventory();
-            
-            Cursor.visible = true;
-            isInInventory = true;
-        }
+        if (InputManager.Instance.PlayerOpenInventory()) OpenInventory();
         
-        if (InputManager.Instance.PlayerOpenShop())
+        if (isInPauseMenu && InputManager.Instance.PlayerClosePauseMenu())
         {
-            // change action maps
-            InputManager.Instance.OpenShop();
-            // open inventory
-            shop.OpenOrCloseInventory();
-            
-            Cursor.visible = true;
-            isInInventory  = true;
+            ClosePauseMenu();
+            return;
         }
+        if (InputManager.Instance.PlayerOpenPauseMenu()) OpenPauseMenu();
 
+        if (isInShop && InputManager.Instance.PlayerCloseShop()){
+            CloseShopMenu();
+            return;
+        }
+        if (InputManager.Instance.PlayerOpenShop()) OpenShopMenu();
+
+
+        if (InputManager.Instance.BossTeleport()) LoadBossScene();
         
-        groundedPlayer = controller.isGrounded;
+        
         mouseYVelocity = InputManager.Instance.OnRotate();
-        
         isRunning = InputManager.Instance.PlayerIsRunning();
         isCrouching = InputManager.Instance.PlayerIsSneaking();
         isAttacking = InputManager.Instance.PlayerIsAttacking();
@@ -146,11 +194,8 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
         
         var state = GetState();
         
-        if (!isAttacking)
-        {
-            UpdateOrientation();
-            MovePlayer();
-        }
+        UpdateOrientation();
+        MovePlayer();
 
         if (state == currentState) return;
 
@@ -161,6 +206,43 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     #endregion
     
     #region Animations
+
+    private int LockState(int s, float t)
+    {
+        lockedUntil = Time.time + t;
+        return s;
+    }
+
+    
+    private int HandleShield()
+    {
+        // SHIELD WHILE IN CROUCH
+        if (currentState == CrouchStayAnimation || currentState == CrouchEnterAnimation || currentState == CrouchShieldAnimation)
+        {
+            // if (isHit) return LockState(ShieldHitAnimation, .5f);
+            return CrouchShieldAnimation;
+        }
+            
+        // SHIELD STAY STAND UP
+        // CROUCH ENTER STAND UP
+        return currentState == ShieldEnterAnimation || currentState == ShieldStayAnimation
+            ? ShieldStayAnimation
+            : LockState(ShieldEnterAnimation, .46f);
+    }
+    
+
+    private int HandleCrouch()
+    {
+        // CROUCH STAY OR HIT
+        if (currentState == CrouchEnterAnimation || currentState == CrouchStayAnimation)
+        {
+            return isHit ? LockState(CrouchHitAnimation, .5f) : CrouchStayAnimation;
+        }
+            
+        // CROUCH ENTER
+        return LockState(CrouchEnterAnimation, .56f);
+    }
+    
     
     private int GetState()
     {
@@ -169,49 +251,72 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
 
         if (Time.time < lockedUntil) return currentState;
         
-        // ATTACK PRESSED
-        if (isAttacking) return LockState(isCrouching ? CrouchAttackAnimation : AttackAnimation, 1.5f);
-
-        if (isShielding)
-        {
-            // TODO : shield while crouch
-            
-            // SHIELD STAY STAND UP
-            if (currentState == ShieldEnterAnimation || currentState == ShieldStayAnimation) return ShieldStayAnimation;
-            // CROUCH ENTER STAND UP
-            return LockState(ShieldEnterAnimation, .46f);
-        }
         
-        if (currentState == ShieldStayAnimation) return LockState(ShieldLeaveAnimation, .46f);
+        // ATTACK PRESSED PRIORITY
+        if (isAttacking) return LockState(isCrouching ? CrouchAttackAnimation : AttackAnimation, 1.4f);
 
+        
+        // SHIELD
+        if (isShielding) return HandleShield();
+
+        // LEAVING SHIELD
+        if (currentState == ShieldStayAnimation || currentState == ShieldEnterAnimation)
+            return LockState(ShieldLeaveAnimation, .3f);
+        
+        // LEAVING SHIELD WHILE CROUCHED
+        if (currentState == CrouchShieldAnimation) return CrouchStayAnimation;
+        
+        
+        // JUMP
         if (isJumping) return LockState(JumpAnimation, .7f);
         
-        // PLAYER HIT
-        if (isHit) return LockState(HitAnimation, .7f);
-
-        Vector2 movement = InputManager.Instance.GetPlayerMovement();
         
-        if (isCrouching)
-        {
-            // CROUCH STAY
-            if (currentState == CrouchEnterAnimation || currentState == CrouchStayAnimation) return CrouchStayAnimation;
-            // CROUCH ENTER
-            return LockState(CrouchEnterAnimation, .56f);
-        }
+        // CROUCH
+        if (isCrouching) return HandleCrouch();
+        
         // CROUCH LEAVE
-        if (currentState == CrouchStayAnimation) return LockState(CrouchLeaveAnimation, .45f);
+        if (currentState == CrouchStayAnimation || currentState == CrouchEnterAnimation)
+            return LockState(CrouchLeaveAnimation, .45f);
         
-        // PLAYER IS NOT MOVING
-        if (movement.x == 0 && movement.y == 0) return IdleAnimation;
+        
+        // PLAYER HIT
+        if (isHit) return LockState(HitAnimation, .5f);
+        
+        
+        // MOVEMENT
+        Vector2 movement = InputManager.Instance.GetPlayerMovement();
 
-        // TODO : movement direction 
-        return isRunning ? FrontRunAnimation : FrontWalkAnimation;
-        
-        int LockState(int s, float t)
+        switch (movement.y)
         {
-            lockedUntil = Time.time + t;
-            return s;
+            case < 0:   
+                return movement.x switch
+                {
+                    // BACK
+                    0 => isRunning ? BackRunAnimation : BackWalkAnimation,
+                    // FRONT LEFT
+                    < 0 => isRunning ? FrontLeftRunAnimation : FrontLeftWalkAnimation,
+                    // BACK RIGHT
+                    _ => isRunning ? BackRightRunAnimation : BackRightWalkAnimation
+                };
+            case > 0:
+                return movement.x switch
+                {
+                    // FRONT
+                    0 => isRunning ? FrontRunAnimation : FrontWalkAnimation,
+                    // BACK LEFT
+                    < 0 => isRunning ? BackLeftRunAnimation : BackLeftWalkAnimation,
+                    // FRONT RIGHT
+                    _ => isRunning ? FrontRightRunAnimation : FrontRightWalkAnimation
+                };
         }
+
+        // RIGHT
+        if (movement.x > 0) return isRunning ? FrontRightRunAnimation : FrontRightWalkAnimation;
+
+        // LEFT
+        if (movement.x < 0) return isRunning ? FrontLeftRunAnimation : FrontLeftWalkAnimation;
+
+        return IdleAnimation;
     }
     
     #endregion
@@ -220,12 +325,20 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
 
     private float Speed()
     {
-        var moveSpeed = isCrouching
-            ? crouchSpeed
-            : isRunning
-                ? runSpeed
-                : walkSpeed;
+        var moveSpeed = lowerSpeedAnimation.Contains(currentState)
+            ? animationSpeed
+            : isCrouching
+                ? crouchSpeed
+                : isRunning
+                    ? runSpeed
+                    : walkSpeed;
+
         return Mathf.Clamp(moveSpeed, 0, maxSpeed);
+    }
+    
+    public void LoadBossScene()
+    {
+        PhotonNetwork.LoadLevel(bossScene);
     }
 
     private void UpdateOrientation()
@@ -251,36 +364,105 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     }
 
 
-    private void HandleInventory()
+    private void HandleDungeonComplete()
     {
-        if (InputManager.Instance.PlayerCloseInventory())
-        {
-            // change action map
-            InputManager.Instance.CloseInventory();
-            // close inventory
-            inventory.OpenOrCloseInventory();
-            
-            Cursor.visible = false;
-            isInInventory = false;
-        }
-        
-        if (InputManager.Instance.PlayerCloseShop())
-        {
-            // change action map
-            InputManager.Instance.CloseShop();
-            // close inventory
-            shop.OpenOrCloseInventory();
-            
-            Cursor.visible = false;
-            isInInventory  = false;
-        }
+        pv.RPC(nameof(EnableWinMenu), RpcTarget.AllBuffered);
+        StartCoroutine(DelayLoadBossScene());
     }
 
-    public void StartDealingDamage()
-        => damageBehavior?.StartDealingDamage();
+    private IEnumerator DelayLoadBossScene()
+    {
+        yield return new WaitForSeconds(5);
+        LoadBossScene();
+    } 
+
+    [PunRPC]
+    private void EnableWinMenu()
+    {
+        // TODO : enable countdown prefab for each player
+    }
+    
+    private void CloseInventory()
+    {
+        // change action map
+        InputManager.Instance.CloseInventory();
+        // close inventory
+        inventory.OpenOrCloseInventory();
         
-    public void StopDealingDamage()
-        => damageBehavior?.StopDealingDamage();
+        Cursor.visible = false;
+        isInInventory = false;
+    }
+
+    private void OpenInventory()
+    {
+        // change action maps
+        InputManager.Instance.OpenInventory();
+        // open inventory
+        inventory.OpenOrCloseInventory();
+            
+        Cursor.visible = true;
+        isInInventory = true;
+    }
+    
+    private void OpenShopMenu(){
+        // change action maps
+        InputManager.Instance.OpenShop();
+        // open inventory
+        shop.OpenOrCloseInventory();
+            
+        Cursor.visible = true;
+        isInShop  = true;
+    }
+    
+    private void CloseShopMenu(){
+        // change action maps
+        InputManager.Instance.CloseShop();
+        // open or close shop
+        shop.OpenOrCloseShopMenu();
+            
+        Cursor.visible = false;
+        isInShop = false;
+    }
+
+    private void OpenPauseMenu()
+    {
+        // change action maps
+        InputManager.Instance.OpenPauseMenu();
+        // open inventory
+        pauseMenu.OpenOrClosePauseMenu();
+            
+        Cursor.visible = true;
+        isInPauseMenu = true;
+    }
+
+    private void ClosePauseMenu()
+    {
+        // change action maps
+        InputManager.Instance.ClosePauseMenu();
+        // open inventory
+        pauseMenu.OpenOrClosePauseMenu();
+            
+        Cursor.visible = false;
+        isInPauseMenu = false;
+    }
+    
+    private void OnSceneLoaded(Scene scene, LoadSceneMode loadSceneMode)
+        => ResetCameras();
+
+    private void ResetCameras()
+    {
+        var players = PhotonNetwork.CurrentRoom.Players.Values
+            .Select(player => player.TagObject as GameObject)
+            .ToList();
+        
+        var currPlayer = PhotonNetwork.LocalPlayer.TagObject as GameObject;
+
+        for (var i = 0; i < players.Count; i++)
+        {
+            var player = players[i].GetComponent<PlayerController>();
+            player.cam.gameObject.SetActive(currPlayer == players[i]);
+        }
+    }
 
     #endregion
     

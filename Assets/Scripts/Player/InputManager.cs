@@ -33,7 +33,7 @@ public class InputManager : MonoBehaviourPunCallbacks
         => playerControls.Ground.Attack.triggered;
 
     public bool PlayerIsShield()
-        => playerControls.Ground.Shield.IsPressed();
+        => playerControls.Ground.Shield.IsPressed() || playerControls.Ground.Shield.IsInProgress();
 
     public Vector2 GetPlayerMovement()
         => playerControls.Ground.Movement.ReadValue<Vector2>().normalized;
@@ -73,7 +73,31 @@ public class InputManager : MonoBehaviourPunCallbacks
         playerControls.Inventory.Disable();
         playerControls.Ground.Enable();
     }
+
+
+    public bool PlayerOpenPauseMenu()
+        => playerControls.Ground.OpenPauseMenu.triggered;
     
+    public bool PlayerClosePauseMenu()
+        => playerControls.PauseMenu.Resume.triggered;
+    
+    public void OpenPauseMenu()
+    {
+        playerControls.Ground.Disable();
+        playerControls.PauseMenu.Enable();
+    }
+
+    public void ClosePauseMenu()
+    {
+        playerControls.PauseMenu.Disable();
+        playerControls.Ground.Enable();
+    }
+
+    public bool BossTeleport()
+    {
+        return playerControls.Ground.BossTP.triggered;
+    }
+
     
     public void OpenShop()
     {

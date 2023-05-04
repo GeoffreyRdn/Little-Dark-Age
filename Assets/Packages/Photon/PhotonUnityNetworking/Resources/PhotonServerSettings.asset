@@ -45,6 +45,12 @@ MonoBehaviour:
   - SetMapData
   - TpPlayersToDungeon
   - RemoveGravity
+  - TeleportPlayers
+  - TpPlayersToLobby
+  - DeactivateCameras
+  - TransmitSpawnPoint
+  - KillEnemy
+  - EnableWinMenu
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1

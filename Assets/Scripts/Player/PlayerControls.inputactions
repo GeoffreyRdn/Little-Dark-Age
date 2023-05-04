@@ -87,6 +87,24 @@
                     "initialStateCheck": false
                 },
                 {
+                    "name": "BossTP",
+                    "type": "Button",
+                    "id": "d0de9d36-3525-4306-b79f-6c58145bd898",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "OpenPauseMenu",
+                    "type": "Button",
+                    "id": "c1d20410-9e4b-4ef4-a4fa-cbf775e689cb",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "OpenShop",
                     "type": "Button",
                     "id": "099c6e99-8452-44d1-922a-0de8bacfd427",
@@ -242,6 +260,28 @@
                 },
                 {
                     "name": "",
+                    "id": "dcbe1c08-5872-4c5a-92d9-74b9b4f3ce38",
+                    "path": "<Keyboard>/downArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "BossTP",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "4dee3b35-3d51-47d0-ab44-19dd5d6da28a",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "OpenPauseMenu",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "433e9dfb-c910-4ba8-bedb-ccac77cb9d31",
                     "path": "<Keyboard>/p",
                     "interactions": "",
@@ -282,6 +322,34 @@
             ]
         },
         {
+            "name": "PauseMenu",
+            "id": "918c65ca-5030-4036-a1f2-a88cbc7813b7",
+            "actions": [
+                {
+                    "name": "Resume",
+                    "type": "Button",
+                    "id": "bcb7e879-4dfe-41b7-bf45-0494ffb1bf71",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "b12a7c02-df0a-4f7f-8c96-3e96af014647",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Resume",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
             "name": "Shop",
             "id": "714cbf10-28ba-4ce8-bf02-97a4265bbba8",
             "actions": [
@@ -300,6 +368,17 @@
                     "name": "",
                     "id": "9ce18b9b-e4e9-480b-ad57-9ca9f57194da",
                     "path": "<Keyboard>/p",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CloseShop",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "3faabdb0-b2cb-47ff-9893-767774703162",
+                    "path": "<Keyboard>/escape",
                     "interactions": "",
                     "processors": "",
                     "groups": "",

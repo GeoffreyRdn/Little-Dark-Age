@@ -27,5 +27,11 @@ namespace Inventory {
 			script.StorageController = this;
 			// script.SetItem(item);
 		}
+		
+		public void OpenOrCloseShopMenu()
+		{
+			Debug.Log("Opening shop -> " + !gameObject.activeInHierarchy);
+			gameObject.SetActive(!gameObject.activeInHierarchy);
+		}
 	}
 }
