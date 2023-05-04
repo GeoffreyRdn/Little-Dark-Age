@@ -1765,6 +1765,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lobbyScene: Lobby
+  mainMenuScene: Menu
 --- !u!1 &7715970575662973238
 GameObject:
   m_ObjectHideFlags: 0

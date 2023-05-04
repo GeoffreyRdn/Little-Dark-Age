@@ -1,11 +1,14 @@
+using System.Linq;
 using Photon.Pun;
+using Photon.Realtime;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class PauseMenu : MonoBehaviour
+public class PauseMenu : MonoBehaviourPunCallbacks
 {
     [SerializeField] private string lobbyScene;
+    [SerializeField] private string mainMenuScene;
 
     public void Resume()
     {
@@ -30,14 +33,18 @@ public class PauseMenu : MonoBehaviour
 
     public void ReturnToMainMenu()
     {
+        PhotonNetwork.Destroy(PhotonNetwork.LocalPlayer.TagObject as GameObject);
+        PhotonNetwork.LocalPlayer.TagObject = null;
+        Destroy(InputManager.Instance.gameObject);
+
+        PhotonNetwork.LeaveRoom();
+        SceneManager.LoadScene(mainMenuScene);
         Debug.Log("Return to main menu");
     }
 
     public void ExitGame()
     {
         Debug.Log("Exiting ...");
-
-        
         Application.Quit();
         
         #if UNITY_EDITOR

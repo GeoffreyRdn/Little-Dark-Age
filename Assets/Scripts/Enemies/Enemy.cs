@@ -58,8 +58,7 @@ namespace Enemies
 
         private NavMeshAgent agent;
         private GameObject[] players;
-        private DamageBehavior damageBehavior;
-        
+
         private Vector3 destination;
         private bool hasDestination;
         
@@ -69,7 +68,6 @@ namespace Enemies
 
         private void Start()
         {
-            damageBehavior = GetComponentInChildren<DamageBehavior>();
             animator = GetComponentInChildren<Animator>();
             agent = GetComponent<NavMeshAgent>();
             players = GameObject.FindGameObjectsWithTag(playerTag);
@@ -109,7 +107,6 @@ namespace Enemies
         private void OnDisable()
         {
             HealthController.onPlayerDeath -= HandlePlayerDeath;
-
         }
 
         #endregion
@@ -138,12 +135,6 @@ namespace Enemies
                 return s;
             }
         }
-        
-        public void StartDealingDamage()
-            => damageBehavior?.StartDealingDamage();
-        
-        public void StopDealingDamage()
-            => damageBehavior?.StopDealingDamage();
         
         #endregion
 
