@@ -8,11 +8,6 @@ namespace Inventory {
 		[ShowIf(nameof(AcceptType), ItemType.Armor)]
 		public ArmorType ArmorType;
 
-		public override void Start() {
-			base.Start();
-		}
-
-
 		public override void AddItem(ref ItemStack stack) {
 			if (AcceptType != ItemType.Default &&
 			    stack.Item.ItemType != AcceptType) {
@@ -22,7 +17,7 @@ namespace Inventory {
 			    ((ItemArmor) stack.Item).ArmorType != ArmorType) {
 				return;
 			}
-			
+
 			base.AddItem(ref stack);
 		}
 	}

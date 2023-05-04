@@ -1,19 +1,18 @@
-﻿using Items;
+﻿using System.Collections.Generic;
+using Items;
+using JetBrains.Annotations;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 namespace Inventory {
-	public class InventoryController: MonoBehaviour {
+	public class InventoryController: StorageController {
 		public static InventoryController Instance;
 
 		public static  ItemStack  HeldItem;
 		public static  bool       IsHoldingItem = false;
 		private static GameObject itemGo;
-
-		public GameObject      ItemDescriptionGo;
-		public TextMeshProUGUI ItemDescriptionText;
 
 		public EquipmentSlot HelmetSlot;
 		public EquipmentSlot ChestplateSlot;
@@ -22,11 +21,21 @@ namespace Inventory {
 		public EquipmentSlot WeaponSlot;
 		public EquipmentSlot ConsumableSlot;
 
-		private void Start() {
+		protected override void Start() {
+			base.Start();
 			Instance = this;
-			ItemDescriptionGo.SetActive(false);
 		}
 
+		[CanBeNull]
+		public Item GetEquippedWeapon() {
+			return WeaponSlot.HasItem ? WeaponSlot.Item : null;
+		}
+
+		[CanBeNull]
+		public Item GetEquippedConsumable() {
+			return ConsumableSlot.HasItem ? ConsumableSlot.Item : null;
+		}
+		
 		public float GetTotalBonusArmor() {
 			float total = 0;
 			total += HelmetSlot.HasItem ? (HelmetSlot.Item as ItemArmor).Armor : 0;
@@ -61,25 +70,6 @@ namespace Inventory {
 			itemGo = null;
 		}
 
-		public void ShowItemDescription(InventorySlot slot) {
-			if (!slot.HasItem) {
-				return;
-			}
-			float verticalOffset = (float) 1.2 * slot.GetComponent<RectTransform>().rect.height;
-			ItemDescriptionGo.transform.localPosition = slot.transform.localPosition +
-			                                            new Vector3(0, verticalOffset, 0);
-			// ItemDescriptionText.text = slot.Item!.Description;
-			string description = slot.Item!.Name + "\n";
-			description              += slot.Item.Description + "\n";
-			description              += slot.Item.GetStats();
-			ItemDescriptionText.text =  description;
-			ItemDescriptionGo.SetActive(true);
-		}
-
-		public void ClearItemDescription() {
-			ItemDescriptionGo.SetActive(false);
-		}
-
 		private void Update() {
 			if (!IsHoldingItem) {
 				return;
@@ -87,12 +77,6 @@ namespace Inventory {
 
 			// itemGo.transform.localPosition = Input.mousePosition - transform.localPosition;
 			itemGo.transform.position = Mouse.current.position.ReadValue();
-		}
-
-		public void OpenOrCloseInventory()
-		{
-			Debug.Log("Opening inventory -> " + !gameObject.activeSelf);
-			gameObject.SetActive(!gameObject.activeInHierarchy);
 		}
 	}
 }
