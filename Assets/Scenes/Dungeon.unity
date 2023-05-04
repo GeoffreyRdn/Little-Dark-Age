@@ -168,97 +168,119 @@ MonoBehaviour:
   bedroomRoom: []
   chestRoom: []
   skeletonRoom:
-  - gameObject: {fileID: 3506935191967020088, guid: 67932966a8af198498e0c52b26d7372c, type: 3}
+  - gameObject: {fileID: 6925658078782104458, guid: 2fa01332e46bd514c8511eb5302cf736, type: 3}
     count: 0
     radius: 0
     position: 2
-  - gameObject: {fileID: 4086085499139853773, guid: 7e9b09746ef882b41ac57db072b3fed0, type: 3}
+    offset: {x: 0, y: 0, z: 0}
+  - gameObject: {fileID: 809246325334306752, guid: cd625983c29f34f41b3e2519b3e91904, type: 3}
     count: 0
     radius: 1
     position: 5
+    offset: {x: 0, y: 0, z: 0}
   parent: {fileID: 903032346}
   deletionTag: CanBeDeleted
   rooms:
   - serializedVersion: 2
-    x: 4
+    x: 6
     y: 4
-    width: 63
-    height: 5
-  - serializedVersion: 2
-    x: 9
-    y: 14
-    width: 15
-    height: 5
-  - serializedVersion: 2
-    x: 5
-    y: 24
-    width: 14
-    height: 6
-  - serializedVersion: 2
-    x: 8
-    y: 36
-    width: 12
-    height: 5
+    width: 19
+    height: 10
   - serializedVersion: 2
     x: 1
-    y: 46
-    width: 17
+    y: 22
+    width: 5
+    height: 14
+  - serializedVersion: 2
+    x: 16
+    y: 23
+    width: 14
     height: 5
   - serializedVersion: 2
-    x: 5
-    y: 59
-    width: 17
-    height: 7
+    x: 15
+    y: 32
+    width: 14
+    height: 5
   - serializedVersion: 2
-    x: 5
-    y: 72
+    x: 2
+    y: 45
+    width: 21
+    height: 9
+  - serializedVersion: 2
+    x: 42
+    y: 4
+    width: 31
+    height: 5
+  - serializedVersion: 2
+    x: 35
+    y: 14
+    width: 36
+    height: 6
+  - serializedVersion: 2
+    x: 40
+    y: 25
+    width: 13
+    height: 5
+  - serializedVersion: 2
+    x: 35
+    y: 34
+    width: 11
+    height: 5
+  - serializedVersion: 2
+    x: 38
+    y: 46
+    width: 11
+    height: 9
+  - serializedVersion: 2
+    x: 62
+    y: 23
+    width: 14
+    height: 5
+  - serializedVersion: 2
+    x: 63
+    y: 35
+    width: 15
+    height: 6
+  - serializedVersion: 2
+    x: 55
+    y: 49
     width: 13
     height: 6
   - serializedVersion: 2
-    x: 28
-    y: 15
-    width: 6
-    height: 34
+    x: 3
+    y: 60
+    width: 5
+    height: 15
   - serializedVersion: 2
-    x: 39
-    y: 13
+    x: 15
+    y: 58
     width: 5
     height: 16
   - serializedVersion: 2
-    x: 50
-    y: 13
-    width: 7
+    x: 23
+    y: 58
+    width: 5
     height: 15
   - serializedVersion: 2
-    x: 68
-    y: 13
-    width: 11
-    height: 20
+    x: 37
+    y: 61
+    width: 5
+    height: 17
   - serializedVersion: 2
-    x: 51
-    y: 40
-    width: 26
-    height: 7
+    x: 46
+    y: 59
+    width: 5
+    height: 17
   - serializedVersion: 2
-    x: 28
-    y: 56
-    width: 7
+    x: 58
+    y: 62
+    width: 6
     height: 14
   - serializedVersion: 2
-    x: 40
-    y: 56
-    width: 8
-    height: 19
-  - serializedVersion: 2
-    x: 58
-    y: 58
-    width: 14
-    height: 6
-  - serializedVersion: 2
-    x: 58
-    y: 71
-    width: 16
-    height: 7
+    x: 71
+    y: 62
+    width: 7
+    height: 15
 --- !u!4 &841107531
 Transform:
   m_ObjectHideFlags: 0

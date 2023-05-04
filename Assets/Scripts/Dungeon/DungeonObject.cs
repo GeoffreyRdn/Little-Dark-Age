@@ -9,6 +9,7 @@ namespace Dungeon
         public int count;
         public int radius;
         public ObjectPosition position;
+        public Vector3 offset;
     }
 
     public enum ObjectPosition

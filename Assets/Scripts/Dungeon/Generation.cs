@@ -182,16 +182,28 @@ namespace Dungeon
             bool topOrBot = corridorEntrance == CorridorDirection.Bottom || corridorEntrance == CorridorDirection.Top;
 
             var sidePrefab = skeletonRoom.Where(x => x.position == ObjectPosition.NotCorridorSideAndOpposite).ToList()[0];
-
+            var sideOffset = sidePrefab.offset;
+            
+            Debug.Log("TOP/BOT : " + topOrBot);
+            
             // WE WANT SIDES LEFT / RIGHT
             if (topOrBot)
             {
                 for (int i = (int) (room.yMin + 1); i < (room.yMax - 1); i++)
                 {
                     if (DungeonBoard[(int) room.xMin, i] != TileType.Hallway)
-                        Instantiate(sidePrefab.gameObject, new Vector3((int) (room.xMin +1) * 4, 0, i * 4), Quaternion.identity, parent);
+                    {
+                        Instantiate(sidePrefab.gameObject,
+                            new Vector3((int) (room.xMin +1) * 4, 0, i * 4) + sideOffset,
+                            Quaternion.identity, parent);
+                    }
+
                     if (DungeonBoard[(int) room.xMax, i] != TileType.Hallway)
-                        Instantiate(sidePrefab.gameObject, new Vector3((int) (room.xMax - 2) * 4, 0, i * 4), Quaternion.identity, parent);
+                    {
+                        Instantiate(sidePrefab.gameObject, 
+                            new Vector3((int) (room.xMax - 2) * 4, 0, i * 4) + sideOffset, 
+                            Quaternion.identity, parent);
+                    }
                 }
             }
 
@@ -200,15 +212,25 @@ namespace Dungeon
                 for (int i = (int) (room.xMin + 1); i < (room.xMax - 1); i++)
                 {
                     if (DungeonBoard[(int) room.xMin, i] != TileType.Hallway)
-                        Instantiate(sidePrefab.gameObject, new Vector3((int) (room.yMin +1) * 4, 0, i * 4), Quaternion.identity, parent);
+                    {
+                        Instantiate(sidePrefab.gameObject, 
+                            new Vector3(i*4, 0, (int) (room.yMin +1) * 4) + sideOffset,
+                            Quaternion.identity, parent);
+                    }
+
                     if (DungeonBoard[(int) room.xMax, i] != TileType.Hallway)
-                        Instantiate(sidePrefab.gameObject, new Vector3((int) (room.yMax - 2) * 4, 0, i * 4), Quaternion.identity, parent);
+                    {
+                        Instantiate(sidePrefab.gameObject, 
+                            new Vector3(i*4, 0, (int) (room.yMax - 2) * 4) + sideOffset, 
+                            Quaternion.identity, parent);
+                    }
                 }
             }
             
             var middlePrefab = skeletonRoom.Where(x => x.position == ObjectPosition.Middle).ToList()[0];
+            var middleOffset = middlePrefab.offset;
             Vector3 middle = new Vector3 ((int) room.center.x * 4, 0, (int) room.center.y * 4);
-            Instantiate(middlePrefab.gameObject, middle, Quaternion.identity, parent);
+            Instantiate(middlePrefab.gameObject, middle + middleOffset , Quaternion.identity, parent);
         }
         
         private void DrawChestRoom(Rect room)
