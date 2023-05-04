@@ -22,7 +22,7 @@ namespace Enemies
                 for (int i = 0; i < Random.Range(2, 5); i++)
                 {
                     Vector3 spawnPos = new Vector3(x+Random.Range(-1f, 1f), 0, z + Random.Range(-1f, 1f));
-                    var enemy = PhotonNetwork.Instantiate(enemyPath, spawnPos, Quaternion.identity);
+                    var enemy = PhotonNetwork.InstantiateRoomObject(enemyPath, spawnPos, Quaternion.identity);
                     enemy.transform.parent = transform;
                     
                     EnemiesRemaining++;

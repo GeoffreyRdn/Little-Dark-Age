@@ -26,7 +26,6 @@ public class PlayerManager : MonoBehaviourPunCallbacks
 
     private void CreateController()
     {
-        var player = PhotonNetwork.Instantiate(playerLocation, spawnPoint, Quaternion.identity);
-        DontDestroyOnLoad(player);
+        PhotonNetwork.Instantiate(playerLocation, spawnPoint, Quaternion.identity);
     }
 }

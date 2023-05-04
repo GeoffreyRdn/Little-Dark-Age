@@ -6,6 +6,7 @@ using Health;
 using Inventory;
 using NaughtyAttributes;
 using Photon.Pun;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -124,6 +125,12 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
 
     #region Start - Update
 
+    private void Awake()
+    {
+        DontDestroyOnLoad(gameObject);
+        PhotonNetwork.AutomaticallySyncScene = true;
+    }
+
     private void Start()
     {
         pv = GetComponent<PhotonView>();
@@ -131,7 +138,6 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
         if (PhotonNetwork.IsConnectedAndReady && !pv.IsMine)
         {
             cam.gameObject.SetActive(false);
-            gameObject.GetComponent<PlayerInput>().enabled = false;
             enabled = false;
             return;
         }
@@ -201,12 +207,23 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
 
         animator.CrossFade(state, 0, 0);
         currentState = state;
+        pv.RPC(nameof(SendAnimations), RpcTarget.Others, currentState);
     }
     
     #endregion
     
     #region Animations
 
+    [PunRPC]
+    private void SendAnimations(int state, PhotonMessageInfo info)
+    {
+        if (info.Sender.TagObject is GameObject sender)
+        {
+            var playerAnimator = sender.GetComponentInChildren<Animator>();
+            playerAnimator.CrossFade(state, 0, 0);
+        }
+    }
+    
     private int LockState(int s, float t)
     {
         lockedUntil = Time.time + t;
