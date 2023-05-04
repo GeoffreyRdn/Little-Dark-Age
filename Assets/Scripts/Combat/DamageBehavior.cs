@@ -1,36 +1,31 @@
-using System;
 using System.Collections.Generic;
 using Health;
+using NaughtyAttributes;
 using UnityEngine;
 
 public class DamageBehavior : MonoBehaviour
 {
-    [SerializeField] private LayerMask targetMask;
-    [SerializeField] private float weaponLength;
     [SerializeField] private float weaponDamage;
-    [SerializeField] private Vector3 raycastOffset;
-    
-    
+    [SerializeField, Tag] private string TagGO;
+
     private bool canDealDamage;
     private RaycastHit hit;
     private List<GameObject> damaged;
 
     private void Start()
         => damaged = new List<GameObject>();
-
-    private void Update()
+    
+    private void OnTriggerEnter(Collider collider)
     {
-        if (!canDealDamage) return;
-
-        if (Physics.Raycast(transform.position + raycastOffset, -transform.right, out hit, weaponLength, targetMask))
-        {
-            GameObject target = hit.transform.gameObject;
-            if (!damaged.Contains(target)) Damage(target);
-        }
+        if (!canDealDamage || collider.gameObject.CompareTag(TagGO)) return;
+        
+        GameObject target = collider.transform.gameObject;
+        if (!damaged.Contains(target)) Damage(target);
     }
 
     private void Damage(GameObject target)
     {
+        Debug.Log("DAMAGING");
         if (target.TryGetComponent(out HealthController targetHealth))
         {
             var playerController = target.GetComponentInParent<PlayerController>();
@@ -48,7 +43,6 @@ public class DamageBehavior : MonoBehaviour
         damaged.Add(target);
     }
 
-
     public void StartDealingDamage()
     {
         damaged.Clear();
@@ -57,11 +51,4 @@ public class DamageBehavior : MonoBehaviour
 
     public void StopDealingDamage()
         => canDealDamage = false;
-
-    private void OnDrawGizmos()
-    {
-        var position = transform.position + raycastOffset;
-        Gizmos.color = Color.red;
-        Gizmos.DrawLine(position, position - transform.right * weaponLength);
-    }
 }

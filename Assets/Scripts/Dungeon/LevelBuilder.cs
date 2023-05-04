@@ -37,6 +37,7 @@ namespace Dungeon
                 
                 Rect room = generation.rooms.OrderByDescending(x => x.height * x.width).ToList()[^1];
                 spawnPoint = new Vector3(room.center.x * 4, 1, room.center.y * 4);
+                photonView.RPC(nameof(TransmitSpawnPoint), RpcTarget.OthersBuffered, spawnPoint.x, spawnPoint.z);
                 
                 // create the navMesh for enemies / spawn enemies
                 surface = GameObject.Find("Dungeon").GetComponent<NavMeshSurface>();
@@ -83,6 +84,12 @@ namespace Dungeon
             
             PlayerController.isLoadingScene = false;
             // // TODO : remove loading screen
+        }
+
+        [PunRPC]
+        private void TransmitSpawnPoint(float x, float z)
+        {
+            spawnPoint = new Vector3(x, 1, z);
         }
 
         #endregion

@@ -6,20 +6,12 @@ using System.IO;
 public class RoomManager : MonoBehaviourPunCallbacks
 {
     [SerializeField] private string lobbyScene;
+    [SerializeField] private string dungeonScene;
     [SerializeField] private string playerManagerPath;
-    
-    public static RoomManager Instance;
 
     private void Awake()
     {
-        if (Instance)
-        {
-            Destroy(gameObject);
-            return;
-        }
-
         DontDestroyOnLoad(gameObject);
-        Instance = this;
     }
 
     public override void OnEnable()
@@ -36,9 +28,10 @@ public class RoomManager : MonoBehaviourPunCallbacks
 
     void OnSceneLoaded(Scene scene, LoadSceneMode loadSceneMode)
     {
-        if (scene.name == lobbyScene)
+        if (scene.name == lobbyScene || scene.name == dungeonScene)
         {
             PhotonNetwork.Instantiate(playerManagerPath, Vector3.zero, Quaternion.identity);
+            Destroy(gameObject);
         }
     }
 }

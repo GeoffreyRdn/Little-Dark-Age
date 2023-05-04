@@ -1,28 +1,37 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Health;
 using Inventory;
+using NaughtyAttributes;
 using Photon.Pun;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 //[RequireComponent(typeof(CharacterController))]
 public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
 {
-    [SerializeField] private float walkSpeed = 8.0f;
-    [SerializeField] private float crouchSpeed = 4.0f;
-    [SerializeField] private float animationSpeed = 2.0f;
-    [SerializeField] private float runSpeed = 12f;
-    [SerializeField] private float maxSpeed = 15f;
+    [BoxGroup("Player")] [SerializeField] private float walkSpeed = 8.0f;
+    [BoxGroup("Player")] [SerializeField] private float crouchSpeed = 4.0f;
+    [BoxGroup("Player")] [SerializeField] private float animationSpeed = 2.0f;
+    [BoxGroup("Player")] [SerializeField] private float runSpeed = 12f;
+    [BoxGroup("Player")] [SerializeField] private float maxSpeed = 15f;
     
     [SerializeField] private string bossScene;
     
     [SerializeField] private InventoryController inventory;
+    [SerializeField] private ShopController shop;
     [SerializeField] private PauseMenu pauseMenu;
+    
+    [BoxGroup("Camera")] [SerializeField] Camera cam;
+    // [BoxGroup("Camera")] [SerializeField] GameObject displayCamera;
+    
 
 
     private float mouseYVelocity;
-
-    private DamageBehavior damageBehavior;
+    
     private CharacterController controller;
     private Transform playerTransform;
     private PhotonView pv;
@@ -31,6 +40,7 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
 
     public static bool isInInventory = false;
     public static bool isInPauseMenu = false;
+    public static bool isInShop = false;
     
     public static bool isLoadingScene = false;
     public static bool applyGravity = true;
@@ -99,11 +109,15 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     private void OnEnable()
     {
         HealthController.onPlayerDeath += HandlePlayerDeath;
+        HealthController.onDungeonComplete += HandleDungeonComplete;
+        SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
     private void OnDisable()
     {
         HealthController.onPlayerDeath -= HandlePlayerDeath;
+        HealthController.onDungeonComplete -= HandleDungeonComplete;
+        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
     #endregion
@@ -113,7 +127,14 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     private void Start()
     {
         pv = GetComponent<PhotonView>();
-        if (!pv.IsMine) return;
+        
+        if (PhotonNetwork.IsConnectedAndReady && !pv.IsMine)
+        {
+            cam.gameObject.SetActive(false);
+            gameObject.GetComponent<PlayerInput>().enabled = false;
+            enabled = false;
+            return;
+        }
 
         lowerSpeedAnimation = new List<int>
         {
@@ -127,8 +148,7 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
         };
 
         delay = 0;
-        damageBehavior = GetComponentInChildren<DamageBehavior>();  
-        animator = GetComponent<Animator>();
+        animator = GetComponentInChildren<Animator>();
         controller = GetComponent<CharacterController>();
         pv = GetComponent<PhotonView>();
         playerTransform = controller.gameObject.transform;
@@ -154,6 +174,13 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
             return;
         }
         if (InputManager.Instance.PlayerOpenPauseMenu()) OpenPauseMenu();
+
+        if (isInShop && InputManager.Instance.PlayerCloseShop()){
+            CloseShopMenu();
+            return;
+        }
+        if (InputManager.Instance.PlayerOpenShop()) OpenShopMenu();
+
 
         if (InputManager.Instance.BossTeleport()) LoadBossScene();
         
@@ -258,7 +285,6 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
         
         // MOVEMENT
         Vector2 movement = InputManager.Instance.GetPlayerMovement();
-        Debug.Log(movement);
 
         switch (movement.y)
         {
@@ -338,6 +364,24 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     }
 
 
+    private void HandleDungeonComplete()
+    {
+        pv.RPC(nameof(EnableWinMenu), RpcTarget.AllBuffered);
+        StartCoroutine(DelayLoadBossScene());
+    }
+
+    private IEnumerator DelayLoadBossScene()
+    {
+        yield return new WaitForSeconds(5);
+        LoadBossScene();
+    } 
+
+    [PunRPC]
+    private void EnableWinMenu()
+    {
+        // TODO : enable countdown prefab for each player
+    }
+    
     private void CloseInventory()
     {
         // change action map
@@ -358,6 +402,26 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
             
         Cursor.visible = true;
         isInInventory = true;
+    }
+    
+    private void OpenShopMenu(){
+        // change action maps
+        InputManager.Instance.OpenShop();
+        // open inventory
+        shop.OpenOrCloseInventory();
+            
+        Cursor.visible = true;
+        isInShop  = true;
+    }
+    
+    private void CloseShopMenu(){
+        // change action maps
+        InputManager.Instance.CloseShop();
+        // open or close shop
+        shop.OpenOrCloseShopMenu();
+            
+        Cursor.visible = false;
+        isInShop = false;
     }
 
     private void OpenPauseMenu()
@@ -382,11 +446,23 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
         isInPauseMenu = false;
     }
     
-    public void StartDealingDamage()
-        => damageBehavior?.StartDealingDamage();
+    private void OnSceneLoaded(Scene scene, LoadSceneMode loadSceneMode)
+        => ResetCameras();
+
+    private void ResetCameras()
+    {
+        var players = PhotonNetwork.CurrentRoom.Players.Values
+            .Select(player => player.TagObject as GameObject)
+            .ToList();
         
-    public void StopDealingDamage()
-        => damageBehavior?.StopDealingDamage();
+        var currPlayer = PhotonNetwork.LocalPlayer.TagObject as GameObject;
+
+        for (var i = 0; i < players.Count; i++)
+        {
+            var player = players[i].GetComponent<PlayerController>();
+            player.cam.gameObject.SetActive(currPlayer == players[i]);
+        }
+    }
 
     #endregion
     

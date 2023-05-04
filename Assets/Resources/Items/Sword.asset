@@ -14,11 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   BuyCost: 50
   Name: Sword
-  Id: 0
+  Id: 5
   Description: A beautiful sword
   Icon: {fileID: 21300000, guid: dd6a4f1b48fdfa24795480dd2bce1661, type: 3}
   ItemType: 1
-  Damage: 0
+  Damage: 15
   MaxAmmo: 0
   ReloadTime: 0
   FireRate: 0
