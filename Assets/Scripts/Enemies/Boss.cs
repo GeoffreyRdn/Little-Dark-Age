@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.AI;
@@ -14,6 +16,9 @@ namespace Enemies
         
         [Tag] [SerializeField] private string playerTag;
 
+        
+        [BoxGroup("FX")] [SerializeField] private ParticleSystem sparkle;
+        
         [BoxGroup("Mask")] [SerializeField] private LayerMask playerMask;
         [BoxGroup("Mask")] [SerializeField] private LayerMask obstacleMask;
         [BoxGroup("Mask")] [SerializeField] private LayerMask wallMask;
@@ -37,6 +42,7 @@ namespace Enemies
 
         private bool isAttacking;
         private bool isHit;
+        private bool isRunning;
 
         #endregion
 
@@ -47,6 +53,10 @@ namespace Enemies
         private static readonly int RunAnimation = Animator.StringToHash("run");
         private static readonly int AttackAnimation = Animator.StringToHash("attack");
         private static readonly int HitAnimation = Animator.StringToHash("hit");
+        private float cameraShakeMagnitude = 6.9f;
+        private float cameraShakeDuration = 0.9f;
+        private float cameraShakeInterval = 0.2f;
+        private float nextCameraShakeTime;
         
         private float lockedUntil;
         private int currentState;
@@ -90,8 +100,35 @@ namespace Enemies
             
             if (state == currentState) return;
 
-            animator.CrossFade(state, 0, 0);
+            animator.CrossFade(state, 1, 0);
             currentState = state;
+            
+            //Sword FX
+            var emissionModule = sparkle.emission;
+            var rateOverTime = emissionModule.rateOverTime;
+            if (isAttacking)
+            {
+                rateOverTime.constant = 50;
+                emissionModule.rateOverTime = rateOverTime;
+            }
+            else
+            {
+                rateOverTime.constant = 1.5f;
+                emissionModule.rateOverTime = rateOverTime;
+            }
+
+            if (!isAttacking)
+            {
+                
+                if (Time.time >= nextCameraShakeTime)
+                {
+                    // Perform camera shake here
+                    ShakeCamera();
+
+                    // Set the time for the next camera shake
+                    nextCameraShakeTime = Time.time + cameraShakeInterval;
+                }
+            }
         }
 
         #endregion
@@ -102,6 +139,7 @@ namespace Enemies
         {
             if (currentState == AttackAnimation) isAttacking = false;
             if (currentState == HitAnimation) isHit = false;
+            if (currentState == RunAnimation) isRunning = false;
 
             if (Time.time < lockedUntil) return currentState;
             
@@ -109,16 +147,51 @@ namespace Enemies
             if (isHit) return LockState(HitAnimation, .7f);
             
             return agent.velocity.magnitude < .15f 
-                ? IdleAnimation 
-                : Math.Abs(agent.speed - patrolSpeed) < .1f 
-                    ? WalkAnimation 
-                    : RunAnimation;
+                ? IdleAnimation
+                : RunAnimation;
 
             int LockState(int s, float t)
             {
                 lockedUntil = Time.time + t;
                 return s;
             }
+        }
+        
+        
+
+        private void ShakeCamera()
+        {
+            
+            // Get all the cameras in the scene
+            Camera[] cameras = Camera.allCameras;
+
+            // Shake each camera individually
+            foreach (Camera camera in cameras)
+            {
+                StartCoroutine(ShakeCameraCoroutine(camera));
+            }
+        }
+
+        private IEnumerator ShakeCameraCoroutine(Camera camera)
+        {
+            Debug.Log("SHAKING");
+            Vector3 originalPosition = camera.transform.localPosition;
+
+            float elapsedTime = 0f;
+            while (elapsedTime < cameraShakeDuration)
+            {
+                // Generate a random offset for the camera position
+                Vector3 randomOffset = Random.insideUnitSphere * cameraShakeMagnitude;
+
+                // Apply the random offset to the camera's local position
+                camera.transform.localPosition = originalPosition + randomOffset;
+
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }
+
+            // Reset the camera position to the original position after the shake is finished
+            camera.transform.localPosition = originalPosition;
         }
         
         #endregion
@@ -170,6 +243,7 @@ namespace Enemies
             {
                 if (InDetectionRange(player.transform))
                 {
+                    
                     var currentDistance = Vector3.Distance(player.transform.position, transform.position);
                     
                     // the AI will follow the closest player in detection range

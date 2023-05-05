@@ -386,7 +386,7 @@ GameObject:
   - component: {fileID: 4978646082267340}
   - component: {fileID: 95779955075033070}
   m_Layer: 0
-  m_Name: Chr_BR_Demon_01
+  m_Name: old
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
