@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 37327136737007109}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Semi-Broken Barels Rotated
   m_TagString: CanBeDeleted
   m_Icon: {fileID: 0}
@@ -45,7 +45,7 @@ GameObject:
   - component: {fileID: 7097128167098865967}
   - component: {fileID: 961396778445654514}
   - component: {fileID: 2997720885750673150}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: SM_Prop_Barrel_Stack_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -151,7 +151,7 @@ GameObject:
   - component: {fileID: 2066996971712438588}
   - component: {fileID: 746554367738627899}
   - component: {fileID: 1282903604997909132}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: SM_Prop_Barrel_Shelf_Small_Broken_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}

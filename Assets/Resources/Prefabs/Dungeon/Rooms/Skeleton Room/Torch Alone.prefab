@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 4913905279318622552}
   - component: {fileID: 8404944402485097891}
   - component: {fileID: 5973650152562482924}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: SM_Prop_Dwarf_Torch_07
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -115,7 +115,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7653924854676992891}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Torch Alone
   m_TagString: CanBeDeleted
   m_Icon: {fileID: 0}

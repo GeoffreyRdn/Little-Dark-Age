@@ -74,6 +74,14 @@ public class InputManager : MonoBehaviourPunCallbacks
         playerControls.Ground.Enable();
     }
 
+    public void DisableActionMap()
+    {
+        playerControls.Ground.Disable();
+        playerControls.Shop.Disable();
+        playerControls.Inventory.Disable();
+        playerControls.PauseMenu.Disable();
+    }
+
 
     public bool PlayerOpenPauseMenu()
         => playerControls.Ground.OpenPauseMenu.triggered;

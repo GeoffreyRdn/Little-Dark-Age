@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 53017526106971609}
   - component: {fileID: 7041689784749960761}
   - component: {fileID: 2018685594961464982}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: SM_Prop_Barrel_Shelf_Small_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -118,7 +118,7 @@ GameObject:
   - component: {fileID: 5865694961505793080}
   - component: {fileID: 2913012806757715496}
   - component: {fileID: 3200273735659774336}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: SM_Prop_Barrel_Shelf_Small_Broken_01 (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -221,7 +221,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4934390909841769668}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Broken Barels Rotated
   m_TagString: CanBeDeleted
   m_Icon: {fileID: 0}
@@ -258,7 +258,7 @@ GameObject:
   - component: {fileID: 3681083056921648524}
   - component: {fileID: 1632484498499049081}
   - component: {fileID: 1727732056854373928}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: SM_Prop_Barrel_Shelf_Small_Broken_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 8598630056927612211}
   - component: {fileID: 5331298299037603322}
   - component: {fileID: 21109791540601780}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: SM_Env_Hell_Bone_Skull_Jaw_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -118,7 +118,7 @@ GameObject:
   - component: {fileID: 1806802173248639003}
   - component: {fileID: 3120158621998434387}
   - component: {fileID: 8008152281772720192}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: SM_Env_Hell_Bone_Hand_R_01 (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -224,7 +224,7 @@ GameObject:
   - component: {fileID: 3737092334283377203}
   - component: {fileID: 9123140454010575388}
   - component: {fileID: 8467094470741095867}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: SM_Env_Hell_Bone_Skull_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -328,7 +328,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5056944462248412387}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Giant Skeleton Left
   m_TagString: CanBeDeleted
   m_Icon: {fileID: 0}
@@ -365,7 +365,7 @@ GameObject:
   - component: {fileID: 6253456146979354143}
   - component: {fileID: 7670224046742704120}
   - component: {fileID: 8880615987775233443}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: SM_Env_Hell_Bone_Hand_R_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
