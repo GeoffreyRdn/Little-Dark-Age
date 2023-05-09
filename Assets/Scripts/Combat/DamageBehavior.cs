@@ -11,6 +11,11 @@ public class DamageBehavior : MonoBehaviour
     private bool canDealDamage;
     private RaycastHit hit;
     private List<GameObject> damaged;
+    
+    public delegate void OnPlayerDamaged(GameObject player);
+    public delegate void OnEnemyDamaged(GameObject player);
+    public static OnPlayerDamaged onPlayerDamaged;
+    public static OnEnemyDamaged onEnemyDamaged;
 
     private void Start()
         => damaged = new List<GameObject>();
@@ -33,10 +38,18 @@ public class DamageBehavior : MonoBehaviour
             // player is damaged 
             if (playerController)
             {
-                if (!playerController.IsShielding) targetHealth.Damage(weaponDamage);
-            } 
-            
-            else targetHealth.Damage(weaponDamage);
+                if (!playerController.IsShielding)
+                {
+                    onPlayerDamaged?.Invoke(target);
+                    targetHealth.Damage(weaponDamage);
+                }
+            }
+
+            else
+            {
+                onEnemyDamaged?.Invoke(target);
+                targetHealth.Damage(weaponDamage);
+            }
                 
         }
         

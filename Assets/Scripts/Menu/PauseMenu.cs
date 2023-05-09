@@ -33,6 +33,10 @@ public class PauseMenu : MonoBehaviourPunCallbacks
 
     public void ReturnToMainMenu()
     {
+        InputManager.Instance.CloseInventory();
+        InputManager.Instance.CloseShop();
+        InputManager.Instance.ClosePauseMenu();
+
         PhotonNetwork.Destroy(PhotonNetwork.LocalPlayer.TagObject as GameObject);
         PhotonNetwork.LocalPlayer.TagObject = null;
         Destroy(InputManager.Instance.gameObject);

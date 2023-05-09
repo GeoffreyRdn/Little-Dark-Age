@@ -9,9 +9,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6923945053230981406}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Chest Protector
-  m_TagString: Untagged
+  m_TagString: CanBeDeleted
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -47,6 +47,10 @@ PrefabInstance:
     - target: {fileID: 100000, guid: f81dbc9d7972c824f86b122ebb958807, type: 3}
       propertyPath: m_Name
       value: SM_Env_Dwarf_Floor_Round_01
+      objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: f81dbc9d7972c824f86b122ebb958807, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: f81dbc9d7972c824f86b122ebb958807, type: 3}
       propertyPath: m_RootOrder
@@ -114,6 +118,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: SM_Bld_Ruin_Pillar_Arches_Round_01
       objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: 0d13f7b336caf354ea20a5293711211d, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 0d13f7b336caf354ea20a5293711211d, type: 3}
       propertyPath: m_RootOrder
       value: -1
@@ -179,6 +187,10 @@ PrefabInstance:
     - target: {fileID: 100000, guid: 06b88eb292d265b429f4266a8a2c494b, type: 3}
       propertyPath: m_Name
       value: SM_Env_Statue_Female_03
+      objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: 06b88eb292d265b429f4266a8a2c494b, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 06b88eb292d265b429f4266a8a2c494b, type: 3}
       propertyPath: m_RootOrder
@@ -302,9 +314,21 @@ PrefabInstance:
       propertyPath: m_ConstrainProportionsScale
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1659166760720322233, guid: 944bff624466e4242a3377fba75ddaf3, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 6876824233961894805, guid: 944bff624466e4242a3377fba75ddaf3, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     - target: {fileID: 8929589423702217963, guid: 944bff624466e4242a3377fba75ddaf3, type: 3}
       propertyPath: m_Name
       value: Chest
+      objectReference: {fileID: 0}
+    - target: {fileID: 8929589423702217963, guid: 944bff624466e4242a3377fba75ddaf3, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -327,6 +351,10 @@ PrefabInstance:
     - target: {fileID: 100000, guid: 06b88eb292d265b429f4266a8a2c494b, type: 3}
       propertyPath: m_Name
       value: SM_Env_Statue_Female_03 (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: 06b88eb292d265b429f4266a8a2c494b, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 06b88eb292d265b429f4266a8a2c494b, type: 3}
       propertyPath: m_RootOrder

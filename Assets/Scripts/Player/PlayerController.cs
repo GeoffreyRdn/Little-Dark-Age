@@ -19,6 +19,17 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     [BoxGroup("Player")] [SerializeField] private float animationSpeed = 2.0f;
     [BoxGroup("Player")] [SerializeField] private float runSpeed = 12f;
     [BoxGroup("Player")] [SerializeField] private float maxSpeed = 15f;
+
+    [BoxGroup("Sounds"), SerializeField] private AudioClip walkSound;
+    [BoxGroup("Sounds"), SerializeField] private AudioClip runSound;
+    [BoxGroup("Sounds"), SerializeField] private AudioClip jumpSound;
+    [BoxGroup("Sounds"), SerializeField] private AudioClip attackSound;
+    
+    [BoxGroup("Sounds"), SerializeField] private AudioClip drawShieldSound;
+    [BoxGroup("Sounds"), SerializeField] private AudioClip sheatheShieldSound;
+    
+    [BoxGroup("Sounds"), SerializeField] private AudioClip deathSound;
+    [BoxGroup("Sounds"), SerializeField] private AudioClip hurtSound;
     
     [SerializeField] private string bossScene;
     
@@ -28,8 +39,6 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     
     [BoxGroup("Camera")] [SerializeField] Camera cam;
     // [BoxGroup("Camera")] [SerializeField] GameObject displayCamera;
-    
-
 
     private float mouseYVelocity;
     
@@ -39,6 +48,7 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     private Vector3 playerVelocity;
 
 
+    public AudioSource audioSource;
     public static bool isInInventory = false;
     public static bool isInPauseMenu = false;
     public static bool isInShop = false;
@@ -91,6 +101,7 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     private bool isAttacking;
     private bool isHit;
     private bool isRunning;
+    private bool isDead;
     private bool isCrouching;
     private bool isShielding;
     private bool isJumping;
@@ -111,6 +122,7 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     {
         HealthController.onPlayerDeath += HandlePlayerDeath;
         HealthController.onDungeonComplete += HandleDungeonComplete;
+        DamageBehavior.onPlayerDamaged += HandlePlayerDamaged;
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
@@ -118,6 +130,7 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     {
         HealthController.onPlayerDeath -= HandlePlayerDeath;
         HealthController.onDungeonComplete -= HandleDungeonComplete;
+        DamageBehavior.onPlayerDamaged -= HandlePlayerDamaged;
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
@@ -158,6 +171,7 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
         controller = GetComponent<CharacterController>();
         pv = GetComponent<PhotonView>();
         playerTransform = controller.gameObject.transform;
+        audioSource = GetComponent<AudioSource>();
 
         Cursor.visible = false;
     }
@@ -165,6 +179,16 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     void Update()
     {
         if (!pv.IsMine) return;
+        if (currentState == DeathAnimation) return;
+        
+        if (isDead)
+        {
+            animator.CrossFade(DeathAnimation, 0, 0);
+            currentState = DeathAnimation;
+            pv.RPC(nameof(SendAnimations), RpcTarget.Others, currentState);
+            return;
+        }
+        
         if (isLoadingScene) delay = 1f;
 
         if (isInInventory && InputManager.Instance.PlayerCloseInventory())
@@ -242,9 +266,12 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
             
         // SHIELD STAY STAND UP
         // CROUCH ENTER STAND UP
-        return currentState == ShieldEnterAnimation || currentState == ShieldStayAnimation
-            ? ShieldStayAnimation
-            : LockState(ShieldEnterAnimation, .46f);
+        if (currentState == ShieldEnterAnimation || currentState == ShieldStayAnimation) return ShieldStayAnimation;
+
+        audioSource.loop = false;
+        audioSource.clip = drawShieldSound;
+        audioSource.Play();
+        return LockState(ShieldEnterAnimation, .46f);
     }
     
 
@@ -270,7 +297,13 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
         
         
         // ATTACK PRESSED PRIORITY
-        if (isAttacking) return LockState(isCrouching ? CrouchAttackAnimation : AttackAnimation, 1.4f);
+        if (isAttacking)
+        {
+            audioSource.loop = false;
+            audioSource.clip = attackSound;
+            audioSource.Play();
+            return LockState(isCrouching ? CrouchAttackAnimation : AttackAnimation, 1.4f);
+        }
 
         
         // SHIELD
@@ -278,14 +311,25 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
 
         // LEAVING SHIELD
         if (currentState == ShieldStayAnimation || currentState == ShieldEnterAnimation)
+        {
+            audioSource.loop = false;
+            audioSource.clip = sheatheShieldSound;
+            audioSource.Play();
             return LockState(ShieldLeaveAnimation, .3f);
+        }
         
         // LEAVING SHIELD WHILE CROUCHED
         if (currentState == CrouchShieldAnimation) return CrouchStayAnimation;
         
         
         // JUMP
-        if (isJumping) return LockState(JumpAnimation, .7f);
+        if (isJumping)
+        {
+            audioSource.loop = false;
+            audioSource.clip = jumpSound;
+            audioSource.Play();
+            return LockState(JumpAnimation, .7f);
+        }
         
         
         // CROUCH
@@ -297,11 +341,24 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
         
         
         // PLAYER HIT
-        if (isHit) return LockState(HitAnimation, .5f);
+        if (isHit)
+        {
+            audioSource.loop = false;
+            audioSource.clip = hurtSound;
+            audioSource.Play();
+            return LockState(HitAnimation, .5f);
+        }
         
         
         // MOVEMENT
         Vector2 movement = InputManager.Instance.GetPlayerMovement();
+
+        if (movement != Vector2.zero)
+        {
+            audioSource.loop = true;
+            audioSource.clip = isRunning ? runSound : walkSound;
+            audioSource.Play();
+        }
 
         switch (movement.y)
         {
@@ -333,6 +390,7 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
         // LEFT
         if (movement.x < 0) return isRunning ? FrontLeftRunAnimation : FrontLeftWalkAnimation;
 
+        audioSource.Stop();
         return IdleAnimation;
     }
     
@@ -377,7 +435,19 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     private void HandlePlayerDeath(GameObject playerDead)
     {
         Debug.Log("A player is dead");
-        if (playerDead == gameObject) gameObject.SetActive(false);
+        if (playerDead == gameObject)
+        {
+            audioSource.loop = false;
+            audioSource.clip = deathSound;
+            audioSource.Play();
+            isDead = true;
+            
+            if (isInInventory) CloseInventory();
+            if (isInShop) CloseShopMenu();
+            if (isInPauseMenu) ClosePauseMenu();
+            
+            InputManager.Instance.DisableActionMap();
+        }
     }
 
 
@@ -391,7 +461,15 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     {
         yield return new WaitForSeconds(5);
         LoadBossScene();
-    } 
+    }
+
+    private void HandlePlayerDamaged(GameObject player)
+    {
+        if (pv.IsMine && player == gameObject)
+        {
+            isHit = true;
+        }
+    }
 
     [PunRPC]
     private void EnableWinMenu()
