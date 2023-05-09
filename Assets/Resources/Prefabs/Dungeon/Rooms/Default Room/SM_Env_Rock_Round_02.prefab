@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 2666103583014430676}
   m_Layer: 0
   m_Name: SM_Env_Rock_Round_02
-  m_TagString: Untagged
+  m_TagString: CanBeDeleted
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

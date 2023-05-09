@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7983083908778056279}
   m_Layer: 0
-  m_Name: Giant Skeleton
+  m_Name: Giant Skeleton Top
   m_TagString: CanBeDeleted
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

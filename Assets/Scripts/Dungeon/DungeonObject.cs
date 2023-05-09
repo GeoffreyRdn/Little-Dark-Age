@@ -6,6 +6,9 @@ namespace Dungeon
     public class DungeonObject
     {
         public GameObject gameObject;
+        public GameObject rightGameObject;
+        public GameObject leftGameObject;
+        public GameObject bottomGameObject;
         public int count;
         public int radius;
         public ObjectPosition position;
@@ -14,11 +17,8 @@ namespace Dungeon
 
     public enum ObjectPosition
     {
-        AllSides,
-        RandomSide,
-        NotCorridorSideAndOpposite,
-        CorridorSideAndOpposite,
         Everywhere,
+        Side,
         Middle
     }
 }
