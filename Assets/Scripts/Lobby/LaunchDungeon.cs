@@ -36,7 +36,9 @@ namespace Lobby
             Debug.Log("ENABLING LOADING SCREEN");
             if (PhotonNetwork.LocalPlayer.TagObject is GameObject player)
             {
-                player.GetComponent<PlayerController>().loadingScreen.SetActive(true);
+                var pc = player.GetComponent<PlayerController>(); 
+                pc.loadingScreen.SetActive(true);
+                pc.audioSource.mute = true;
                 Debug.Log("LOADING SCREEN ENABLE");
 
             }

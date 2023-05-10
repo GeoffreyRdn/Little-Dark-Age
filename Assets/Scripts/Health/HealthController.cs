@@ -1,7 +1,10 @@
 using System;
+using System.Collections;
 using Enemies;
 using NaughtyAttributes;
 using Photon.Pun;
+using UI;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -48,6 +51,11 @@ namespace Health {
 				Kill();
 			}
 
+			else
+			{
+				photonView.RPC(nameof(TransmitHealth), RpcTarget.All, health);
+			}
+
 			Debug.Log($"Health after damage: {health}");
 		}
 
@@ -66,6 +74,7 @@ namespace Health {
 			if (gameObject.CompareTag(playerTag))
 			{
 				onPlayerDeath?.Invoke(gameObject);
+				photonView.RPC(nameof(KillPlayer), RpcTarget.All);
 			}
 			
 			else
@@ -74,9 +83,16 @@ namespace Health {
 			}
 		}
 
+
 		[PunRPC]
-		private void KillEnemy()
+		private void KillPlayer()
+			=> gameObject.GetComponent<PlayerController>().isDead = true;
+
+		[PunRPC]
+		private IEnumerator KillEnemy()
 		{
+			yield return new WaitForSeconds(.2f);
+			
 			EnemyInstantiation.Enemies.Remove(gameObject);
 			PhotonNetwork.Destroy(gameObject);
 			EnemyInstantiation.EnemiesRemaining--;
@@ -87,6 +103,14 @@ namespace Health {
 				Debug.Log("DUNGEON COMPLETE !");
 				onDungeonComplete?.Invoke();
 			}
+		}
+		
+		
+		[PunRPC]
+		private void TransmitHealth(float health)
+		{
+			this.health = health;
+			gameObject.GetComponentInChildren<HealthBar>()?.UpdateHealthBar(health, maxHealth);
 		}
 	}
 }

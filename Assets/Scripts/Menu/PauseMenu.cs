@@ -1,4 +1,6 @@
+using System;
 using Photon.Pun;
+using Photon.Realtime;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -7,6 +9,21 @@ public class PauseMenu : MonoBehaviourPunCallbacks
 {
     [SerializeField] private string lobbyScene;
     [SerializeField] private string mainMenuScene;
+    [SerializeField] private GameObject lobbyGO;
+
+    private void Start()
+    {
+        if (PhotonNetwork.IsMasterClient) lobbyGO.SetActive(true);
+        else lobbyGO.SetActive(false);
+    }
+
+    public override void OnMasterClientSwitched(Player newMasterClient)
+    {
+        base.OnMasterClientSwitched(newMasterClient);
+        if (PhotonNetwork.IsMasterClient) lobbyGO.SetActive(true);
+        else lobbyGO.SetActive(false);
+        
+    }
 
     public void Resume()
     {
@@ -38,6 +55,8 @@ public class PauseMenu : MonoBehaviourPunCallbacks
         PhotonNetwork.Destroy(PhotonNetwork.LocalPlayer.TagObject as GameObject);
         PhotonNetwork.LocalPlayer.TagObject = null;
         Destroy(InputManager.Instance.gameObject);
+        
+        Cursor.visible = true;
 
         PhotonNetwork.LeaveRoom();
         SceneManager.LoadScene(mainMenuScene);

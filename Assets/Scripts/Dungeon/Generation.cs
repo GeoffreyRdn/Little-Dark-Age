@@ -36,9 +36,13 @@ namespace Dungeon
         [BoxGroup("Dungeon Settings")] [Range(1,5)] [SerializeField] internal int minHallwaySize;
         [BoxGroup("Dungeon Settings")] [Range(1,5)] [SerializeField] internal int maxHallwaySize;
 
-        [BoxGroup("Prefabs")] [SerializeField] private GameObject wall;
+        [BoxGroup("Prefabs")] [SerializeField] private GameObject basicWallGO;
+        [BoxGroup("Prefabs")] [SerializeField] private GameObject wallTorchGO;
+        [BoxGroup("Prefabs")] [SerializeField] private GameObject wallWindowGO;
+        [BoxGroup("Prefabs")] [SerializeField] private GameObject doorGO;
         [BoxGroup("Prefabs")] [SerializeField] private GameObject floorRoom;
         [BoxGroup("Prefabs")] [SerializeField] private GameObject floorHallway;
+        [BoxGroup("Prefabs"), SerializeField] private float wallWindowProba;
         
         
         [SerializeField] private List<DungeonObject> genericRoom;
@@ -46,8 +50,9 @@ namespace Dungeon
         [SerializeField] private List<DungeonObject> chestRoom;
         [SerializeField] private List<DungeonObject> skeletonRoom;
 
-        [SerializeField] private GameObject occupiedGO;
-        [SerializeField] private float objectInstantiationProbability;
+        [BoxGroup("Debug"), SerializeField] private GameObject occupiedGO;
+        [BoxGroup("Debug"), SerializeField] private GameObject occupiedGO2;
+        [BoxGroup("Debug"), SerializeField] private float objectInstantiationProbability;
         
         
         [BoxGroup("Parents")] [SerializeField] private Transform parent;
@@ -59,7 +64,7 @@ namespace Dungeon
         internal RoomAvailability[,] roomAvailability;
 
         // getting all the rooms for the AI
-        public List<Rect> rooms;
+        [HideInInspector] public List<Rect> rooms;
 
         #endregion
 
@@ -94,7 +99,7 @@ namespace Dungeon
             dungeon.GetRoom();
 
             // retrieving the data from the dungeon and putting it into the array
-            GetComponent<GetDungeon>().GetData(dungeon, this);
+            GetComponent<GetDungeon>().GetData(dungeon, this, wallWindowProba);
 
             // instantiating the dungeon
             DrawBoard();
@@ -114,31 +119,57 @@ namespace Dungeon
         
         #region Dungeon Instantiation
 
-        private void InstantiateWall(int i, int j)
+        private void InstantiateWall(int i, int j, GameObject wallPrefab)
         {
-
             // ROOM UP
             if (DungeonBoard[i, j + 1] == TileType.Hallway || DungeonBoard[i, j + 1] == TileType.Room)
             {
-                Instantiate(wall, new Vector3(i*4,0, (j+1)*4), Quaternion.identity, parent);
+                Instantiate(wallPrefab, new Vector3(i*4,0, (j+1)*4), Quaternion.identity, parent);
             }
 
             // ROOM DOWN
             if (DungeonBoard[i, j - 1] == TileType.Hallway || DungeonBoard[i, j - 1] == TileType.Room)
             {
-                Instantiate(wall, new Vector3(i*4,0, (j-1)*4), Quaternion.Euler(0,180,0), parent);
+                Instantiate(wallPrefab, new Vector3(i*4,0, (j-1)*4), Quaternion.Euler(0,180,0), parent);
             }
             
             // LEFT ROOM
             if (DungeonBoard[i - 1, j] == TileType.Hallway || DungeonBoard[i - 1, j] == TileType.Room)
             {
-                Instantiate(wall, new Vector3((i-1)*4,0, j*4), Quaternion.Euler(0,-90,0), parent);
+                Instantiate(wallPrefab, new Vector3((i-1)*4,0, j*4), Quaternion.Euler(0,-90,0), parent);
             }
 
             // ROOM RIGHT
             if (DungeonBoard[i + 1, j] == TileType.Hallway || DungeonBoard[i + 1, j] == TileType.Room)
             {
-                Instantiate(wall, new Vector3((i+1)*4,0, j*4), Quaternion.Euler(0,90,0), parent);
+                Instantiate(wallPrefab, new Vector3((i+1)*4,0, j*4), Quaternion.Euler(0,90,0), parent);
+            }
+        }
+        
+        private void InstantiateDoor(int i, int j, GameObject doorPrefab)
+        {
+            // ROOM UP
+            if (DungeonBoard[i, j + 1] == TileType.Room)
+            {
+                Instantiate(doorPrefab, new Vector3(i*4,0, (j+1)*4), Quaternion.identity, parent);
+            }
+
+            // ROOM DOWN
+            else if (DungeonBoard[i, j - 1] == TileType.Room)
+            {
+                Instantiate(doorPrefab, new Vector3(i*4,0, (j-1)*4), Quaternion.Euler(0,180,0), parent);
+            }
+            
+            // LEFT ROOM
+            else if (DungeonBoard[i - 1, j] == TileType.Room)
+            {
+                Instantiate(doorPrefab, new Vector3((i-1)*4,0, j*4), Quaternion.Euler(0,-90,0), parent);
+            }
+
+            // ROOM RIGHT
+            else if (DungeonBoard[i + 1, j] == TileType.Room)
+            {
+                Instantiate(doorPrefab, new Vector3((i+1)*4,0, j*4), Quaternion.Euler(0,90,0), parent);
             }
         }
         
@@ -150,6 +181,17 @@ namespace Dungeon
         private void InstantiateCorridor(int i, int j)
         {
             Instantiate(floorHallway, new Vector3(i*4,0, j*4), Quaternion.identity, parent);
+            
+            for (int k = i - 1; k <= i+1; k++)
+            {
+                for (int l = j-1; l <= j+1; l++)
+                {
+                    if (DungeonBoard[k, l] == TileType.Room)
+                    {
+                        InstantiateDoor(i, j, doorGO);
+                    }
+                }
+            }
         }
         
         public void DrawBoard()
@@ -161,7 +203,13 @@ namespace Dungeon
                     switch (DungeonBoard[i, j])
                     {
                         case TileType.Wall:
-                            InstantiateWall(i,j);
+                            InstantiateWall(i,j, basicWallGO);
+                            break;
+                        case TileType.WallTorch:
+                            InstantiateWall(i,j, wallTorchGO);
+                            break;
+                        case TileType.WallWindow:
+                            InstantiateWall(i,j, wallWindowGO);
                             break;
                         case TileType.Room:
                             InstantiateFloor(i, j);

@@ -64,6 +64,9 @@ MonoBehaviour:
   - ReturnToLobby
   - TransmitPlayerDamaged
   - TransmitPlayerDeath
+  - UpdateHealthBarRPC
+  - KillPlayer
+  - TransmitHealth
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1

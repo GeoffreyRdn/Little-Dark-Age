@@ -101,6 +101,7 @@ namespace Dungeon
             if (PhotonNetwork.LocalPlayer.TagObject is GameObject player)
             {
                 var playerController = player.GetComponent<PlayerController>();
+                playerController.audioSource.mute = false;
                 playerController.loadingScreen.SetActive(false);
             }
         }

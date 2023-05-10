@@ -47,6 +47,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   spawnPoint: {x: 0, y: -2, z: 0}
   playerLocation: Prefabs/Characters/Player
+  weaponTag: 
 --- !u!114 &7863475788644236415
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -7577,7 +7577,7 @@ MonoBehaviour:
   m_text: Little Dark Age
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 56d52a6c3f6abe8419fe5c6b0a7f805e, type: 2}
-  m_sharedMaterial: {fileID: -929459792819001837, guid: 56d52a6c3f6abe8419fe5c6b0a7f805e, type: 2}
+  m_sharedMaterial: {fileID: -1518942174625234107, guid: 56d52a6c3f6abe8419fe5c6b0a7f805e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []

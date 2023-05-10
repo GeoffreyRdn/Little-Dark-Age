@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Photon.Pun;
 using UnityEngine;
@@ -20,8 +19,6 @@ namespace Enemies
 
         public void SpawnEnemies(List<Rect> rooms)
         {
-            if (!PhotonNetwork.IsMasterClient) return;
-            
             for (var index = 0; index < rooms.Count - 1; index++)
             {
                 var room = rooms[index];
@@ -36,8 +33,6 @@ namespace Enemies
                     EnemiesRemaining++;
                 }
             }
-            
-            Debug.Log("ENEMIES : " + Enemies.Count);
         }
     }
 }

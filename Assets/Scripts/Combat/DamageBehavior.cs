@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Enemies;
@@ -38,24 +39,18 @@ public class DamageBehavior : MonoBehaviour
             int targetID = photonView.ViewID;
             if (!damaged.Contains(targetID))
             {
-                pv.RPC(nameof(TransmitPlayerDamaged), RpcTarget.All, targetID);
+                damaged.Add(targetID);
                 Damage(collider.gameObject);
             }
         }
         
     }
 
-    [PunRPC]
-    private void TransmitPlayerDamaged(int targetID)
-        => damaged.Add(targetID);
-
     private void Damage(GameObject target)
     {
-        Debug.Log("hit on player");
         if (target.TryGetComponent(out HealthController targetHealth))
         {
             var playerController = target.GetComponentInParent<PlayerController>();
-            var viewId = target.GetComponent<PhotonView>().ViewID;
             
             // player is damaged 
             if (playerController)
@@ -64,16 +59,15 @@ public class DamageBehavior : MonoBehaviour
                 if (!(playerController.currentState == PlayerController.ShieldEnterAnimation ||
                     playerController.currentState == PlayerController.ShieldStayAnimation))
                 {
-                    
                     onPlayerDamaged?.Invoke(target);
-                    pv.RPC(nameof(DamagePlayer), RpcTarget.All, viewId, weaponDamage);
+                    target.GetComponent<HealthController>().Damage(weaponDamage);
                 }
             }
 
             else
             {
                 onEnemyDamaged?.Invoke(target);
-                pv.RPC(nameof(DamageEnemy), RpcTarget.MasterClient, viewId, weaponDamage);
+                target.GetComponent<HealthController>().Damage(weaponDamage);
             }
         }
     }
@@ -86,35 +80,5 @@ public class DamageBehavior : MonoBehaviour
 
     public void StopDealingDamage()
         => canDealDamage = false;
-
     
-    [PunRPC]
-    private void DamagePlayer(int id, float dmg)
-    {
-        Player player = PhotonNetwork.PlayerList.FirstOrDefault(x => 
-            ((GameObject) x.TagObject).GetComponent<PhotonView>().ViewID == id);
-        
-        if (player != null)
-        {
-            var playerGO = player.TagObject as GameObject;
-            var healthController = playerGO.GetComponent<HealthController>();
-            healthController.Damage(dmg);
-            playerGO.GetComponent<PlayerController>().UpdateHealthBar(healthController.Health, healthController.MaxHealth);
-            Debug.Log("PLAYER HEALTH : " + playerGO.GetComponent<HealthController>().Health);
-        }
-    }
-
-    [PunRPC]
-    private void DamageEnemy(int id, float dmg)
-    {
-        GameObject enemy = EnemyInstantiation.Enemies.FirstOrDefault(x => x.GetComponent<PhotonView>().ViewID == id);
-        if (enemy)
-        {
-            Debug.Log("DAMAGING ENEMY NAMED " + enemy.name);
-            var healthController = enemy.GetComponent<HealthController>();
-            healthController.Damage(dmg);
-            
-            enemy.GetComponentInChildren<HealthBar>().UpdateHealthBar(healthController.Health, healthController.MaxHealth);
-        }
-    }
 }
