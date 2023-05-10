@@ -71,7 +71,6 @@ public class DamageBehavior : MonoBehaviour
 
     public void StartDealingDamage()
     {
-        Debug.Log("dealing damage");
         damaged.Clear();
         canDealDamage = true;
     }
