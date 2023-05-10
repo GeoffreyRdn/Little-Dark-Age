@@ -199,7 +199,7 @@ namespace Enemies
             
             foreach (var player in players)
             {
-                if (player == null)
+                if (player == null || player.GetComponent<PlayerController>().isDead)
                 {
                     players.Remove(player);
                     continue;

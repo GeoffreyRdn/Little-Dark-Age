@@ -92,6 +92,9 @@ public class MusicHandler : MonoBehaviour
             var playerController = playerGO.GetComponent<PlayerController>();
             playerController.isDead = false;
             playerController.currentState = PlayerController.IdleAnimation;
+            
+            playerController.UpdateHealthBar(health.Health, health.MaxHealth);
+            
             InputManager.Instance.EnableControls();
         }
     }

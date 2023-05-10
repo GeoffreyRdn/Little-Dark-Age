@@ -5,6 +5,7 @@ using Health;
 using NaughtyAttributes;
 using Photon.Pun;
 using Photon.Realtime;
+using UI;
 using UnityEngine;
 
 public class DamageBehavior : MonoBehaviour
@@ -96,7 +97,9 @@ public class DamageBehavior : MonoBehaviour
         if (player != null)
         {
             var playerGO = player.TagObject as GameObject;
-            playerGO.GetComponent<HealthController>().Damage(dmg);
+            var healthController = playerGO.GetComponent<HealthController>();
+            healthController.Damage(dmg);
+            playerGO.GetComponent<PlayerController>().UpdateHealthBar(healthController.Health, healthController.MaxHealth);
             Debug.Log("PLAYER HEALTH : " + playerGO.GetComponent<HealthController>().Health);
         }
     }
@@ -108,7 +111,10 @@ public class DamageBehavior : MonoBehaviour
         if (enemy)
         {
             Debug.Log("DAMAGING ENEMY NAMED " + enemy.name);
-            enemy.GetComponent<HealthController>().Damage(dmg);
+            var healthController = enemy.GetComponent<HealthController>();
+            healthController.Damage(dmg);
+            
+            enemy.GetComponentInChildren<HealthBar>().UpdateHealthBar(healthController.Health, healthController.MaxHealth);
         }
     }
 }

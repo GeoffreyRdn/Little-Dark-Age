@@ -5,6 +5,7 @@ using Health;
 using Inventory;
 using NaughtyAttributes;
 using Photon.Pun;
+using UI;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -33,6 +34,7 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     [SerializeField] private InventoryController inventory;
     [SerializeField] private ShopController shop;
     [SerializeField] private PauseMenu pauseMenu;
+    [SerializeField] private HealthBar healthBar;
     [SerializeField] public GameObject loadingScreen;
     
     [BoxGroup("Camera")] [SerializeField] Camera cam;
@@ -144,6 +146,10 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     {
         pv = GetComponent<PhotonView>();
         loadingScreen.SetActive(false);
+        
+        var maxHealth = GetComponent<HealthController>().MaxHealth;
+        var health = GetComponent<HealthController>().Health;
+        UpdateHealthBar(health, maxHealth);
         
         if (PhotonNetwork.IsConnectedAndReady && !pv.IsMine)
         {
@@ -467,6 +473,10 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     #endregion
     
     #region Methods
+    
+    public void UpdateHealthBar(float health, float maxHealth)
+        => healthBar.UpdateHealthBar(health, maxHealth);
+
 
     private float Speed()
     {
