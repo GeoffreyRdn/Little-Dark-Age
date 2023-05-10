@@ -116,6 +116,24 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""OpenPauseMenu"",
+                    ""type"": ""Button"",
+                    ""id"": ""c1d20410-9e4b-4ef4-a4fa-cbf775e689cb"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""OpenShop"",
+                    ""type"": ""Button"",
+                    ""id"": ""099c6e99-8452-44d1-922a-0de8bacfd427"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -272,6 +290,28 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                     ""action"": ""BossTP"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""4dee3b35-3d51-47d0-ab44-19dd5d6da28a"",
+                    ""path"": ""<Keyboard>/escape"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""OpenPauseMenu"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""433e9dfb-c910-4ba8-bedb-ccac77cb9d31"",
+                    ""path"": ""<Keyboard>/p"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""OpenShop"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -302,6 +342,73 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 }
             ]
+        },
+        {
+            ""name"": ""PauseMenu"",
+            ""id"": ""918c65ca-5030-4036-a1f2-a88cbc7813b7"",
+            ""actions"": [
+                {
+                    ""name"": ""Resume"",
+                    ""type"": ""Button"",
+                    ""id"": ""bcb7e879-4dfe-41b7-bf45-0494ffb1bf71"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""b12a7c02-df0a-4f7f-8c96-3e96af014647"",
+                    ""path"": ""<Keyboard>/escape"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Resume"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
+        },
+        {
+            ""name"": ""Shop"",
+            ""id"": ""714cbf10-28ba-4ce8-bf02-97a4265bbba8"",
+            ""actions"": [
+                {
+                    ""name"": ""CloseShop"",
+                    ""type"": ""Button"",
+                    ""id"": ""39306f66-9c6c-44f5-9834-35ea425131d9"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""9ce18b9b-e4e9-480b-ad57-9ca9f57194da"",
+                    ""path"": ""<Keyboard>/p"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""CloseShop"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""3faabdb0-b2cb-47ff-9893-767774703162"",
+                    ""path"": ""<Keyboard>/escape"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""CloseShop"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": []
@@ -318,9 +425,17 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
         m_Ground_Attack = m_Ground.FindAction("Attack", throwIfNotFound: true);
         m_Ground_OpenInventory = m_Ground.FindAction("OpenInventory", throwIfNotFound: true);
         m_Ground_BossTP = m_Ground.FindAction("BossTP", throwIfNotFound: true);
+        m_Ground_OpenPauseMenu = m_Ground.FindAction("OpenPauseMenu", throwIfNotFound: true);
+        m_Ground_OpenShop = m_Ground.FindAction("OpenShop", throwIfNotFound: true);
         // Inventory
         m_Inventory = asset.FindActionMap("Inventory", throwIfNotFound: true);
         m_Inventory_CloseInventory = m_Inventory.FindAction("CloseInventory", throwIfNotFound: true);
+        // PauseMenu
+        m_PauseMenu = asset.FindActionMap("PauseMenu", throwIfNotFound: true);
+        m_PauseMenu_Resume = m_PauseMenu.FindAction("Resume", throwIfNotFound: true);
+        // Shop
+        m_Shop = asset.FindActionMap("Shop", throwIfNotFound: true);
+        m_Shop_CloseShop = m_Shop.FindAction("CloseShop", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -390,6 +505,8 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
     private readonly InputAction m_Ground_Attack;
     private readonly InputAction m_Ground_OpenInventory;
     private readonly InputAction m_Ground_BossTP;
+    private readonly InputAction m_Ground_OpenPauseMenu;
+    private readonly InputAction m_Ground_OpenShop;
     public struct GroundActions
     {
         private @PlayerControls m_Wrapper;
@@ -404,6 +521,8 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
         public InputAction @Attack => m_Wrapper.m_Ground_Attack;
         public InputAction @OpenInventory => m_Wrapper.m_Ground_OpenInventory;
         public InputAction @BossTP => m_Wrapper.m_Ground_BossTP;
+        public InputAction @OpenPauseMenu => m_Wrapper.m_Ground_OpenPauseMenu;
+        public InputAction @OpenShop => m_Wrapper.m_Ground_OpenShop;
         public InputActionMap Get() { return m_Wrapper.m_Ground; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -443,6 +562,12 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                 @BossTP.started -= m_Wrapper.m_GroundActionsCallbackInterface.OnBossTP;
                 @BossTP.performed -= m_Wrapper.m_GroundActionsCallbackInterface.OnBossTP;
                 @BossTP.canceled -= m_Wrapper.m_GroundActionsCallbackInterface.OnBossTP;
+                @OpenPauseMenu.started -= m_Wrapper.m_GroundActionsCallbackInterface.OnOpenPauseMenu;
+                @OpenPauseMenu.performed -= m_Wrapper.m_GroundActionsCallbackInterface.OnOpenPauseMenu;
+                @OpenPauseMenu.canceled -= m_Wrapper.m_GroundActionsCallbackInterface.OnOpenPauseMenu;
+                @OpenShop.started -= m_Wrapper.m_GroundActionsCallbackInterface.OnOpenShop;
+                @OpenShop.performed -= m_Wrapper.m_GroundActionsCallbackInterface.OnOpenShop;
+                @OpenShop.canceled -= m_Wrapper.m_GroundActionsCallbackInterface.OnOpenShop;
             }
             m_Wrapper.m_GroundActionsCallbackInterface = instance;
             if (instance != null)
@@ -477,6 +602,12 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                 @BossTP.started += instance.OnBossTP;
                 @BossTP.performed += instance.OnBossTP;
                 @BossTP.canceled += instance.OnBossTP;
+                @OpenPauseMenu.started += instance.OnOpenPauseMenu;
+                @OpenPauseMenu.performed += instance.OnOpenPauseMenu;
+                @OpenPauseMenu.canceled += instance.OnOpenPauseMenu;
+                @OpenShop.started += instance.OnOpenShop;
+                @OpenShop.performed += instance.OnOpenShop;
+                @OpenShop.canceled += instance.OnOpenShop;
             }
         }
     }
@@ -514,6 +645,72 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
         }
     }
     public InventoryActions @Inventory => new InventoryActions(this);
+
+    // PauseMenu
+    private readonly InputActionMap m_PauseMenu;
+    private IPauseMenuActions m_PauseMenuActionsCallbackInterface;
+    private readonly InputAction m_PauseMenu_Resume;
+    public struct PauseMenuActions
+    {
+        private @PlayerControls m_Wrapper;
+        public PauseMenuActions(@PlayerControls wrapper) { m_Wrapper = wrapper; }
+        public InputAction @Resume => m_Wrapper.m_PauseMenu_Resume;
+        public InputActionMap Get() { return m_Wrapper.m_PauseMenu; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(PauseMenuActions set) { return set.Get(); }
+        public void SetCallbacks(IPauseMenuActions instance)
+        {
+            if (m_Wrapper.m_PauseMenuActionsCallbackInterface != null)
+            {
+                @Resume.started -= m_Wrapper.m_PauseMenuActionsCallbackInterface.OnResume;
+                @Resume.performed -= m_Wrapper.m_PauseMenuActionsCallbackInterface.OnResume;
+                @Resume.canceled -= m_Wrapper.m_PauseMenuActionsCallbackInterface.OnResume;
+            }
+            m_Wrapper.m_PauseMenuActionsCallbackInterface = instance;
+            if (instance != null)
+            {
+                @Resume.started += instance.OnResume;
+                @Resume.performed += instance.OnResume;
+                @Resume.canceled += instance.OnResume;
+            }
+        }
+    }
+    public PauseMenuActions @PauseMenu => new PauseMenuActions(this);
+
+    // Shop
+    private readonly InputActionMap m_Shop;
+    private IShopActions m_ShopActionsCallbackInterface;
+    private readonly InputAction m_Shop_CloseShop;
+    public struct ShopActions
+    {
+        private @PlayerControls m_Wrapper;
+        public ShopActions(@PlayerControls wrapper) { m_Wrapper = wrapper; }
+        public InputAction @CloseShop => m_Wrapper.m_Shop_CloseShop;
+        public InputActionMap Get() { return m_Wrapper.m_Shop; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(ShopActions set) { return set.Get(); }
+        public void SetCallbacks(IShopActions instance)
+        {
+            if (m_Wrapper.m_ShopActionsCallbackInterface != null)
+            {
+                @CloseShop.started -= m_Wrapper.m_ShopActionsCallbackInterface.OnCloseShop;
+                @CloseShop.performed -= m_Wrapper.m_ShopActionsCallbackInterface.OnCloseShop;
+                @CloseShop.canceled -= m_Wrapper.m_ShopActionsCallbackInterface.OnCloseShop;
+            }
+            m_Wrapper.m_ShopActionsCallbackInterface = instance;
+            if (instance != null)
+            {
+                @CloseShop.started += instance.OnCloseShop;
+                @CloseShop.performed += instance.OnCloseShop;
+                @CloseShop.canceled += instance.OnCloseShop;
+            }
+        }
+    }
+    public ShopActions @Shop => new ShopActions(this);
     public interface IGroundActions
     {
         void OnMovement(InputAction.CallbackContext context);
@@ -526,9 +723,19 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
         void OnAttack(InputAction.CallbackContext context);
         void OnOpenInventory(InputAction.CallbackContext context);
         void OnBossTP(InputAction.CallbackContext context);
+        void OnOpenPauseMenu(InputAction.CallbackContext context);
+        void OnOpenShop(InputAction.CallbackContext context);
     }
     public interface IInventoryActions
     {
         void OnCloseInventory(InputAction.CallbackContext context);
+    }
+    public interface IPauseMenuActions
+    {
+        void OnResume(InputAction.CallbackContext context);
+    }
+    public interface IShopActions
+    {
+        void OnCloseShop(InputAction.CallbackContext context);
     }
 }

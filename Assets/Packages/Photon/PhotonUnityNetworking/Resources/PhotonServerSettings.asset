@@ -46,6 +46,22 @@ MonoBehaviour:
   - TpPlayersToDungeon
   - RemoveGravity
   - TeleportPlayers
+  - TpPlayersToLobby
+  - DeactivateCameras
+  - TransmitSpawnPoint
+  - KillEnemy
+  - EnableWinMenu
+  - SendAnimations
+  - SendDeath
+  - DamageTarget
+  - DamageEnemy
+  - DamagePlayer
+  - DisableLoadingScren
+  - EnableLoadingScren
+  - ResetPlayers
+  - DisableOrEnableAnimatorRPC
+  - EnableAnimator
+  - ReturnToLobby
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1

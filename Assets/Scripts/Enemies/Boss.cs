@@ -56,8 +56,8 @@ namespace Enemies
         private static readonly int AttackAnimation = Animator.StringToHash("attack");
         private static readonly int HitAnimation = Animator.StringToHash("hit");
         private static readonly int StageAnimation = Animator.StringToHash("stage");
-        private static readonly int ComboAttackAnimation = Animator.StringToHash("melee combo");
-        private static readonly int TurningAttackAnimation = Animator.StringToHash("melee 360");
+        private static readonly int ComboAttackAnimation = Animator.StringToHash("melee_combo");
+        private static readonly int TurningAttackAnimation = Animator.StringToHash("melee_360");
         
         private float cameraShakeMagnitude = 0.2f;
         private float cameraShakeDuration = 0.1f;
@@ -163,7 +163,7 @@ namespace Enemies
 
         #endregion
 
-        #region stageChange
+        #region StageChange
 
         private void StageChange1()
         {
@@ -196,6 +196,7 @@ namespace Enemies
         }
 
         #endregion
+        
         #region Methods Anim
         
         private int GetState()

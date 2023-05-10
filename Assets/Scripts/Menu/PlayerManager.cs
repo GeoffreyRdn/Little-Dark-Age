@@ -1,13 +1,16 @@
 using Photon.Pun;
 using UnityEngine;
 using System.IO;
+using System.Linq;
+using Cinemachine;
+using UnityEngine.SceneManagement;
 
 public class PlayerManager : MonoBehaviourPunCallbacks
 {
     [SerializeField] private Vector3 spawnPoint;
     [SerializeField] private string playerLocation;
     PhotonView pv;
-
+    
     private void Awake()
     {
         pv = GetComponent<PhotonView>();
@@ -23,7 +26,6 @@ public class PlayerManager : MonoBehaviourPunCallbacks
 
     private void CreateController()
     {
-        var player = PhotonNetwork.Instantiate(playerLocation, spawnPoint, Quaternion.identity);
-        DontDestroyOnLoad(player);
+        PhotonNetwork.Instantiate(playerLocation, spawnPoint, Quaternion.identity);
     }
 }

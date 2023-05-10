@@ -56,6 +56,12 @@ public class InputManager : MonoBehaviourPunCallbacks
     public bool PlayerCloseInventory()
         => playerControls.Inventory.CloseInventory.triggered;
 
+    public bool PlayerOpenShop()
+        => playerControls.Ground.OpenShop.triggered;
+
+    public bool PlayerCloseShop()
+        => playerControls.Shop.CloseShop.triggered;
+
     public void OpenInventory()
     {
         playerControls.Ground.Disable();
@@ -68,8 +74,48 @@ public class InputManager : MonoBehaviourPunCallbacks
         playerControls.Ground.Enable();
     }
 
+    public void DisableActionMap()
+    {
+        playerControls.Ground.Disable();
+        playerControls.Shop.Disable();
+        playerControls.Inventory.Disable();
+        playerControls.PauseMenu.Disable();
+    }
+
+
+    public bool PlayerOpenPauseMenu()
+        => playerControls.Ground.OpenPauseMenu.triggered;
+    
+    public bool PlayerClosePauseMenu()
+        => playerControls.PauseMenu.Resume.triggered;
+    
+    public void OpenPauseMenu()
+    {
+        playerControls.Ground.Disable();
+        playerControls.PauseMenu.Enable();
+    }
+
+    public void ClosePauseMenu()
+    {
+        playerControls.PauseMenu.Disable();
+        playerControls.Ground.Enable();
+    }
+
     public bool BossTeleport()
     {
         return playerControls.Ground.BossTP.triggered;
+    }
+
+    
+    public void OpenShop()
+    {
+        playerControls.Ground.Disable();
+        playerControls.Shop.Enable();
+    }
+
+    public void CloseShop()
+    {
+        playerControls.Shop.Disable();
+        playerControls.Ground.Enable();
     }
 }

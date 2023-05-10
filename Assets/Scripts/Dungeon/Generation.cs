@@ -3,11 +3,27 @@ using System.Collections.Generic;
 using System.Linq;
 using NaughtyAttributes;
 using UnityEngine;
+using UnityEngine.Serialization;
+using Random = System.Random;
 
 namespace Dungeon
 {
     public class Generation : MonoBehaviour
     {
+        internal enum RoomAvailability
+        {
+            Available,
+            Occupied
+        }
+        
+        internal enum CorridorDirection
+        {
+            Left,
+            Right,
+            Top,
+            Bottom
+        }
+        
         #region Variables
         
         [BoxGroup("Dungeon Settings")] [Range(50,200)] [SerializeField] private int boardWidth;
@@ -22,54 +38,23 @@ namespace Dungeon
         [BoxGroup("Prefabs")] [SerializeField] private GameObject wall;
         [BoxGroup("Prefabs")] [SerializeField] private GameObject floorRoom;
         [BoxGroup("Prefabs")] [SerializeField] private GameObject floorHallway;
+        
+        
+        [SerializeField] private List<DungeonObject> genericRoom;
+        [SerializeField] private List<DungeonObject> kitchenRoom;
+        [SerializeField] private List<DungeonObject> chestRoom;
+        [SerializeField] private List<DungeonObject> skeletonRoom;
 
-        #region Throne room
+        [SerializeField] private GameObject occupiedGO;
+        [SerializeField] private float objectInstantiationProbability;
         
-        [BoxGroup("Throne Room"), SerializeField] private GameObject throneGO;
-        
-        #endregion
-        
-        #region Buffet room
-        
-        [BoxGroup("Buffet Room"), SerializeField] private GameObject buffetGO;
-        
-        #endregion
-        
-        #region Wine Cellar Room
-        
-        [BoxGroup("Wine Cellar Room"), SerializeField] private GameObject wineGO;
-        
-        #endregion
-        
-        #region Office Room
-        
-        [BoxGroup("Office Room"), SerializeField] private GameObject officeGO;
-        
-        #endregion
-        
-        #region Bedroom
-        
-        [BoxGroup("Bedroom Room"), SerializeField] private GameObject bedroomGO;
-        
-        #endregion
-        
-        #region Spawn Room
-        
-        [BoxGroup("Spawn Room"), SerializeField] private GameObject spawnGO;
-        
-        #endregion
-        
-        #region Generic Room
-        
-        [BoxGroup("Generic Room"), SerializeField] private GameObject genericGO;
-        
-        #endregion
         
         [BoxGroup("Parents")] [SerializeField] private Transform parent;
         
         [Tag] [SerializeField] private string deletionTag;
 
         internal TileType[,] DungeonBoard;
+        internal RoomAvailability[,] roomAvailability;
 
         // getting all the rooms for the AI
         public List<Rect> rooms;
@@ -85,10 +70,13 @@ namespace Dungeon
 
         #region Methods
         
+        #region Generation
+        
         [Button]
         public void GenerateDungeon()
         {
             DungeonBoard = new TileType[boardWidth, boardHeight];
+            roomAvailability = new RoomAvailability[boardWidth, boardHeight];
             rooms = new List<Rect>();
             
             #if UNITY_EDITOR
@@ -119,6 +107,10 @@ namespace Dungeon
                 DestroyImmediate(go);
             }
         }
+        
+        #endregion
+        
+        #region Dungeon Instantiation
 
         private void InstantiateWall(int i, int j)
         {
@@ -157,7 +149,7 @@ namespace Dungeon
         {
             Instantiate(floorHallway, new Vector3(i*4,0, j*4), Quaternion.identity, parent);
         }
-
+        
         public void DrawBoard()
         {
             for (int i = 0; i < boardWidth; i++)
@@ -180,156 +172,363 @@ namespace Dungeon
             }
         }
         
-        #region Draw Rooms
+        #endregion
         
-        private void DrawBossRoom(Rect room)
+        #region Objects Instantiation
+
+        private bool CorridorNextToTile(Rect room, int x, int y)
         {
-            // Debug.Log("Boss room : " + room.x + " - " + room.y + " - " + room.width * room.height);
+            for (int i = x - 1; i <= x + 1; i++)
+            {
+                for (int j = y - 1; j <= y + 1; j++)
+                {
+                    if (DungeonBoard[i, j] == TileType.Hallway) return true;
+                }
+            }
+
+            return false;
         }
 
-        private void DrawSpawnRoom(Rect room)
+        private void UpdateObjectsRadius(Vector3 pos, RoomAvailability availability, int radius)
         {
-            // Debug.Log("Spawn : " + room.x + " - " + room.y + " - " + room.width * room.height);
+            int posX = (int) pos.x;
+            int posY = (int) pos.z;
             
-            for (int i = (int) room.xMin + 1; i < room.xMax - 1; i++)
+            int xMin = posX - radius < 0 ? 0 : posX - radius;
+            int xMax = posX + radius + 1 > boardWidth ? boardWidth : posX + radius + 1;
+            int yMin = posY - radius < 0 ? 0 : posY - radius;
+            int yMax = posY + radius + 1 > boardHeight ? boardHeight : posY + radius + 1;
+
+            for (int i = xMin; i < xMax; i++)
             {
-                for (int j = (int) room.yMin + 1; j < room.yMax - 1; j++)
+                for (int j = yMin; j < yMax; j++)
                 {
-                    // Instantiate(spawnGO, new Vector3(i * 4, 0,j * 4), Quaternion.identity, parent);
+                    roomAvailability[i, j] = availability;
+                    // Instantiate(occupiedGO, new Vector3(i*4,1,j*4), Quaternion.identity, parent);
                 }
             }
         }
 
-        private void DrawThroneRoom(Rect room)
+        private void DrawSkeletonRoom(Rect room)
         {
-            // Debug.Log("Throne : " + room.x + " - " + room.y + " - " + room.width * room.height);
-            
-            for (int i = (int) room.xMin + 1; i < room.xMax - 1; i++)
+            var corridorEntrance = GetRoomOrientation(room);
+            bool topOrBot = corridorEntrance == CorridorDirection.Bottom || corridorEntrance == CorridorDirection.Top;
+
+            var sidePrefab = skeletonRoom.Where(x => x.position == ObjectPosition.Side).ToList()[0];
+            var sideOffset = sidePrefab.offset;
+                            
+            // WE WANT SIDES LEFT / RIGHT
+            if (topOrBot)
             {
-                for (int j = (int) room.yMin + 1; j < room.yMax - 1; j++)
+                for (int i = (int) (room.yMin + 2); i < (room.yMax - 2); i++)
                 {
-                    // Instantiate(throneGO, new Vector3(i * 4, 0,j * 4), Quaternion.identity, parent);
+                    // Instantiate(OccupiedGO, new Vector3((int) room.xMin,0,i) * 4, Quaternion.identity, parent);
+                    // Instantiate(OccupiedGO, new Vector3((int) room.xMax - 1,0,i) * 4, Quaternion.identity, parent);
+
+                    if (DungeonBoard[(int) room.xMin, i] != TileType.Hallway)
+                    {
+                        var position = new Vector3((int) (room.xMin + 1), 0, i);
+                        Instantiate(sidePrefab.gameObject, position * 4 + sideOffset, Quaternion.identity, parent);
+                        UpdateObjectsRadius(position, RoomAvailability.Occupied, sidePrefab.radius);
+                    }
+
+                    if (DungeonBoard[(int) room.xMax - 1, i] != TileType.Hallway)
+                    {
+                        var position = new Vector3((int) (room.xMax - 2), 0, i);
+                        Instantiate(sidePrefab.gameObject, position * 4 + sideOffset, Quaternion.identity, parent);
+                        UpdateObjectsRadius(position, RoomAvailability.Occupied, sidePrefab.radius);
+                    }
                 }
             }
+
+            else
+            {
+                for (int i = (int) (room.xMin + 2); i < (room.xMax - 2); i++)
+                {
+                    // Instantiate(OccupiedGO, new Vector3(i, 0, (int) room.yMin) * 4, Quaternion.identity, parent);
+                    // Instantiate(OccupiedGO, new Vector3(i, 0, (int) room.yMax - 1) * 4, Quaternion.identity, parent);
+
+                    if (DungeonBoard[i, (int) room.yMin] != TileType.Hallway)
+                    {
+                        var position = new Vector3(i, 0, (int) (room.yMin + 1));
+                        Instantiate(sidePrefab.gameObject, position * 4 + sideOffset, Quaternion.identity, parent);
+                        UpdateObjectsRadius(position, RoomAvailability.Occupied, sidePrefab.radius);
+                    }
+
+                    if (DungeonBoard[i, (int) room.yMax - 1] != TileType.Hallway)
+                    {
+                        var position = new Vector3(i, 0, (int) (room.yMax - 2));
+                        Instantiate(sidePrefab.gameObject, position * 4 + sideOffset, Quaternion.identity, parent);
+                        UpdateObjectsRadius(position, RoomAvailability.Occupied, sidePrefab.radius);
+                    }
+                }
+            }
+            
+            var middlePrefab = skeletonRoom.Where(x => x.position == ObjectPosition.Middle).ToList()[0];
+            var middleOffset = middlePrefab.offset;
+            
+            Vector3 middle = new Vector3 ((int) room.center.x, 0, (int) room.center.y);
+
+            var prefab = corridorEntrance switch
+            {
+                CorridorDirection.Left => middlePrefab.leftGameObject,
+                CorridorDirection.Right => middlePrefab.rightGameObject,
+                CorridorDirection.Top => middlePrefab.gameObject,
+                _ => middlePrefab.bottomGameObject
+            };
+
+            Instantiate(prefab, middle * 4 + middleOffset , Quaternion.identity, parent);
+            UpdateObjectsRadius(middle, RoomAvailability.Occupied, middlePrefab.radius);
+        }
+        
+        private void DrawChestRoom(Rect room)
+        {
+            var sidePrefab = chestRoom.Where(x => x.position == ObjectPosition.Side).ToList()[0];
+            var sideOffset = sidePrefab.offset;
+            
+            
+            for (int i = (int) (room.yMin + 1); i < (room.yMax - 1); i++)
+            {
+                if (!CorridorNextToTile(room, (int) room.xMin + 1, i))
+                {
+                    var position = new Vector3((int) (room.xMin + 1), 0, i);
+                    Instantiate(sidePrefab.gameObject, position * 4 + sideOffset, Quaternion.identity, parent);
+                    UpdateObjectsRadius(position, RoomAvailability.Occupied, sidePrefab.radius);
+                }
+
+                if (!CorridorNextToTile(room, (int) room.xMax - 2, i))
+                {
+                    var position = new Vector3((int) (room.xMax - 2), 0, i);
+                    Instantiate(sidePrefab.gameObject, position * 4 + sideOffset, Quaternion.identity, parent);
+                    UpdateObjectsRadius(position, RoomAvailability.Occupied, sidePrefab.radius);
+                }
+            }
+
+            for (int i = (int) (room.xMin + 1); i < (room.xMax - 1); i++)
+            {
+                if (!CorridorNextToTile(room, i, (int) room.yMin + 1))
+                {
+                    var position = new Vector3(i, 0, (int) (room.yMin + 1));
+                    Instantiate(sidePrefab.gameObject, position * 4 + sideOffset, Quaternion.identity, parent);
+                    UpdateObjectsRadius(position, RoomAvailability.Occupied, sidePrefab.radius);
+                }
+
+                if (!CorridorNextToTile(room, i, (int) room.yMax - 2))
+                {
+                    var position = new Vector3(i, 0, (int) (room.yMax - 2));
+                    Instantiate(sidePrefab.gameObject, position * 4 + sideOffset, Quaternion.identity, parent);
+                    UpdateObjectsRadius(position, RoomAvailability.Occupied, sidePrefab.radius);
+                }
+            }
+
+            var middlePrefab = chestRoom.Where(x => x.position == ObjectPosition.Middle).ToList()[0];
+            var middleOffset = middlePrefab.offset;
+            
+            Vector3 middle = new Vector3 ((int) room.center.x, 0, (int) room.center.y);
+            
+            Instantiate(middlePrefab.gameObject, middle * 4 + middleOffset , Quaternion.identity, parent);
+            UpdateObjectsRadius(middle, RoomAvailability.Occupied, middlePrefab.radius);
         }
 
-
-        private void DrawBuffet(Rect room)
+        private void DrawKitchen(Rect room)
         {
-            // Debug.Log("Buffet : " + room.x + " - " + room.y + " - " + room.width * room.height);
-            
-            for (int i = (int) room.xMin + 1; i < room.xMax - 1; i++)
+            var corridorEntrance = GetRoomOrientation(room);
+            var sidePrefabList = kitchenRoom.Where(x => x.position == ObjectPosition.Side).ToList();
+
+            switch (corridorEntrance)
             {
-                for (int j = (int) room.yMin + 1; j < room.yMax - 1; j++)
-                {
-                    // Instantiate(buffetGO, new Vector3(i * 4, 0,j * 4), Quaternion.identity, parent);
-                }
+                case CorridorDirection.Left:
+                    
+                    for (int i = (int) (room.yMin + 1); i < (room.yMax - 1); i++)
+                    {
+                        // Instantiate(OccupiedGO, new Vector3((int) room.xMax - 1,0,i) * 4, Quaternion.identity, parent);
+                        
+                        if (DungeonBoard[(int) room.xMax - 1, i] != TileType.Hallway)
+                        {
+                            Random random = new Random();
+                            var sidePrefab = sidePrefabList[random.Next(0, sidePrefabList.Count)];
+                            var sideOffset = sidePrefab.offset;
+
+                            var position = new Vector3((int) (room.xMax - 2), 0, i);
+                            Instantiate(sidePrefab.rightGameObject, position * 4 + sideOffset, Quaternion.identity, parent);
+                            UpdateObjectsRadius(position, RoomAvailability.Occupied, sidePrefab.radius);
+                        }
+                    }
+
+                    break;
+                case CorridorDirection.Right:
+                    
+                    for (int i = (int) (room.yMin + 1); i < (room.yMax - 1); i++)
+                    {
+                        // Instantiate(OccupiedGO, new Vector3((int) room.xMin,0,i) * 4, Quaternion.identity, parent);
+
+                        if (DungeonBoard[(int) room.xMin, i] != TileType.Hallway)
+                        {
+                            Random random = new Random();
+                            var sidePrefab = sidePrefabList[random.Next(0, sidePrefabList.Count)];
+                            var sideOffset = sidePrefab.offset;
+
+                            var position = new Vector3((int) (room.xMin + 1), 0, i);
+                            Instantiate(sidePrefab.rightGameObject, position * 4 + sideOffset, Quaternion.identity, parent);
+                            UpdateObjectsRadius(position, RoomAvailability.Occupied, sidePrefab.radius);
+                        }
+                    }
+                
+                    break;
+                case CorridorDirection.Top:
+                    
+                    for (int i = (int) (room.xMin + 1); i < (room.xMax - 1); i++)
+                    {
+                        // Instantiate(OccupiedGO, new Vector3(i, 0, (int) room.yMin) * 4, Quaternion.identity, parent);
+
+                        if (DungeonBoard[i, (int) room.yMin] != TileType.Hallway)
+                        {
+                            Random random = new Random();
+                            var sidePrefab = sidePrefabList[random.Next(0, sidePrefabList.Count)];
+                            var sideOffset = sidePrefab.offset;
+                            
+                            var position = new Vector3(i, 0, (int) (room.yMin + 1));
+                            Instantiate(sidePrefab.gameObject, position * 4 + sideOffset, Quaternion.identity, parent);
+                            UpdateObjectsRadius(position, RoomAvailability.Occupied, sidePrefab.radius);
+                        }
+                    }
+                    
+                    break;
+                
+                case CorridorDirection.Bottom:
+                    
+                    for (int i = (int) (room.xMin + 1); i < (room.xMax - 1); i++)
+                    {
+                        // Instantiate(OccupiedGO, new Vector3(i, 0, (int) room.yMax - 1) * 4, Quaternion.identity, parent);
+                        
+                        if (DungeonBoard[i, (int) room.yMax - 1] != TileType.Hallway)
+                        {
+                            Random random = new Random();
+                            var sidePrefab = sidePrefabList[random.Next(0, sidePrefabList.Count)];
+                            var sideOffset = sidePrefab.offset;
+                            
+                            var position = new Vector3(i, 0, (int) (room.yMax - 2));
+                            Instantiate(sidePrefab.gameObject, position * 4 + sideOffset, Quaternion.identity, parent);
+                            UpdateObjectsRadius(position, RoomAvailability.Occupied, sidePrefab.radius);
+                        }
+                    }
+                    break;
             }
-        }
 
-
-        private void DrawBedroom(Rect room)
-        {
-            // Debug.Log("Bedroom : " + room.x + " - " + room.y + " - " + room.width * room.height);
+            var middlePrefab = kitchenRoom.Where(x => x.position == ObjectPosition.Middle).ToList()[0];
+            var middleOffset = middlePrefab.offset;
             
-            for (int i = (int) room.xMin + 1; i < room.xMax - 1; i++)
-            {
-                for (int j = (int) room.yMin + 1; j < room.yMax - 1; j++)
-                {
-                    // Instantiate(bedroomGO, new Vector3(i * 4, 0,j * 4), Quaternion.identity, parent);
-                }
-            }
-        }
-
-
-        private void DrawOffice(Rect room)
-        {
-            // Debug.Log("Office : " + room.x + " - " + room.y + " - " + room.width * room.height);
+            Vector3 middle = new Vector3 ((int) room.center.x, 0, (int) room.center.y);
             
-            for (int i = (int) room.xMin + 1; i < room.xMax - 1; i++)
-            {
-                for (int j = (int) room.yMin + 1; j < room.yMax - 1; j++)
-                {
-                    // Instantiate(officeGO, new Vector3(i * 4, 0,j * 4), Quaternion.identity, parent);
-                }
-            }
-        }
-
-        private void DrawWineCellar(Rect room)
-        {
-            // Debug.Log("Wine cellar : " + room.x + " - " + room.y + " - " + room.width * room.height);
-            
-            for (int i = (int) room.xMin + 1; i < room.xMax - 1; i++)
-            {
-                for (int j = (int) room.yMin + 1; j < room.yMax - 1; j++)
-                {
-                    // Instantiate(wineGO, new Vector3(i * 4, 0,j * 4), Quaternion.identity, parent);
-                }
-            }
+            Instantiate(middlePrefab.gameObject, middle * 4 + middleOffset , Quaternion.identity, parent);
+            UpdateObjectsRadius(middle, RoomAvailability.Occupied, middlePrefab.radius);
         }
 
         private void DrawGenericRoom(Rect room)
         {
-            // Debug.Log("Generic room : " + room.x + " - " + room.y + " - " + room.width * room.height);
-            
-            for (int i = (int) room.xMin + 1; i < room.xMax - 1; i++)
+            for (int i = (int) room.xMin + 2; i < room.xMax - 2; i++)
             {
-                for (int j = (int) room.yMin + 1; j < room.yMax - 1; j++)
+                for (int j = (int) room.yMin + 2; j < room.yMax - 2; j++)
                 {
-                    // Instantiate(genericGO, new Vector3(i * 4, 0,j * 4), Quaternion.identity, parent);
+                    if (roomAvailability[i, j] == RoomAvailability.Occupied) continue;
+
+                    Random random = new Random();
+                    if (random.Next(100) > objectInstantiationProbability) continue;
+                    
+                    random = new Random();
+                    var objectPrefab = genericRoom[random.Next(0, genericRoom.Count)];
+                    
+                    var position = new Vector3(i, 0, j);
+
+                    Instantiate(objectPrefab.gameObject, position * 4, Quaternion.identity, parent);
+                    // Instantiate(occupiedGO, position * 4, Quaternion.identity, parent);
+                    UpdateObjectsRadius(position, RoomAvailability.Occupied, objectPrefab.radius);
+
                 }
             }
         }
-        
+
         #endregion
+
+        private CorridorDirection GetRoomOrientation(Rect room)
+        {
+            for (int i = (int) room.xMin; i < room.xMax; i++)
+            {
+                if (DungeonBoard[i, (int) room.yMin] == TileType.Hallway) return CorridorDirection.Bottom;
+                if (DungeonBoard[i, (int) room.yMax - 1] == TileType.Hallway) return CorridorDirection.Top;
+            }
+            
+            for (int i = (int) room.yMin; i < room.yMax; i++)
+            {
+                if (DungeonBoard[(int) room.xMin, i] == TileType.Hallway) return CorridorDirection.Left;
+                if (DungeonBoard[(int) room.xMax - 1, i] == TileType.Hallway) return CorridorDirection.Right;
+            }
+            
+            Debug.Log("ORIENTATION ISSUE");
+            return CorridorDirection.Bottom;
+        }
 
         public void DrawObjects()
         {
-            List<Rect> roomsOrdered = rooms.OrderByDescending(x=> x.width * x.height).ToList();
+            List<Rect> allRooms = rooms.OrderBy(x=> x.height * x.width).ToList();
 
-            if (roomsOrdered.Count == 1)
+            // SPAWN PRIORITY
+            // 0 - Spawn Room
+            // 1 - Skeleton
+            // 2 - Chest
+            // 3 - Chest
+            // 4 - Kitchen
+
+            int currentRoom = -1;
+            while (allRooms.Count > 0)
             {
-                DrawBossRoom(roomsOrdered[0]);
-                roomsOrdered.RemoveAt(0);
-                return;
-            }
-            
-            // spawn
-            Rect spawnRoom = roomsOrdered[^1];
-            DrawSpawnRoom(spawnRoom);
-            roomsOrdered.Remove(spawnRoom);
-            
-            if (roomsOrdered.Count > 5)
-            {
-                // biggest (throne)
-                Rect throneRoom = roomsOrdered[0];
-                DrawThroneRoom(throneRoom);
-                roomsOrdered.Remove(throneRoom);
+                currentRoom++;
+                
+                switch (currentRoom)
+                {
+                    case 0:
+                        DrawGenericRoom(allRooms[0]);
+                        allRooms.RemoveAt(0);
+                        break;
+                    
+                    case 1:
+                        Rect skelRect = allRooms.Select(x => x).
+                            Where(x => x.height > 5 && x.width > 5).
+                            OrderByDescending(x=>x.width * x.height).First();
 
-                // 2nd biggest (buffet)
-                Rect buffetRoom = roomsOrdered[0];
-                DrawBuffet(buffetRoom);
-                roomsOrdered.Remove(buffetRoom);
+                        DrawSkeletonRoom(skelRect);
+                        DrawGenericRoom(skelRect);
+                        allRooms.Remove(skelRect);
+                        break;
+                    
+                    case 2 or 3:
+                        Rect chestRect = allRooms.Select(x => x).
+                            Where(x => x.height > 5 && x.width > 5).
+                            OrderByDescending(x=>x.width * x.height).FirstOrDefault();
 
-                // 3rd biggest (wine cellar)
-                Rect kitchen = roomsOrdered[0];
-                DrawWineCellar(kitchen);
-                roomsOrdered.Remove(kitchen);
+                        if (chestRect == default) break;
+                        
+                        DrawChestRoom(chestRect);
+                        DrawGenericRoom(chestRect);
+                        allRooms.Remove(chestRect); 
+                        break;
 
-                // smallest room (office)
-                Rect officeRoom = roomsOrdered[^1];
-                DrawOffice(officeRoom);
-                roomsOrdered.Remove(officeRoom);
+                    case 4:
+                        Rect kitchenRect = allRooms.Select(x => x).
+                            Where(x => x.height >= 4 && x.width >= 4).
+                            OrderByDescending(x=>x.width * x.height).First();
+                        
+                        DrawKitchen(kitchenRect);
+                        DrawGenericRoom(kitchenRect);
 
-                // 2nd smallest room (bedroom)
-                Rect bedroom = roomsOrdered[^1];
-                DrawBedroom(bedroom);
-                roomsOrdered.Remove(bedroom);
-            }
+                        allRooms.Remove(kitchenRect); 
+                        break;
 
-            foreach (var room in roomsOrdered)
-            {
-                DrawGenericRoom(room);
+                    default:
+                        DrawGenericRoom(allRooms[0]);
+                        allRooms.RemoveAt(0);
+                        break;
+                }
             }
         }
         
