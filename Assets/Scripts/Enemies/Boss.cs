@@ -18,6 +18,7 @@ namespace Enemies
 
         
         [BoxGroup("FX")] [SerializeField] private ParticleSystem sparkle;
+        [BoxGroup("FX")] [SerializeField] private ParticleSystem stageChangeFX;
         
         [BoxGroup("Mask")] [SerializeField] private LayerMask playerMask;
         [BoxGroup("Mask")] [SerializeField] private LayerMask obstacleMask;
@@ -30,6 +31,7 @@ namespace Enemies
         [BoxGroup("Settings")] [SerializeField] private float abandonRange;
         [BoxGroup("Settings")] [SerializeField] private float stopRange;
         [BoxGroup("Settings")] [SerializeField] private float sightAngle;
+        [BoxGroup("Settings")] [SerializeField] private float health = 200f;
         
         [BoxGroup("Settings")] [SerializeField] private float patrolSpeed;
         [BoxGroup("Settings")] [SerializeField] private float chaseSpeed;
@@ -43,23 +45,28 @@ namespace Enemies
         private bool isAttacking;
         private bool isHit;
         private bool isRunning;
+        private bool isChangingStage;
 
         #endregion
 
         #region Animations
 
         private static readonly int IdleAnimation = Animator.StringToHash("idle");
-        private static readonly int WalkAnimation = Animator.StringToHash("walk");
         private static readonly int RunAnimation = Animator.StringToHash("run");
         private static readonly int AttackAnimation = Animator.StringToHash("attack");
         private static readonly int HitAnimation = Animator.StringToHash("hit");
-        private float cameraShakeMagnitude = 6.9f;
-        private float cameraShakeDuration = 0.9f;
-        private float cameraShakeInterval = 0.2f;
+        private static readonly int StageAnimation = Animator.StringToHash("stage");
+        private static readonly int ComboAttackAnimation = Animator.StringToHash("melee combo");
+        private static readonly int TurningAttackAnimation = Animator.StringToHash("melee 360");
+        
+        private float cameraShakeMagnitude = 0.2f;
+        private float cameraShakeDuration = 0.1f;
+        private float cameraShakeInterval = 0.1f;
         private float nextCameraShakeTime;
         
         private float lockedUntil;
         private int currentState;
+        private float initialHealth;
 
         private Animator animator;
 
@@ -77,6 +84,7 @@ namespace Enemies
 
         private void Start()
         {
+            initialHealth = health;
             animator = GetComponentInChildren<Animator>();
             agent = GetComponent<NavMeshAgent>();
             players = GameObject.FindGameObjectsWithTag(playerTag);
@@ -94,13 +102,11 @@ namespace Enemies
                     if (InAttackRange()) Attack();
                     else Chase();
                 }
-
-                else Patrol();
             }
             
             if (state == currentState) return;
 
-            animator.CrossFade(state, 1, 0);
+            animator.CrossFade(state, 0, 0);
             currentState = state;
             
             //Sword FX
@@ -117,33 +123,105 @@ namespace Enemies
                 emissionModule.rateOverTime = rateOverTime;
             }
 
-            if (!isAttacking)
+            if (isRunning)
             {
-                
+                Debug.Log("running");
                 if (Time.time >= nextCameraShakeTime)
                 {
                     // Perform camera shake here
-                    ShakeCamera();
+                    //ShakeCamera();
 
                     // Set the time for the next camera shake
                     nextCameraShakeTime = Time.time + cameraShakeInterval;
                 }
             }
+
+            if (isHit)
+            {
+                health -= 25;
+            }
+            
+            //stage 1
+            if (health <= initialHealth*0.50f)
+            {
+                chaseSpeed *= 1.25f;
+                StageChange1();
+            }
+            
+            //stage 2
+            if (health <= initialHealth*0.25f)
+            {
+                chaseSpeed *= 1.25f;
+                
+            }
+            
+            if (health <= 0)
+            {
+                //DEATH
+            }
         }
 
         #endregion
 
-        #region Methods Anim
+        #region stageChange
 
+        private void StageChange1()
+        {
+            var emissionModule = stageChangeFX.emission;
+            var rateOverTime = emissionModule.rateOverTime;
+            rateOverTime.constant = 50;
+            emissionModule.rateOverTime = rateOverTime;
+            StartCoroutine(waiter1());
+            StageChangeAnimation();
+        }
+
+        private IEnumerator waiter1()
+        {
+            var emissionModule = stageChangeFX.emission;
+            var rateOverTime = emissionModule.rateOverTime;
+            yield return new WaitForSeconds(2f);
+            rateOverTime.constant = 0f;
+            emissionModule.rateOverTime = rateOverTime;
+        }
+        
+        
+        private void StageChangeAnimation()
+        {
+            Vector3 agentPosition = transform.position;
+            Vector3 targetPosition = target.position;
+            
+            agent.SetDestination(agentPosition);
+            transform.LookAt(new Vector3(targetPosition.x, agentPosition.y, targetPosition.z));
+            isAttacking = true;
+        }
+
+        #endregion
+        #region Methods Anim
+        
         private int GetState()
         {
             if (currentState == AttackAnimation) isAttacking = false;
             if (currentState == HitAnimation) isHit = false;
-            if (currentState == RunAnimation) isRunning = false;
+            if (currentState == RunAnimation) isRunning = true;
 
             if (Time.time < lockedUntil) return currentState;
-            
-            if (isAttacking) return LockState(AttackAnimation, 1.5f);
+
+            if (isAttacking)
+            {
+                //different attack types
+                int randomAttack = Random.Range(1, 4);
+                switch (randomAttack)
+                {
+                    case 1:
+                        return LockState(AttackAnimation, 1.5f);
+                    case 2:
+                        return LockState(TurningAttackAnimation, 2.48f);
+                    case 3:
+                        return LockState(ComboAttackAnimation, 4.2f);
+                }
+                
+            }
+            if (isChangingStage) return LockState(StageAnimation, 1.5f);
             if (isHit) return LockState(HitAnimation, .7f);
             
             return agent.velocity.magnitude < .15f 
@@ -174,7 +252,7 @@ namespace Enemies
 
         private IEnumerator ShakeCameraCoroutine(Camera camera)
         {
-            Debug.Log("SHAKING");
+            Debug.Log(camera.name);
             Vector3 originalPosition = camera.transform.localPosition;
 
             float elapsedTime = 0f;
@@ -258,34 +336,6 @@ namespace Enemies
             target = playerInRange != null ? playerInRange.transform : null;
         }
         
-        private void SearchForDestination()
-        {
-            Vector3 position = transform.position;
-            Vector3 route;
-            
-            do
-            {
-                float rndX = Random.Range(-destinationRange, destinationRange);
-                float rndZ = Random.Range(-destinationRange, destinationRange);
-                destination = new Vector3(position.x + rndX, position.y, position.z + rndZ);
-                route = destination - position;
-            } // ensure it does not cross any wall (to avoid pointing outside) and not pointing to an obstacle
-            while (Physics.Raycast(position, route.normalized, route.magnitude, wallMask) ||
-                   Physics.CheckSphere(destination, 0.5f, obstacleMask));
-
-            hasDestination = true;
-        }
-
-        private void Patrol()
-        {
-            agent.speed = patrolSpeed;
-            
-            if (!hasDestination) SearchForDestination();
-            if (hasDestination) agent.SetDestination(destination);
-
-            // AI has reached the destination
-            if (agent.pathStatus == NavMeshPathStatus.PathComplete && agent.remainingDistance == 0) hasDestination = false;
-        }
 
         private void Chase()
         {

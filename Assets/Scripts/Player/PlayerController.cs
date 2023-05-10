@@ -244,7 +244,6 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
         
         // MOVEMENT
         Vector2 movement = InputManager.Instance.GetPlayerMovement();
-        Debug.Log(movement);
 
         switch (movement.y)
         {
