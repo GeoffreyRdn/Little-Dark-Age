@@ -74,6 +74,7 @@ namespace Health {
 		[PunRPC]
 		private void KillEnemy()
 		{
+			EnemyInstantiation.Enemies.Remove(gameObject);
 			PhotonNetwork.Destroy(gameObject);
 			EnemyInstantiation.EnemiesRemaining--;
 			Debug.Log("ENEMY KILLED , REMAINING : " + EnemyInstantiation.EnemiesRemaining);

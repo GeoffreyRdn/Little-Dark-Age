@@ -28,8 +28,6 @@ namespace Dungeon
 
         private void Start()
         {
-            PlayerController.isLoadingScene = true;
-
             if (PhotonNetwork.IsMasterClient)
             {
                 generation.GenerateDungeon();
@@ -60,6 +58,7 @@ namespace Dungeon
             Debug.Log("Setting map data");
             generation.DungeonBoard = mapData.ArrayArrayToArray2d();
             generation.DrawBoard();
+            generation.DrawObjects();
         }
 
         
@@ -75,21 +74,29 @@ namespace Dungeon
             controller.enabled = false;
             controller.gameObject.transform.position = spawnPoint;
             controller.enabled = true;
-            
-            Debug.Log("Player " + currentPlayer.name + " moved to : " + spawnPoint + " - actual position : " + currentPlayer.transform.position);
-
-            // Collider[] hitColliders = Physics.OverlapSphere(currentPlayer.transform.GetChild(0).transform.position, 1);
-            // foreach (var collider in hitColliders.Where(col => col.CompareTag(environmentTag))) Destroy(collider.gameObject);
-            //
-            
-            PlayerController.isLoadingScene = false;
-            // // TODO : remove loading screen
         }
 
         [PunRPC]
         private void TransmitSpawnPoint(float x, float z)
         {
             spawnPoint = new Vector3(x, 1, z);
+        }
+        
+        [PunRPC]
+        private void DisableLoadingScren()
+        {
+            if (PhotonNetwork.LocalPlayer.TagObject is GameObject player)
+            {
+                var playerController = player.GetComponent<PlayerController>();
+                playerController.loadingScreen.SetActive(false);
+            }
+        }
+
+        [PunRPC]
+        private void EnableAnimator()
+        {
+            var player = PhotonNetwork.LocalPlayer.TagObject as GameObject;
+            player.GetComponent<PlayerController>().EnableAnimator();
         }
 
         #endregion
@@ -110,6 +117,11 @@ namespace Dungeon
         {
             yield return new WaitForSeconds(.2f);
             photonView.RPC(nameof(TpPlayersToDungeon), RpcTarget.AllBuffered);
+            
+            yield return new WaitForSeconds(.2f);
+            photonView.RPC(nameof(EnableAnimator), RpcTarget.MasterClient);
+            photonView.RPC(nameof(DisableLoadingScren), RpcTarget.All);
+            
         }
 
         #endregion

@@ -110,11 +110,13 @@ namespace Enemies
         private void OnEnable()
         {
             HealthController.onPlayerDeath += HandlePlayerDeath;
+            DamageBehavior.onEnemyDamaged += HandleEnemyDamaged;
         }
 
         private void OnDisable()
         {
             HealthController.onPlayerDeath -= HandlePlayerDeath;
+            DamageBehavior.onEnemyDamaged -= HandleEnemyDamaged;
         }
 
         #endregion
@@ -279,10 +281,19 @@ namespace Enemies
         {
             if (target != null && target.gameObject == playerDead)
             {
-                List<GameObject> remainingPlayers = players.Where(player => player != null && player != playerDead).ToList();
+                List<GameObject> remainingPlayers = players.Where(player => player != null && 
+                                                                   !player.GetComponent<PlayerController>().isDead && 
+                                                                    player != playerDead).ToList();
                 target = null;
                 players = remainingPlayers;
             }
+        }
+
+        private void HandleEnemyDamaged(GameObject enemyDamaged)
+        {
+            if (gameObject != enemyDamaged) return;
+
+            isHit = true;
         }
 
         #endregion

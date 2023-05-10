@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,9 +5,7 @@ using Health;
 using Inventory;
 using NaughtyAttributes;
 using Photon.Pun;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
 //[RequireComponent(typeof(CharacterController))]
@@ -36,6 +33,7 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     [SerializeField] private InventoryController inventory;
     [SerializeField] private ShopController shop;
     [SerializeField] private PauseMenu pauseMenu;
+    [SerializeField] public GameObject loadingScreen;
     
     [BoxGroup("Camera")] [SerializeField] Camera cam;
     // [BoxGroup("Camera")] [SerializeField] GameObject displayCamera;
@@ -53,7 +51,6 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     public static bool isInPauseMenu = false;
     public static bool isInShop = false;
     
-    public static bool isLoadingScene = false;
     public static bool applyGravity = true;
     
     #region Animations
@@ -91,8 +88,8 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     private static readonly int CrouchShieldAnimation = Animator.StringToHash("crouch_shield");
     private static readonly int CrouchLeaveAnimation = Animator.StringToHash("crouch_leave");
     
-    private static readonly int ShieldEnterAnimation = Animator.StringToHash("shield_enter");
-    private static readonly int ShieldStayAnimation = Animator.StringToHash("shield_stay");
+    public static readonly int ShieldEnterAnimation = Animator.StringToHash("shield_enter");
+    public static readonly int ShieldStayAnimation = Animator.StringToHash("shield_stay");
     private static readonly int ShieldHitAnimation = Animator.StringToHash("shield_hit");
     private static readonly int ShieldLeaveAnimation = Animator.StringToHash("shield_leave");
 
@@ -101,7 +98,7 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     private bool isAttacking;
     private bool isHit;
     private bool isRunning;
-    private bool isDead;
+    public bool isDead;
     private bool isCrouching;
     private bool isShielding;
     private bool isJumping;
@@ -109,8 +106,7 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     public bool IsShielding => isShielding;
     
     private float lockedUntil;
-    private int currentState;
-    private float delay;
+    public int currentState;
 
     private Animator animator;
 
@@ -147,6 +143,7 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     private void Start()
     {
         pv = GetComponent<PhotonView>();
+        loadingScreen.SetActive(false);
         
         if (PhotonNetwork.IsConnectedAndReady && !pv.IsMine)
         {
@@ -165,8 +162,7 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
             CrouchAttackAnimation,
             AttackAnimation
         };
-
-        delay = 0;
+        
         animator = GetComponentInChildren<Animator>();
         controller = GetComponent<CharacterController>();
         pv = GetComponent<PhotonView>();
@@ -188,8 +184,6 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
             pv.RPC(nameof(SendAnimations), RpcTarget.Others, currentState);
             return;
         }
-        
-        if (isLoadingScene) delay = 1f;
 
         if (isInInventory && InputManager.Instance.PlayerCloseInventory())
         {
@@ -238,6 +232,25 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     
     #region Animations
 
+    public void DisableAnimator()
+        => pv.RPC(nameof(DisableOrEnableAnimatorRPC), RpcTarget.All, false);
+
+    public void EnableAnimator()
+        => pv.RPC(nameof(DisableOrEnableAnimatorRPC), RpcTarget.All, true);
+
+            
+    [PunRPC]
+    private void DisableOrEnableAnimatorRPC(bool state)
+    {
+        foreach (var player in PhotonNetwork.PlayerList)
+        {
+            GameObject playerGO = player.TagObject as GameObject;
+            playerGO.GetComponent<PlayerController>().animator.enabled = state;
+            Debug.Log(state ? "ANIMATOR ENABLED FOR " + player.NickName : "ANIMATOR DISABLED FOR " + player.NickName);
+        }
+    }
+    
+
     [PunRPC]
     private void SendAnimations(int state, PhotonMessageInfo info)
     {
@@ -245,6 +258,81 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
         {
             var playerAnimator = sender.GetComponentInChildren<Animator>();
             playerAnimator.CrossFade(state, 0, 0);
+
+            var pc = sender.GetComponent<PlayerController>();
+
+            if (state == AttackAnimation)
+            {
+                pc.audioSource.loop = false;
+                pc.audioSource.clip = attackSound;
+                pc.audioSource.Play();
+            }
+            
+            else if (state == HitAnimation)
+            {
+                pc.audioSource.loop = false;
+                pc.audioSource.clip = hurtSound;
+                pc.audioSource.Play();
+            }
+            
+            else if (state == DeathAnimation)
+            {
+                pc.audioSource.loop = false;
+                pc.audioSource.clip = deathSound;
+                pc.audioSource.Play();
+            }
+            
+            else if (state == JumpAnimation)
+            {
+                pc.audioSource.loop = false;
+                pc.audioSource.clip = jumpSound;
+                pc.audioSource.Play();
+            }
+            
+            else if (state == ShieldEnterAnimation)
+            {
+                audioSource.loop = false;
+                audioSource.clip = drawShieldSound;
+                audioSource.Play();
+            }
+            
+            else if (state == ShieldLeaveAnimation)
+            {
+                audioSource.loop = false;
+                audioSource.clip = sheatheShieldSound;
+                audioSource.Play();
+            }
+            
+            else if (state == BackRunAnimation ||
+                     state == FrontRunAnimation ||
+                     state == BackLeftRunAnimation ||
+                     state == BackRightRunAnimation ||
+                     state == FrontLeftRunAnimation ||
+                     state == FrontRightRunAnimation)
+            {
+                audioSource.loop = true;
+                audioSource.clip = runSound;
+                audioSource.Play();
+            }
+
+            // WALKING
+            else
+            {
+                audioSource.loop = true;
+                audioSource.clip = walkSound;
+                audioSource.Play();
+            }
+        }
+    }
+    
+
+    [PunRPC]
+    private void SendDeath(PhotonMessageInfo info)
+    {
+        if (info.Sender.TagObject is GameObject sender)
+        {
+            var playerController = sender.GetComponent<PlayerController>();
+            playerController.isDead = true;
         }
     }
     
@@ -411,7 +499,7 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
         return Mathf.Clamp(moveSpeed, 0, maxSpeed);
     }
     
-    public void LoadBossScene()
+    private void LoadBossScene()
     {
         PhotonNetwork.LoadLevel(bossScene);
     }
@@ -442,14 +530,50 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
             audioSource.Play();
             isDead = true;
             
+            pv.RPC(nameof(SendDeath), RpcTarget.Others);
+            
             if (isInInventory) CloseInventory();
             if (isInShop) CloseShopMenu();
             if (isInPauseMenu) ClosePauseMenu();
             
             InputManager.Instance.DisableActionMap();
+            
+            var allDead = true;
+        
+            foreach (var player in PhotonNetwork.PlayerList)
+            {
+                var currPlayer = player.TagObject as GameObject;
+                
+                if (currPlayer.TryGetComponent<PlayerController>(out var playerController))
+                {
+                    allDead &= playerController.isDead;
+                }
+            }
+
+            if (allDead)
+            {
+                // TODO: gameover screen + return to lobby + reset action map
+                Debug.Log("ALL PLAYERS ARE DEAD");
+                StartCoroutine(HandleEndGame());
+            }
+            else
+            {
+                Debug.Log("SOME PLAYERS ARE STILL ALIVE");
+            }
         }
+
+        
+    }
+    
+    private IEnumerator HandleEndGame()
+    {
+        yield return new WaitForSeconds(5);
+        pv.RPC(nameof(ReturnToLobby), RpcTarget.MasterClient);
     }
 
+    [PunRPC]
+    private void ReturnToLobby()
+        => (PhotonNetwork.LocalPlayer.TagObject as GameObject)?.GetComponent<PlayerController>().pauseMenu.ReturnToLobby();
 
     private void HandleDungeonComplete()
     {

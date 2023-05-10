@@ -1,6 +1,4 @@
-using System.Linq;
 using Photon.Pun;
-using Photon.Realtime;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -14,9 +12,9 @@ public class PauseMenu : MonoBehaviourPunCallbacks
     {
         Debug.Log("Resume");
         InputManager.Instance.ClosePauseMenu();
-        OpenOrClosePauseMenu();
+        ClosePauseMenu();
             
-        Cursor.visible = true;
+        Cursor.visible = false;
     }
 
     public void ReturnToLobby()
@@ -61,4 +59,11 @@ public class PauseMenu : MonoBehaviourPunCallbacks
         Debug.Log("Opening Pause Menu -> " + !gameObject.activeInHierarchy);
         gameObject.SetActive(!gameObject.activeInHierarchy);
     }
+
+    public void ClosePauseMenu()
+        => gameObject.SetActive(false);
+    
+    public void OpenPauseMenu()
+        => gameObject.SetActive(true);
+    
 }
