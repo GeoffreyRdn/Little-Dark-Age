@@ -118,4 +118,7 @@ public class InputManager : MonoBehaviourPunCallbacks
         playerControls.Shop.Disable();
         playerControls.Ground.Enable();
     }
+
+    public void EnableControls()
+        => playerControls.Ground.Enable();
 }

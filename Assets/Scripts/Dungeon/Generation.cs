@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using NaughtyAttributes;
+using Photon.Pun;
 using UnityEngine;
 using UnityEngine.Serialization;
 using Random = System.Random;
@@ -54,6 +55,7 @@ namespace Dungeon
         [Tag] [SerializeField] private string deletionTag;
 
         internal TileType[,] DungeonBoard;
+        internal int[,] ObjectsBoard;
         internal RoomAvailability[,] roomAvailability;
 
         // getting all the rooms for the AI
@@ -76,7 +78,7 @@ namespace Dungeon
         public void GenerateDungeon()
         {
             DungeonBoard = new TileType[boardWidth, boardHeight];
-            roomAvailability = new RoomAvailability[boardWidth, boardHeight];
+            ObjectsBoard = new int [boardWidth, boardHeight];
             rooms = new List<Rect>();
             
             #if UNITY_EDITOR
@@ -176,7 +178,7 @@ namespace Dungeon
         
         #region Objects Instantiation
 
-        private bool CorridorNextToTile(Rect room, int x, int y)
+        private bool CorridorNextToTile(int x, int y)
         {
             for (int i = x - 1; i <= x + 1; i++)
             {
@@ -286,17 +288,16 @@ namespace Dungeon
             var sidePrefab = chestRoom.Where(x => x.position == ObjectPosition.Side).ToList()[0];
             var sideOffset = sidePrefab.offset;
             
-            
             for (int i = (int) (room.yMin + 1); i < (room.yMax - 1); i++)
             {
-                if (!CorridorNextToTile(room, (int) room.xMin + 1, i))
+                if (!CorridorNextToTile((int) room.xMin + 1, i))
                 {
                     var position = new Vector3((int) (room.xMin + 1), 0, i);
                     Instantiate(sidePrefab.gameObject, position * 4 + sideOffset, Quaternion.identity, parent);
                     UpdateObjectsRadius(position, RoomAvailability.Occupied, sidePrefab.radius);
                 }
 
-                if (!CorridorNextToTile(room, (int) room.xMax - 2, i))
+                if (!CorridorNextToTile((int) room.xMax - 2, i))
                 {
                     var position = new Vector3((int) (room.xMax - 2), 0, i);
                     Instantiate(sidePrefab.gameObject, position * 4 + sideOffset, Quaternion.identity, parent);
@@ -306,14 +307,14 @@ namespace Dungeon
 
             for (int i = (int) (room.xMin + 1); i < (room.xMax - 1); i++)
             {
-                if (!CorridorNextToTile(room, i, (int) room.yMin + 1))
+                if (!CorridorNextToTile(i, (int) room.yMin + 1))
                 {
                     var position = new Vector3(i, 0, (int) (room.yMin + 1));
                     Instantiate(sidePrefab.gameObject, position * 4 + sideOffset, Quaternion.identity, parent);
                     UpdateObjectsRadius(position, RoomAvailability.Occupied, sidePrefab.radius);
                 }
 
-                if (!CorridorNextToTile(room, i, (int) room.yMax - 2))
+                if (!CorridorNextToTile(i, (int) room.yMax - 2))
                 {
                     var position = new Vector3(i, 0, (int) (room.yMax - 2));
                     Instantiate(sidePrefab.gameObject, position * 4 + sideOffset, Quaternion.identity, parent);
@@ -345,13 +346,25 @@ namespace Dungeon
                         
                         if (DungeonBoard[(int) room.xMax - 1, i] != TileType.Hallway)
                         {
-                            Random random = new Random();
-                            var sidePrefab = sidePrefabList[random.Next(0, sidePrefabList.Count)];
-                            var sideOffset = sidePrefab.offset;
+                            if (PhotonNetwork.IsMasterClient)
+                            {
+                                Random random = new Random();
+                                var sidePrefab = sidePrefabList[random.Next(0, sidePrefabList.Count)];
+                                var sideOffset = sidePrefab.offset;
 
-                            var position = new Vector3((int) (room.xMax - 2), 0, i);
-                            Instantiate(sidePrefab.rightGameObject, position * 4 + sideOffset, Quaternion.identity, parent);
-                            UpdateObjectsRadius(position, RoomAvailability.Occupied, sidePrefab.radius);
+                                var position = new Vector3((int) (room.xMax - 2), 0, i);
+                                Instantiate(sidePrefab.rightGameObject, position * 4 + sideOffset, Quaternion.identity, parent);
+                                UpdateObjectsRadius(position, RoomAvailability.Occupied, sidePrefab.radius);
+                            }
+
+                            else
+                            {
+                                var prefab = kitchenRoom.
+                                    FirstOrDefault(x=> x.index == ObjectsBoard[(int) (room.xMax - 2), i]);
+                                if (prefab != null)
+                                    Instantiate(prefab.gameObject, new Vector3((int) (room.xMax - 2), 0, i) * 4,
+                                        Quaternion.identity, parent);
+                            }
                         }
                     }
 
@@ -426,6 +439,27 @@ namespace Dungeon
 
         private void DrawGenericRoom(Rect room)
         {
+            if (!PhotonNetwork.IsMasterClient)
+            {
+                for (int i = 0; i < boardWidth; i++)
+                {
+                    for (int j = 0; j < boardHeight; j++)
+                    {
+                        if (ObjectsBoard[i, j] != 0)
+                        {
+                            DungeonObject dungeonObject =
+                                genericRoom.FirstOrDefault(x => x.index == ObjectsBoard[i, j]);
+                            if (dungeonObject != default)
+                            {
+                                Instantiate(dungeonObject.gameObject, new Vector3(i, 0, j) * 4, Quaternion.identity,
+                                    parent);
+                            }
+                        }
+                    }
+                }
+                return;
+            }
+            
             for (int i = (int) room.xMin + 2; i < room.xMax - 2; i++)
             {
                 for (int j = (int) room.yMin + 2; j < room.yMax - 2; j++)
@@ -439,11 +473,11 @@ namespace Dungeon
                     var objectPrefab = genericRoom[random.Next(0, genericRoom.Count)];
                     
                     var position = new Vector3(i, 0, j);
+                    ObjectsBoard[i, j] = objectPrefab.index;
 
                     Instantiate(objectPrefab.gameObject, position * 4, Quaternion.identity, parent);
-                    // Instantiate(occupiedGO, position * 4, Quaternion.identity, parent);
                     UpdateObjectsRadius(position, RoomAvailability.Occupied, objectPrefab.radius);
-
+                    // Instantiate(occupiedGO, position * 4, Quaternion.identity, parent);
                 }
             }
         }
@@ -471,6 +505,7 @@ namespace Dungeon
         public void DrawObjects()
         {
             List<Rect> allRooms = rooms.OrderBy(x=> x.height * x.width).ToList();
+            roomAvailability = new RoomAvailability[boardWidth, boardHeight];
 
             // SPAWN PRIORITY
             // 0 - Spawn Room

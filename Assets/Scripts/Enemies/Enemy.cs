@@ -260,6 +260,12 @@ namespace Enemies
 
         private void Attack()
         {
+            if (target.GetComponent<PlayerController>().isDead)
+            {
+                target = null;
+                return;
+            }
+            
             Vector3 agentPosition = transform.position;
             Vector3 targetPosition = target.position;
             
@@ -279,12 +285,21 @@ namespace Enemies
 
         private void HandlePlayerDeath(GameObject playerDead)
         {
-            if (target != null && target.gameObject == playerDead)
+            int viewID = playerDead.GetComponent<PhotonView>().ViewID;
+            photonView.RPC(nameof(TransmitPlayerDeath), RpcTarget.All, viewID);
+        }
+
+        [PunRPC]
+        private void TransmitPlayerDeath(int viewID)
+        {
+            if (target != null && target.gameObject.GetComponent<PhotonView>().ViewID == viewID)
             {
-                List<GameObject> remainingPlayers = players.Where(player => player != null && 
-                                                                   !player.GetComponent<PlayerController>().isDead && 
-                                                                    player != playerDead).ToList();
                 target = null;
+                List<GameObject> remainingPlayers = players
+                    .Where(player => player != null && 
+                                     !player.GetComponent<PlayerController>().isDead && 
+                                     player.GetComponent<PhotonView>().ViewID != viewID)
+                    .ToList();
                 players = remainingPlayers;
             }
         }

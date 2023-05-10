@@ -55,7 +55,7 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     
     #region Animations
 
-    private static readonly int IdleAnimation = Animator.StringToHash("idle");
+    public static readonly int IdleAnimation = Animator.StringToHash("idle");
     
     private static readonly int FrontWalkAnimation = Animator.StringToHash("walk");
     private static readonly int FrontRunAnimation = Animator.StringToHash("front_run");
@@ -231,24 +231,6 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     #endregion
     
     #region Animations
-
-    public void DisableAnimator()
-        => pv.RPC(nameof(DisableOrEnableAnimatorRPC), RpcTarget.All, false);
-
-    public void EnableAnimator()
-        => pv.RPC(nameof(DisableOrEnableAnimatorRPC), RpcTarget.All, true);
-
-            
-    [PunRPC]
-    private void DisableOrEnableAnimatorRPC(bool state)
-    {
-        foreach (var player in PhotonNetwork.PlayerList)
-        {
-            GameObject playerGO = player.TagObject as GameObject;
-            playerGO.GetComponent<PlayerController>().animator.enabled = state;
-            Debug.Log(state ? "ANIMATOR ENABLED FOR " + player.NickName : "ANIMATOR DISABLED FOR " + player.NickName);
-        }
-    }
     
 
     [PunRPC]

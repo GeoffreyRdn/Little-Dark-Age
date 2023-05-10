@@ -1,4 +1,6 @@
 using System;
+using Health;
+using Photon.Pun;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -15,6 +17,12 @@ public class MusicHandler : MonoBehaviour
 
     private MusicHandler instance;
     private AudioSource audioSource;
+    private PhotonView pv;
+
+    private void Start()
+    {
+        pv = GetComponent<PhotonView>();
+    }
 
     private void OnEnable()
     {
@@ -52,6 +60,13 @@ public class MusicHandler : MonoBehaviour
             Debug.Log("Lobby or Menu started !");
             audioSource.clip = menuAndLobbyMusic;
             audioSource.Play();
+
+            if (scene.name == lobbyScene)
+            {
+                
+                Debug.Log("CALL RESET PLAYERS ...");
+                pv.RPC(nameof(ResetPlayers), RpcTarget.All);
+            }
         }
 
         if (scene.name == bossScene && audioSource.clip != bossMusic)
@@ -59,6 +74,25 @@ public class MusicHandler : MonoBehaviour
             Debug.Log("Boss started !");
             audioSource.clip = bossMusic;
             audioSource.Play();
+        }
+    }
+    
+    [PunRPC]
+    private void ResetPlayers()
+    {
+        Debug.Log("IN RESET PLAYERS");
+        foreach (var player in PhotonNetwork.PlayerList)
+        {
+            Debug.Log("RESETTING " + player.NickName);
+            
+            GameObject playerGO = player.TagObject as GameObject;
+            var health = playerGO.GetComponent<HealthController>();
+            health.ResetHealth();
+
+            var playerController = playerGO.GetComponent<PlayerController>();
+            playerController.isDead = false;
+            playerController.currentState = PlayerController.IdleAnimation;
+            InputManager.Instance.EnableControls();
         }
     }
 }
