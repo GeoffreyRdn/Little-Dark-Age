@@ -60,10 +60,7 @@ public class PauseMenu : MonoBehaviourPunCallbacks
         gameObject.SetActive(!gameObject.activeInHierarchy);
     }
 
-    public void ClosePauseMenu()
+    private void ClosePauseMenu()
         => gameObject.SetActive(false);
-    
-    public void OpenPauseMenu()
-        => gameObject.SetActive(true);
-    
+
 }

@@ -57,6 +57,9 @@ namespace Health {
 			Debug.Log($"Health after heal: {health}");
 		}
 
+		public void ResetHealth()
+			=> health = maxHealth;
+
 		private void Kill() {
 			Debug.Log("Killing target");
 

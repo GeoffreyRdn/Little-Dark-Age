@@ -25,7 +25,6 @@ namespace Lobby
                 PhotonNetwork.CurrentRoom.IsVisible = false;
                 pv.RPC(nameof(EnableLoadingScren), RpcTarget.All);
                 
-                master.GetComponent<PlayerController>().DisableAnimator();
                 Debug.Log("Loading Dungeon");
                 PhotonNetwork.LoadLevel(gameScene);
             }

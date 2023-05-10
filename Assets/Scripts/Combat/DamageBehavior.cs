@@ -15,7 +15,7 @@ public class DamageBehavior : MonoBehaviour
     private PhotonView pv;
     private bool canDealDamage;
     private RaycastHit hit;
-    private List<GameObject> damaged;
+    private List<int> damaged;
     
     public delegate void OnPlayerDamaged(GameObject player);
     public delegate void OnEnemyDamaged(GameObject player);
@@ -25,16 +25,28 @@ public class DamageBehavior : MonoBehaviour
     private void Start()
     {
         pv = GetComponent<PhotonView>();
-        damaged = new List<GameObject>();
+        damaged = new List<int>();
     }
 
     private void OnTriggerEnter(Collider collider)
     {
         if (!canDealDamage || collider.gameObject.CompareTag(TagGO)) return;
         
-        GameObject target = collider.transform.gameObject;
-        if (!damaged.Contains(target)) Damage(target);
+        if (collider.gameObject.TryGetComponent(out PhotonView photonView))
+        {
+            int targetID = photonView.ViewID;
+            if (!damaged.Contains(targetID))
+            {
+                pv.RPC(nameof(TransmitPlayerDamaged), RpcTarget.All, targetID);
+                Damage(collider.gameObject);
+            }
+        }
+        
     }
+
+    [PunRPC]
+    private void TransmitPlayerDamaged(int targetID)
+        => damaged.Add(targetID);
 
     private void Damage(GameObject target)
     {
@@ -42,7 +54,6 @@ public class DamageBehavior : MonoBehaviour
         {
             var playerController = target.GetComponentInParent<PlayerController>();
             var viewId = target.GetComponent<PhotonView>().ViewID;
-            Debug.Log("DAMAGED VIEW ID : " + viewId);
             
             // player is damaged 
             if (playerController)
@@ -61,10 +72,7 @@ public class DamageBehavior : MonoBehaviour
                 onEnemyDamaged?.Invoke(target);
                 pv.RPC(nameof(DamageEnemy), RpcTarget.MasterClient, viewId, weaponDamage);
             }
-                
         }
-        
-        damaged.Add(target);
     }
 
     public void StartDealingDamage()
@@ -86,12 +94,8 @@ public class DamageBehavior : MonoBehaviour
         if (player != null)
         {
             var playerGO = player.TagObject as GameObject;
-            Debug.Log("DAMAGING PLAYER NAMED " + playerGO.name);
             playerGO.GetComponent<HealthController>().Damage(dmg);
-        }
-        else
-        {
-            Debug.Log("NO PLAYER");
+            Debug.Log("PLAYER HEALTH : " + playerGO.GetComponent<HealthController>().Health);
         }
     }
 
