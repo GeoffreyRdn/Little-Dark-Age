@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Cinemachine;
 using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.AI;
@@ -55,10 +56,9 @@ namespace Enemies
         private static readonly int RunAnimation = Animator.StringToHash("run");
         private static readonly int AttackAnimation = Animator.StringToHash("attack");
         private static readonly int HitAnimation = Animator.StringToHash("hit");
-        private static readonly int StageAnimation = Animator.StringToHash("stage");
+        private static readonly int StageAnimation = Animator.StringToHash("stage change");
         private static readonly int ComboAttackAnimation = Animator.StringToHash("melee_combo");
         private static readonly int TurningAttackAnimation = Animator.StringToHash("melee_360");
-        
         private float cameraShakeMagnitude = 0.2f;
         private float cameraShakeDuration = 0.1f;
         private float cameraShakeInterval = 0.1f;
@@ -93,7 +93,7 @@ namespace Enemies
         private void Update()
         {
             var state = GetState();
-            if (state != AttackAnimation)
+            if (state != AttackAnimation && state != TurningAttackAnimation && state != ComboAttackAnimation)
             {
                 UpdateTarget();
 
@@ -125,7 +125,6 @@ namespace Enemies
 
             if (isRunning)
             {
-                Debug.Log("running");
                 if (Time.time >= nextCameraShakeTime)
                 {
                     // Perform camera shake here
@@ -192,7 +191,7 @@ namespace Enemies
             
             agent.SetDestination(agentPosition);
             transform.LookAt(new Vector3(targetPosition.x, agentPosition.y, targetPosition.z));
-            isAttacking = true;
+            isChangingStage = true;
         }
 
         #endregion
@@ -201,7 +200,11 @@ namespace Enemies
         
         private int GetState()
         {
+            
             if (currentState == AttackAnimation) isAttacking = false;
+            if (currentState == ComboAttackAnimation) isAttacking = false;
+            if (currentState == TurningAttackAnimation) isAttacking = false;
+            
             if (currentState == HitAnimation) isHit = false;
             if (currentState == RunAnimation) isRunning = true;
 
@@ -216,11 +219,10 @@ namespace Enemies
                     case 1:
                         return LockState(AttackAnimation, 1.5f);
                     case 2:
-                        return LockState(TurningAttackAnimation, 2.48f);
+                        return LockState(TurningAttackAnimation, 2.2f);
                     case 3:
-                        return LockState(ComboAttackAnimation, 4.2f);
+                        return LockState(ComboAttackAnimation, 4f);
                 }
-                
             }
             if (isChangingStage) return LockState(StageAnimation, 1.5f);
             if (isHit) return LockState(HitAnimation, .7f);
@@ -242,35 +244,20 @@ namespace Enemies
         {
             
             // Get all the cameras in the scene
-            Camera[] cameras = Camera.allCameras;
+            GameObject[] cameras = GameObject.FindGameObjectsWithTag("virtualCamera");
 
             // Shake each camera individually
-            foreach (Camera camera in cameras)
+            foreach (GameObject camera in cameras)
             {
-                StartCoroutine(ShakeCameraCoroutine(camera));
+                CinemachineImpulseSource impulse = camera.GetComponent<CinemachineImpulseSource>();
+                
+                StartCoroutine(ShakeCameraCoroutine(impulse));
             }
         }
 
-        private IEnumerator ShakeCameraCoroutine(Camera camera)
+        private IEnumerator ShakeCameraCoroutine(CinemachineImpulseSource impulse)
         {
-            Debug.Log(camera.name);
-            Vector3 originalPosition = camera.transform.localPosition;
-
-            float elapsedTime = 0f;
-            while (elapsedTime < cameraShakeDuration)
-            {
-                // Generate a random offset for the camera position
-                Vector3 randomOffset = Random.insideUnitSphere * cameraShakeMagnitude;
-
-                // Apply the random offset to the camera's local position
-                camera.transform.localPosition = originalPosition + randomOffset;
-
-                elapsedTime += Time.deltaTime;
                 yield return null;
-            }
-
-            // Reset the camera position to the original position after the shake is finished
-            camera.transform.localPosition = originalPosition;
         }
         
         #endregion

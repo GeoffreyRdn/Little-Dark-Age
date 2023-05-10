@@ -38,6 +38,7 @@ public class DamageBehavior : MonoBehaviour
 
     private void Damage(GameObject target)
     {
+        Debug.Log("hit on player");
         if (target.TryGetComponent(out HealthController targetHealth))
         {
             var playerController = target.GetComponentInParent<PlayerController>();
@@ -51,6 +52,7 @@ public class DamageBehavior : MonoBehaviour
                 if (!(playerController.currentState == PlayerController.ShieldEnterAnimation ||
                     playerController.currentState == PlayerController.ShieldStayAnimation))
                 {
+                    
                     onPlayerDamaged?.Invoke(target);
                     pv.RPC(nameof(DamagePlayer), RpcTarget.All, viewId, weaponDamage);
                 }
@@ -69,6 +71,7 @@ public class DamageBehavior : MonoBehaviour
 
     public void StartDealingDamage()
     {
+        Debug.Log("dealing damage");
         damaged.Clear();
         canDealDamage = true;
     }
