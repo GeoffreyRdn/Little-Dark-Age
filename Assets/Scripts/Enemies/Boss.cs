@@ -247,7 +247,7 @@ namespace Enemies
                     case 3:
                         return LockState(ComboAttackAnimation, 4f);
                 }
-                source.PlayOneShot(sw);
+                source.PlayOneShot(swordSwoosh);
                 int randomSound = Random.Range(1, 3);
                 switch (randomSound)
                 {
