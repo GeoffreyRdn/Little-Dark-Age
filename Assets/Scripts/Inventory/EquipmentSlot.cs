@@ -18,7 +18,17 @@ namespace Inventory {
 				return;
 			}
 
+			if (stack.Item.ItemType is ItemType.Weapon
+			    && !HasItem) {
+				InventoryController.Instance.player.ChangeEquippedWeapon((ItemWeapon) stack.Item);
+			}
+
 			base.AddItem(ref stack);
+		}
+
+		public override void RemoveItem() {
+			InventoryController.Instance.player.ChangeEquippedWeapon(null);
+			base.RemoveItem();
 		}
 	}
 }

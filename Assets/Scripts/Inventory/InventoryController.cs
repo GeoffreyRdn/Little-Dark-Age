@@ -10,6 +10,8 @@ namespace Inventory {
 	public class InventoryController: StorageController {
 		public static InventoryController Instance;
 
+		public PlayerController player;
+
 		public static  ItemStack  HeldItem;
 		public static  bool       IsHoldingItem = false;
 		private static GameObject itemGo;
@@ -25,7 +27,7 @@ namespace Inventory {
 			base.Start();
 			Instance = this;
 		}
-
+		
 		[CanBeNull]
 		public Item GetEquippedWeapon() {
 			return WeaponSlot.HasItem ? WeaponSlot.Item : null;
