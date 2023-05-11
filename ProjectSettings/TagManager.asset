@@ -9,6 +9,8 @@ TagManager:
   - Enemy
   - CanBeDeleted
   - Environment
+  - virtualCamera
+  - ground
   layers:
   - Default
   - TransparentFX
@@ -19,7 +21,7 @@ TagManager:
   - Environment
   - Wall
   - Enemy
-  - 
+  - Ground
   - 
   - 
   - 

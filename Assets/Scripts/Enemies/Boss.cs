@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Cinemachine;
+using Health;
 using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.AI;
@@ -32,7 +33,7 @@ namespace Enemies
         [BoxGroup("Settings")] [SerializeField] private float abandonRange;
         [BoxGroup("Settings")] [SerializeField] private float stopRange;
         [BoxGroup("Settings")] [SerializeField] private float sightAngle;
-        [BoxGroup("Settings")] [SerializeField] private float health = 200f;
+        
         
         [BoxGroup("Settings")] [SerializeField] private float patrolSpeed;
         [BoxGroup("Settings")] [SerializeField] private float chaseSpeed;
@@ -48,6 +49,9 @@ namespace Enemies
         private bool isRunning;
         private bool isChangingStage;
 
+        
+        
+        
         #endregion
 
         #region Animations
@@ -67,7 +71,11 @@ namespace Enemies
         private float lockedUntil;
         private int currentState;
         private float initialHealth;
-
+        private float health;
+        private HealthController healthController;
+        private bool stage1Enabled = false;
+        private bool stage2Enabled = false;
+        
         private Animator animator;
 
         #endregion
@@ -84,7 +92,10 @@ namespace Enemies
 
         private void Start()
         {
-            initialHealth = health;
+            healthController = GetComponent<HealthController>();
+            Debug.Log("health = " + healthController.Health);
+            initialHealth = healthController.MaxHealth;
+            
             animator = GetComponentInChildren<Animator>();
             agent = GetComponent<NavMeshAgent>();
             players = GameObject.FindGameObjectsWithTag(playerTag);
@@ -92,6 +103,8 @@ namespace Enemies
         
         private void Update()
         {
+            health = healthController.Health;
+            
             var state = GetState();
             if (state != AttackAnimation && state != TurningAttackAnimation && state != ComboAttackAnimation)
             {
@@ -127,10 +140,6 @@ namespace Enemies
             {
                 if (Time.time >= nextCameraShakeTime)
                 {
-                    // Perform camera shake here
-                    //ShakeCamera();
-
-                    // Set the time for the next camera shake
                     nextCameraShakeTime = Time.time + cameraShakeInterval;
                 }
             }
@@ -139,19 +148,31 @@ namespace Enemies
             {
                 health -= 25;
             }
-            
-            //stage 1
-            if (health <= initialHealth*0.50f)
+
+            if (!stage1Enabled)
             {
-                chaseSpeed *= 1.25f;
-                StageChange1();
+                //stage 1
+                if (health <= initialHealth * 0.50f)
+                {
+
+                    chaseSpeed *= 1.25f;
+                    Debug.Log("changing stage");
+                    StageChange1();
+                    stage1Enabled = true;
+                }
             }
-            
+
             //stage 2
-            if (health <= initialHealth*0.25f)
+            if (!stage2Enabled)
             {
-                chaseSpeed *= 1.25f;
-                
+                //stage 1
+                if (health <= initialHealth * 0.50f)
+                {
+                    chaseSpeed *= 1.25f;
+                    Debug.Log("changing stage 2222222");
+                    StageChange1();
+                    stage2Enabled = true;
+                }
             }
             
             if (health <= 0)
@@ -166,24 +187,11 @@ namespace Enemies
 
         private void StageChange1()
         {
-            var emissionModule = stageChangeFX.emission;
-            var rateOverTime = emissionModule.rateOverTime;
-            rateOverTime.constant = 50;
-            emissionModule.rateOverTime = rateOverTime;
-            StartCoroutine(waiter1());
             StageChangeAnimation();
+            Debug.Log("StageChange1");
         }
 
-        private IEnumerator waiter1()
-        {
-            var emissionModule = stageChangeFX.emission;
-            var rateOverTime = emissionModule.rateOverTime;
-            yield return new WaitForSeconds(2f);
-            rateOverTime.constant = 0f;
-            emissionModule.rateOverTime = rateOverTime;
-        }
-        
-        
+
         private void StageChangeAnimation()
         {
             Vector3 agentPosition = transform.position;
@@ -204,7 +212,7 @@ namespace Enemies
             if (currentState == AttackAnimation) isAttacking = false;
             if (currentState == ComboAttackAnimation) isAttacking = false;
             if (currentState == TurningAttackAnimation) isAttacking = false;
-            
+            if (currentState == StageAnimation) isChangingStage= false;
             if (currentState == HitAnimation) isHit = false;
             if (currentState == RunAnimation) isRunning = true;
 
@@ -224,7 +232,13 @@ namespace Enemies
                         return LockState(ComboAttackAnimation, 4f);
                 }
             }
-            if (isChangingStage) return LockState(StageAnimation, 1.5f);
+
+            if (isChangingStage)
+            {
+                Debug.Log("stage animation launched");
+                isChangingStage = false;
+                return LockState(StageAnimation, 2.8f);
+            }
             if (isHit) return LockState(HitAnimation, .7f);
             
             return agent.velocity.magnitude < .15f 
