@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 2944950728768544252}
   m_Layer: 0
   m_Name: Sword
-  m_TagString: Untagged
+  m_TagString: Weapon
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -121,7 +121,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   weaponDamage: 8
-  TagGO: 
+  TagGO: Weapon
 --- !u!114 &2944950728768544252
 MonoBehaviour:
   m_ObjectHideFlags: 0

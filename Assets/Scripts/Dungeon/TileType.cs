@@ -5,6 +5,8 @@
         Void,
         Room,
         Hallway,
-        Wall
+        Wall,
+        WallTorch,
+        WallWindow
     }
 }

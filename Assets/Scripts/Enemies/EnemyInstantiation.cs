@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Photon.Pun;
 using UnityEngine;
@@ -12,6 +11,9 @@ namespace Enemies
 
         public static List<GameObject> Enemies;
         public static int EnemiesRemaining = 0;
+        
+        public delegate void OnEnemiesSpawned(int nbEnemies);
+        public static OnEnemiesSpawned onEnemiesSpawned;
 
         private void Awake()
         {
@@ -20,6 +22,9 @@ namespace Enemies
 
         public void SpawnEnemies(List<Rect> rooms)
         {
+            Enemies.Clear();
+            EnemiesRemaining = 0;
+            
             if (!PhotonNetwork.IsMasterClient) return;
             
             for (var index = 0; index < rooms.Count - 1; index++)
@@ -37,7 +42,7 @@ namespace Enemies
                 }
             }
             
-            Debug.Log("ENEMIES : " + Enemies.Count);
+            onEnemiesSpawned?.Invoke(EnemiesRemaining);
         }
     }
 }

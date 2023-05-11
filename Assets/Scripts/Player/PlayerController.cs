@@ -1,14 +1,17 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Enemies;
 using Health;
 using Inventory;
+using Items;
 using NaughtyAttributes;
 using Photon.Pun;
+using TMPro;
+using UI;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-//[RequireComponent(typeof(CharacterController))]
 public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
 {
     [BoxGroup("Player")] [SerializeField] private float walkSpeed = 8.0f;
@@ -27,16 +30,33 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     
     [BoxGroup("Sounds"), SerializeField] private AudioClip deathSound;
     [BoxGroup("Sounds"), SerializeField] private AudioClip hurtSound;
-    
+
+    [BoxGroup("Sounds"), SerializeField] private AudioClip gameOverSound;
+    [BoxGroup("Sounds"), SerializeField] private AudioClip victorySound;
+
     [SerializeField] private string bossScene;
     
     [SerializeField] private InventoryController inventory;
     [SerializeField] private ShopController shop;
     [SerializeField] private PauseMenu pauseMenu;
+    [SerializeField] private HealthBar healthBar;
     [SerializeField] public GameObject loadingScreen;
     
     [BoxGroup("Camera")] [SerializeField] Camera cam;
     // [BoxGroup("Camera")] [SerializeField] GameObject displayCamera;
+    
+    [BoxGroup("Weapons")] [SerializeField] private GameObject activeWeapon;
+    [BoxGroup("Weapons")] [SerializeField] private GameObject axe;
+    [BoxGroup("Weapons")] [SerializeField] private GameObject dagger;
+    [BoxGroup("Weapons")] [SerializeField] private GameObject hammer;
+    [BoxGroup("Weapons")] [SerializeField] private GameObject spear;
+    [BoxGroup("Weapons")] [SerializeField] private GameObject sword;
+    [BoxGroup("Weapons")] [SerializeField] private GameObject shield;
+    
+    [BoxGroup("UI"), SerializeField] private GameObject winDungeonText;
+    [BoxGroup("UI"), SerializeField] private GameObject gameOverText;
+    [BoxGroup("UI"), SerializeField] private GameObject winBossText;
+    [BoxGroup("UI"), SerializeField] private TextMeshProUGUI nbEnemiesText;
 
     private float mouseYVelocity;
     
@@ -55,7 +75,7 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     
     #region Animations
 
-    private static readonly int IdleAnimation = Animator.StringToHash("idle");
+    public static readonly int IdleAnimation = Animator.StringToHash("idle");
     
     private static readonly int FrontWalkAnimation = Animator.StringToHash("walk");
     private static readonly int FrontRunAnimation = Animator.StringToHash("front_run");
@@ -119,6 +139,8 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
         HealthController.onPlayerDeath += HandlePlayerDeath;
         HealthController.onDungeonComplete += HandleDungeonComplete;
         DamageBehavior.onPlayerDamaged += HandlePlayerDamaged;
+        EnemyInstantiation.onEnemiesSpawned += UpdateEnemiesRemainingText;
+        HealthController.onEnemyDeath += UpdateEnemiesRemainingText;
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
@@ -127,6 +149,8 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
         HealthController.onPlayerDeath -= HandlePlayerDeath;
         HealthController.onDungeonComplete -= HandleDungeonComplete;
         DamageBehavior.onPlayerDamaged -= HandlePlayerDamaged;
+        EnemyInstantiation.onEnemiesSpawned -= UpdateEnemiesRemainingText;
+        HealthController.onEnemyDeath -= UpdateEnemiesRemainingText;
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
@@ -144,6 +168,10 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     {
         pv = GetComponent<PhotonView>();
         loadingScreen.SetActive(false);
+        
+        var maxHealth = GetComponent<HealthController>().MaxHealth;
+        var health = GetComponent<HealthController>().Health;
+        UpdateHealthBar(health, maxHealth);
         
         if (PhotonNetwork.IsConnectedAndReady && !pv.IsMine)
         {
@@ -231,24 +259,6 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     #endregion
     
     #region Animations
-
-    public void DisableAnimator()
-        => pv.RPC(nameof(DisableOrEnableAnimatorRPC), RpcTarget.All, false);
-
-    public void EnableAnimator()
-        => pv.RPC(nameof(DisableOrEnableAnimatorRPC), RpcTarget.All, true);
-
-            
-    [PunRPC]
-    private void DisableOrEnableAnimatorRPC(bool state)
-    {
-        foreach (var player in PhotonNetwork.PlayerList)
-        {
-            GameObject playerGO = player.TagObject as GameObject;
-            playerGO.GetComponent<PlayerController>().animator.enabled = state;
-            Debug.Log(state ? "ANIMATOR ENABLED FOR " + player.NickName : "ANIMATOR DISABLED FOR " + player.NickName);
-        }
-    }
     
 
     [PunRPC]
@@ -485,6 +495,50 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     #endregion
     
     #region Methods
+    
+    public void SetShieldActive(bool active) {
+        shield.SetActive(active);
+    }
+
+    public void ChangeEquippedWeapon(ItemWeapon weapon) {
+        if (weapon == null) {
+            activeWeapon.SetActive(false);
+            activeWeapon = null;
+            return;
+        }
+
+        if (activeWeapon != null) {
+            activeWeapon.SetActive(false);
+        }
+
+        switch (weapon.Id) {
+            // Sword
+            case 5:
+                activeWeapon = sword;
+                break;
+            // Axe
+            case 6:
+                activeWeapon = axe;
+                break;
+            // Dagger
+            case 7:
+                activeWeapon = dagger;
+                break;
+            // Hammer
+            case 8:
+                activeWeapon = hammer;
+                break;
+            // Spear
+            case 9:
+                activeWeapon = spear;
+                break;
+        }
+        activeWeapon.SetActive(true);
+    }
+    
+    public void UpdateHealthBar(float health, float maxHealth)
+        => healthBar.UpdateHealthBar(health, maxHealth);
+
 
     private float Speed()
     {
@@ -552,8 +606,7 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
 
             if (allDead)
             {
-                // TODO: gameover screen + return to lobby + reset action map
-                Debug.Log("ALL PLAYERS ARE DEAD");
+                pv.RPC(nameof(EnableOrDisableLoseMenu), RpcTarget.All, true);
                 StartCoroutine(HandleEndGame());
             }
             else
@@ -561,14 +614,21 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
                 Debug.Log("SOME PLAYERS ARE STILL ALIVE");
             }
         }
-
-        
     }
     
     private IEnumerator HandleEndGame()
     {
         yield return new WaitForSeconds(5);
+        pv.RPC(nameof(EnableOrDisableLoseMenu), RpcTarget.All, false);
         pv.RPC(nameof(ReturnToLobby), RpcTarget.MasterClient);
+    }
+
+    [PunRPC]
+    private void EnableOrDisableLoseMenu(bool state)
+    {
+        var player = ((GameObject) PhotonNetwork.LocalPlayer.TagObject).GetComponent<PlayerController>();
+        player.audioSource.PlayOneShot(gameOverSound);
+        player.gameOverText.SetActive(state);
     }
 
     [PunRPC]
@@ -584,6 +644,7 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     private IEnumerator DelayLoadBossScene()
     {
         yield return new WaitForSeconds(5);
+        pv.RPC(nameof(DisableWinMenu), RpcTarget.All);
         LoadBossScene();
     }
 
@@ -595,11 +656,30 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
         }
     }
 
+    public void UpdateEnemiesRemainingText(int nbEnemies)
+        => pv.RPC(nameof(UpdateEnemiesRemainingTextRPC), RpcTarget.All, nbEnemies);
+
+    [PunRPC]
+    private void UpdateEnemiesRemainingTextRPC(int nbEnemies)
+    {
+        var player = ((GameObject) PhotonNetwork.LocalPlayer.TagObject).GetComponent<PlayerController>();
+        player.nbEnemiesText.text = nbEnemies +  (nbEnemies == 1 ? " Enemy Remaining" : " Enemies Remaining");
+        player.nbEnemiesText.gameObject.SetActive(true);
+    }
+
+
     [PunRPC]
     private void EnableWinMenu()
     {
-        // TODO : enable countdown prefab for each player
+        var player = ((GameObject) PhotonNetwork.LocalPlayer.TagObject).GetComponent<PlayerController>();
+        player.audioSource.PlayOneShot(victorySound);
+        player.winDungeonText.SetActive(true);
+        player.nbEnemiesText.gameObject.SetActive(false);
     }
+
+    [PunRPC]
+    private void DisableWinMenu()
+        => winDungeonText.SetActive(false); 
     
     private void CloseInventory()
     {
@@ -664,9 +744,18 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
         Cursor.visible = false;
         isInPauseMenu = false;
     }
+
+    [PunRPC]
+    private void RemoveNbEnemies(bool state)
+        => (PhotonNetwork.LocalPlayer.TagObject as GameObject)?.
+            GetComponent<PlayerController>().nbEnemiesText.gameObject.SetActive(state);
     
+
     private void OnSceneLoaded(Scene scene, LoadSceneMode loadSceneMode)
-        => ResetCameras();
+    {
+        pv.RPC(nameof(RemoveNbEnemies), RpcTarget.All, scene.name == "Dungeon");
+        ResetCameras();
+    }
 
     private void ResetCameras()
     {

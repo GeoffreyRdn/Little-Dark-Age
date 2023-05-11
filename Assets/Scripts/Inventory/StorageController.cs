@@ -27,6 +27,11 @@ namespace Inventory {
 			}
 		}
 
+		public void ResetStorage() {
+			slots.ForEach(slot => slot.RemoveItem());
+			slots.Clear();
+		}
+
 		public bool AddItem(ref ItemStack item) {
 			for (int i = 0 ; i < slots.Count && item.Count > 0 ; i++) {
 				slots[i].AddItem(ref item);

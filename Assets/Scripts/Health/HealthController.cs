@@ -1,7 +1,10 @@
 using System;
+using System.Collections;
 using Enemies;
 using NaughtyAttributes;
 using Photon.Pun;
+using TMPro;
+using UI;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -11,14 +14,18 @@ namespace Health {
 		[BoxGroup("Health"), SerializeField] private float maxHealth      = 100f;
 		[BoxGroup("Health"), SerializeField] private float armor          = 0f;
 		[BoxGroup("Health"), SerializeField] private float healMultiplier = 1f;
+		
+		[BoxGroup("UI"), SerializeField] private TextMeshProUGUI enemiesRemainingText;
 
-		[SerializeField] [Tag] private string playerTag;
+		[SerializeField] [NaughtyAttributes.Tag] private string playerTag;
 
 		public delegate void OnPlayerDeath(GameObject player);
+		public delegate void OnEnemyDeath(int enemiesRemaining);
 		public delegate void OnDungeonComplete();
 		
 
 		public static OnPlayerDeath onPlayerDeath;
+		public static OnEnemyDeath onEnemyDeath;
 		public static OnDungeonComplete onDungeonComplete;
 
 		public float Health         => health;
@@ -48,6 +55,11 @@ namespace Health {
 				Kill();
 			}
 
+			else
+			{
+				photonView.RPC(nameof(TransmitHealth), RpcTarget.All, health);
+			}
+
 			Debug.Log($"Health after damage: {health}");
 		}
 
@@ -57,26 +69,39 @@ namespace Health {
 			Debug.Log($"Health after heal: {health}");
 		}
 
+		public void ResetHealth()
+			=> health = maxHealth;
+
 		private void Kill() {
-			Debug.Log("Killing target");
 
 			if (gameObject.CompareTag(playerTag))
 			{
+				Debug.Log("KILLING PLAYER");
 				onPlayerDeath?.Invoke(gameObject);
+				photonView.RPC(nameof(KillPlayer), RpcTarget.All);
 			}
 			
 			else
 			{
+				Debug.Log("CALLING KILL ENEMY");
 				photonView.RPC(nameof(KillEnemy), RpcTarget.MasterClient);
 			}
 		}
 
 		[PunRPC]
-		private void KillEnemy()
+		private void KillPlayer()
+			=> gameObject.GetComponent<PlayerController>().isDead = true;
+
+		[PunRPC]
+		private IEnumerator KillEnemy()
 		{
+			yield return new WaitForSeconds(.2f);
+
 			EnemyInstantiation.Enemies.Remove(gameObject);
-			PhotonNetwork.Destroy(gameObject);
 			EnemyInstantiation.EnemiesRemaining--;
+			PhotonNetwork.Destroy(gameObject);
+			onEnemyDeath?.Invoke(EnemyInstantiation.EnemiesRemaining);
+
 			Debug.Log("ENEMY KILLED , REMAINING : " + EnemyInstantiation.EnemiesRemaining);
 
 			if (EnemyInstantiation.EnemiesRemaining == 0)
@@ -84,6 +109,13 @@ namespace Health {
 				Debug.Log("DUNGEON COMPLETE !");
 				onDungeonComplete?.Invoke();
 			}
+		}
+		
+		[PunRPC]
+		private void TransmitHealth(float health)
+		{
+			this.health = health;
+			gameObject.GetComponentInChildren<HealthBar>()?.UpdateHealthBar(health, maxHealth);
 		}
 	}
 }

@@ -25,7 +25,6 @@ namespace Lobby
                 PhotonNetwork.CurrentRoom.IsVisible = false;
                 pv.RPC(nameof(EnableLoadingScren), RpcTarget.All);
                 
-                master.GetComponent<PlayerController>().DisableAnimator();
                 Debug.Log("Loading Dungeon");
                 PhotonNetwork.LoadLevel(gameScene);
             }
@@ -37,7 +36,9 @@ namespace Lobby
             Debug.Log("ENABLING LOADING SCREEN");
             if (PhotonNetwork.LocalPlayer.TagObject is GameObject player)
             {
-                player.GetComponent<PlayerController>().loadingScreen.SetActive(true);
+                var playerController = player.GetComponent<PlayerController>();
+                playerController.loadingScreen.SetActive(true);
+                playerController.audioSource.mute = true;
                 Debug.Log("LOADING SCREEN ENABLE");
 
             }

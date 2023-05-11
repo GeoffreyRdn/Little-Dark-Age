@@ -327,6 +327,15 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""ResetInventory"",
+                    ""type"": ""Button"",
+                    ""id"": ""dfda4dd0-3efc-495f-b396-e5b0e3789bf6"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -338,6 +347,28 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""CloseInventory"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""7d357cc2-c674-4a5c-b5d2-f9afb58c4c9b"",
+                    ""path"": ""<Keyboard>/escape"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""CloseInventory"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""76072835-2600-4af9-b14e-8592d7df7775"",
+                    ""path"": ""<Keyboard>/r"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ResetInventory"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -430,6 +461,7 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
         // Inventory
         m_Inventory = asset.FindActionMap("Inventory", throwIfNotFound: true);
         m_Inventory_CloseInventory = m_Inventory.FindAction("CloseInventory", throwIfNotFound: true);
+        m_Inventory_ResetInventory = m_Inventory.FindAction("ResetInventory", throwIfNotFound: true);
         // PauseMenu
         m_PauseMenu = asset.FindActionMap("PauseMenu", throwIfNotFound: true);
         m_PauseMenu_Resume = m_PauseMenu.FindAction("Resume", throwIfNotFound: true);
@@ -617,11 +649,13 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
     private readonly InputActionMap m_Inventory;
     private IInventoryActions m_InventoryActionsCallbackInterface;
     private readonly InputAction m_Inventory_CloseInventory;
+    private readonly InputAction m_Inventory_ResetInventory;
     public struct InventoryActions
     {
         private @PlayerControls m_Wrapper;
         public InventoryActions(@PlayerControls wrapper) { m_Wrapper = wrapper; }
         public InputAction @CloseInventory => m_Wrapper.m_Inventory_CloseInventory;
+        public InputAction @ResetInventory => m_Wrapper.m_Inventory_ResetInventory;
         public InputActionMap Get() { return m_Wrapper.m_Inventory; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -634,6 +668,9 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                 @CloseInventory.started -= m_Wrapper.m_InventoryActionsCallbackInterface.OnCloseInventory;
                 @CloseInventory.performed -= m_Wrapper.m_InventoryActionsCallbackInterface.OnCloseInventory;
                 @CloseInventory.canceled -= m_Wrapper.m_InventoryActionsCallbackInterface.OnCloseInventory;
+                @ResetInventory.started -= m_Wrapper.m_InventoryActionsCallbackInterface.OnResetInventory;
+                @ResetInventory.performed -= m_Wrapper.m_InventoryActionsCallbackInterface.OnResetInventory;
+                @ResetInventory.canceled -= m_Wrapper.m_InventoryActionsCallbackInterface.OnResetInventory;
             }
             m_Wrapper.m_InventoryActionsCallbackInterface = instance;
             if (instance != null)
@@ -641,6 +678,9 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                 @CloseInventory.started += instance.OnCloseInventory;
                 @CloseInventory.performed += instance.OnCloseInventory;
                 @CloseInventory.canceled += instance.OnCloseInventory;
+                @ResetInventory.started += instance.OnResetInventory;
+                @ResetInventory.performed += instance.OnResetInventory;
+                @ResetInventory.canceled += instance.OnResetInventory;
             }
         }
     }
@@ -729,6 +769,7 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
     public interface IInventoryActions
     {
         void OnCloseInventory(InputAction.CallbackContext context);
+        void OnResetInventory(InputAction.CallbackContext context);
     }
     public interface IPauseMenuActions
     {

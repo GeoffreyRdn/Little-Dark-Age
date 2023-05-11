@@ -59,6 +59,19 @@ namespace Enemies
 
         #endregion
 
+        #region Sounds
+
+
+        [SerializeField, BoxGroup("Audio")] private AudioClip walkSound;
+        [SerializeField, BoxGroup("Audio")] private AudioClip runSound;
+        [SerializeField, BoxGroup("Audio")] private AudioClip attackSound;
+        [SerializeField, BoxGroup("Audio")] private AudioClip deathSound;
+        [SerializeField, BoxGroup("Audio")] private AudioClip hurtSound;
+        
+        private AudioSource audioSource;
+
+        #endregion
+        
         private NavMeshAgent agent;
         private List<GameObject> players;
         private PhotonView photonView;
@@ -76,6 +89,7 @@ namespace Enemies
             agent = GetComponent<NavMeshAgent>();
             players = GameObject.FindGameObjectsWithTag(playerTag).ToList();
             photonView = GetComponent<PhotonView>();
+            audioSource = GetComponent<AudioSource>();
         }
         
         private void Update()
@@ -100,6 +114,19 @@ namespace Enemies
 
             animator.CrossFade(state, 0, 0);
             currentState = state;
+            
+            AudioClip sound = walkSound;
+            bool repeat = true;
+
+            if (state == AttackAnimation) (sound, repeat) = (attackSound, false);
+            else if (state == HitAnimation) (sound, repeat) = (hurtSound, false);
+            else if (state == RunAnimation) sound = runSound;
+
+            audioSource.clip = sound;
+            
+            if (repeat) audioSource.Play();
+            else audioSource.PlayOneShot(sound);
+            
             photonView.RPC(nameof(SendAnimations), RpcTarget.Others, currentState);
         }
 
@@ -126,7 +153,23 @@ namespace Enemies
         [PunRPC]
         private void SendAnimations(int state)
         {
-            if (gameObject != null) animator.CrossFade(state, 0, 0);
+            if (gameObject == null) return;
+            
+            animator.CrossFade(state, 0, 0);
+            currentState = state;
+            
+            AudioClip sound = walkSound;
+            bool repeat = true;
+
+            if (state == AttackAnimation) (sound, repeat) = (attackSound, false);
+            else if (state == HitAnimation) (sound, repeat) = (hurtSound, false);
+            else if (state == RunAnimation) sound = runSound;
+
+            var audioS = GetComponent<AudioSource>();
+            audioS.clip = sound;
+            
+            if (repeat) audioS.Play();
+            else audioS.PlayOneShot(sound);
         }
 
         private int GetState()
@@ -199,7 +242,7 @@ namespace Enemies
             
             foreach (var player in players)
             {
-                if (player == null)
+                if (player == null || player.GetComponent<PlayerController>().isDead)
                 {
                     players.Remove(player);
                     continue;
@@ -260,6 +303,12 @@ namespace Enemies
 
         private void Attack()
         {
+            if (target.GetComponent<PlayerController>().isDead)
+            {
+                target = null;
+                return;
+            }
+            
             Vector3 agentPosition = transform.position;
             Vector3 targetPosition = target.position;
             
@@ -279,12 +328,21 @@ namespace Enemies
 
         private void HandlePlayerDeath(GameObject playerDead)
         {
-            if (target != null && target.gameObject == playerDead)
+            int viewID = playerDead.GetComponent<PhotonView>().ViewID;
+            photonView.RPC(nameof(TransmitPlayerDeath), RpcTarget.All, viewID);
+        }
+
+        [PunRPC]
+        private void TransmitPlayerDeath(int viewID)
+        {
+            if (target != null && target.gameObject.GetComponent<PhotonView>().ViewID == viewID)
             {
-                List<GameObject> remainingPlayers = players.Where(player => player != null && 
-                                                                   !player.GetComponent<PlayerController>().isDead && 
-                                                                    player != playerDead).ToList();
                 target = null;
+                List<GameObject> remainingPlayers = players
+                    .Where(player => player != null && 
+                                     !player.GetComponent<PlayerController>().isDead && 
+                                     player.GetComponent<PhotonView>().ViewID != viewID)
+                    .ToList();
                 players = remainingPlayers;
             }
         }

@@ -69,7 +69,7 @@ MonoBehaviour:
   m_text: RETURN TO LOBBY
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 56d52a6c3f6abe8419fe5c6b0a7f805e, type: 2}
-  m_sharedMaterial: {fileID: -929459792819001837, guid: 56d52a6c3f6abe8419fe5c6b0a7f805e, type: 2}
+  m_sharedMaterial: {fileID: -1518942174625234107, guid: 56d52a6c3f6abe8419fe5c6b0a7f805e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -963,7 +963,7 @@ MonoBehaviour:
   m_text: EXIT GAME
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 56d52a6c3f6abe8419fe5c6b0a7f805e, type: 2}
-  m_sharedMaterial: {fileID: -929459792819001837, guid: 56d52a6c3f6abe8419fe5c6b0a7f805e, type: 2}
+  m_sharedMaterial: {fileID: -1518942174625234107, guid: 56d52a6c3f6abe8419fe5c6b0a7f805e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1098,7 +1098,7 @@ MonoBehaviour:
   m_text: RESUME
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 56d52a6c3f6abe8419fe5c6b0a7f805e, type: 2}
-  m_sharedMaterial: {fileID: -929459792819001837, guid: 56d52a6c3f6abe8419fe5c6b0a7f805e, type: 2}
+  m_sharedMaterial: {fileID: -1518942174625234107, guid: 56d52a6c3f6abe8419fe5c6b0a7f805e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1233,7 +1233,7 @@ MonoBehaviour:
   m_text: MAIN MENU
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 56d52a6c3f6abe8419fe5c6b0a7f805e, type: 2}
-  m_sharedMaterial: {fileID: -929459792819001837, guid: 56d52a6c3f6abe8419fe5c6b0a7f805e, type: 2}
+  m_sharedMaterial: {fileID: -1518942174625234107, guid: 56d52a6c3f6abe8419fe5c6b0a7f805e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1701,7 +1701,7 @@ MonoBehaviour:
   m_text: Pause menu
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 56d52a6c3f6abe8419fe5c6b0a7f805e, type: 2}
-  m_sharedMaterial: {fileID: -929459792819001837, guid: 56d52a6c3f6abe8419fe5c6b0a7f805e, type: 2}
+  m_sharedMaterial: {fileID: -1518942174625234107, guid: 56d52a6c3f6abe8419fe5c6b0a7f805e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1905,6 +1905,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   lobbyScene: Lobby
   mainMenuScene: Menu
+  lobbyGO: {fileID: 1050287415547762587}
 --- !u!1 &7715970575662973238
 GameObject:
   m_ObjectHideFlags: 0

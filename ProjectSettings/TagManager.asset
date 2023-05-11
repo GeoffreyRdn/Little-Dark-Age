@@ -10,6 +10,7 @@ TagManager:
   - CanBeDeleted
   - Environment
   - virtualCamera
+  - Weapon
   - ground
   layers:
   - Default
