@@ -165,12 +165,13 @@ namespace Enemies
             else if (state == HitAnimation) (sound, repeat) = (hurtSound, false);
             else if (state == RunAnimation) sound = runSound;
 
-            audioSource.clip = sound;
+            var audioS = GetComponent<AudioSource>();
+            audioS.clip = sound;
             
             Debug.Log("CLIP : " + sound);
             
-            if (repeat) audioSource.Play();
-            else audioSource.PlayOneShot(sound);
+            if (repeat) audioS.Play();
+            else audioS.PlayOneShot(sound);
         }
 
         private int GetState()

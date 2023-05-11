@@ -22,6 +22,9 @@ namespace Enemies
 
         public void SpawnEnemies(List<Rect> rooms)
         {
+            Enemies.Clear();
+            EnemiesRemaining = 0;
+            
             if (!PhotonNetwork.IsMasterClient) return;
             
             for (var index = 0; index < rooms.Count - 1; index++)
