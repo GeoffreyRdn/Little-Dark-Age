@@ -31,6 +31,9 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     [BoxGroup("Sounds"), SerializeField] private AudioClip deathSound;
     [BoxGroup("Sounds"), SerializeField] private AudioClip hurtSound;
     
+    [BoxGroup("Sounds"), SerializeField] private AudioClip gameOverSound;
+    [BoxGroup("Sounds"), SerializeField] private AudioClip victorySound;
+    
     [SerializeField] private string bossScene;
     
     [SerializeField] private InventoryController inventory;
@@ -622,7 +625,10 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
 
     [PunRPC]
     private void EnableOrDisableLoseMenu(bool state)
-        => gameOverText.SetActive(state);
+    {
+        audioSource.PlayOneShot(gameOverSound);
+        gameOverText.SetActive(state);
+    }
 
     [PunRPC]
     private void ReturnToLobby()
@@ -655,15 +661,17 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     [PunRPC]
     private void UpdateEnemiesRemainingTextRPC(int nbEnemies)
     {
-        nbEnemiesText.text = nbEnemies + " Enemies Remaining";
+        nbEnemiesText.text = nbEnemies +  nbEnemies == 1 ? " Enemy Remaining" : " Enemies Remaining";
         nbEnemiesText.gameObject.SetActive(true);
     }
-
-
+    
     [PunRPC]
     private void EnableWinMenu()
-        => winDungeonText.SetActive(true);
-    
+    {
+        audioSource.PlayOneShot(victorySound);
+        winDungeonText.SetActive(true);
+    }
+
     [PunRPC]
     private void DisableWinMenu()
         => winDungeonText.SetActive(false); 
@@ -733,7 +741,10 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     }
     
     private void OnSceneLoaded(Scene scene, LoadSceneMode loadSceneMode)
-        => ResetCameras();
+    {
+        ResetCameras();
+        nbEnemiesText.gameObject.SetActive(scene.name == "Dungeon");
+    }
 
     private void ResetCameras()
     {
