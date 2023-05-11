@@ -30,7 +30,10 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     
     [BoxGroup("Sounds"), SerializeField] private AudioClip deathSound;
     [BoxGroup("Sounds"), SerializeField] private AudioClip hurtSound;
-    
+
+    [BoxGroup("Sounds"), SerializeField] private AudioClip gameOverSound;
+    [BoxGroup("Sounds"), SerializeField] private AudioClip victorySound;
+
     [SerializeField] private string bossScene;
     
     [SerializeField] private InventoryController inventory;
@@ -622,7 +625,11 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
 
     [PunRPC]
     private void EnableOrDisableLoseMenu(bool state)
-        => gameOverText.SetActive(state);
+    {
+        var player = ((GameObject) PhotonNetwork.LocalPlayer.TagObject).GetComponent<PlayerController>();
+        player.audioSource.PlayOneShot(gameOverSound);
+        player.gameOverText.SetActive(state);
+    }
 
     [PunRPC]
     private void ReturnToLobby()
@@ -655,15 +662,21 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     [PunRPC]
     private void UpdateEnemiesRemainingTextRPC(int nbEnemies)
     {
-        nbEnemiesText.text = nbEnemies + " Enemies Remaining";
-        nbEnemiesText.gameObject.SetActive(true);
+        var player = ((GameObject) PhotonNetwork.LocalPlayer.TagObject).GetComponent<PlayerController>();
+        player.nbEnemiesText.text = nbEnemies +  (nbEnemies == 1 ? " Enemy Remaining" : " Enemies Remaining");
+        player.nbEnemiesText.gameObject.SetActive(true);
     }
 
 
     [PunRPC]
     private void EnableWinMenu()
-        => winDungeonText.SetActive(true);
-    
+    {
+        var player = ((GameObject) PhotonNetwork.LocalPlayer.TagObject).GetComponent<PlayerController>();
+        player.audioSource.PlayOneShot(victorySound);
+        player.winDungeonText.SetActive(true);
+        player.nbEnemiesText.gameObject.SetActive(false);
+    }
+
     [PunRPC]
     private void DisableWinMenu()
         => winDungeonText.SetActive(false); 
@@ -731,9 +744,18 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
         Cursor.visible = false;
         isInPauseMenu = false;
     }
+
+    [PunRPC]
+    private void RemoveNbEnemies(bool state)
+        => (PhotonNetwork.LocalPlayer.TagObject as GameObject)?.
+            GetComponent<PlayerController>().nbEnemiesText.gameObject.SetActive(state);
     
+
     private void OnSceneLoaded(Scene scene, LoadSceneMode loadSceneMode)
-        => ResetCameras();
+    {
+        pv.RPC(nameof(RemoveNbEnemies), RpcTarget.All, scene.name == "Dungeon");
+        ResetCameras();
+    }
 
     private void ResetCameras()
     {

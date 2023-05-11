@@ -168,8 +168,6 @@ namespace Enemies
             var audioS = GetComponent<AudioSource>();
             audioS.clip = sound;
             
-            Debug.Log("CLIP : " + sound);
-            
             if (repeat) audioS.Play();
             else audioS.PlayOneShot(sound);
         }

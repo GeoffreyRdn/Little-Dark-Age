@@ -482,6 +482,8 @@ MonoBehaviour:
   sheatheShieldSound: {fileID: 8300000, guid: 6caa79d3676556141a006270a5d94e78, type: 3}
   deathSound: {fileID: 8300000, guid: 57e456df2e102dc469a80161d0fc8739, type: 3}
   hurtSound: {fileID: 8300000, guid: 5cde1aeae29cd09468e281521ea63d67, type: 3}
+  gameOverSound: {fileID: 8300000, guid: d28fb07b05f1bf042bf1402b4df6f6d6, type: 3}
+  victorySound: {fileID: 8300000, guid: bb62651ed8caafd4e957cc6f57fc7b70, type: 3}
   bossScene: Boss Room
   inventory: {fileID: 4656913899444013357}
   shop: {fileID: 6102537978649938927}
