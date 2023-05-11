@@ -91,7 +91,7 @@ RectTransform:
   m_GameObject: {fileID: 5784993928313420164}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.01, y: 1.01, z: 1.01}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 7642422894863382694}
@@ -175,7 +175,7 @@ RectTransform:
   - {fileID: 7642422895367597939}
   - {fileID: 2293152745186704247}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -314,7 +314,7 @@ MonoBehaviour:
   m_text: Pause menu
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 56d52a6c3f6abe8419fe5c6b0a7f805e, type: 2}
-  m_sharedMaterial: {fileID: -929459792819001837, guid: 56d52a6c3f6abe8419fe5c6b0a7f805e, type: 2}
+  m_sharedMaterial: {fileID: -1518942174625234107, guid: 56d52a6c3f6abe8419fe5c6b0a7f805e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -528,6 +528,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7386725134212357123, guid: 9978893eaa56012469ad39a259926662, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: -1518942174625234107, guid: 56d52a6c3f6abe8419fe5c6b0a7f805e, type: 2}
     m_RemovedComponents:
     - {fileID: 7386725132696593605, guid: 9978893eaa56012469ad39a259926662, type: 3}
     m_RemovedGameObjects: []

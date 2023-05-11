@@ -72,6 +72,7 @@ public class MusicHandler : MonoBehaviour
         if (scene.name == bossScene && audioSource.clip != bossMusic)
         {
             Debug.Log("Boss started !");
+            pv.RPC(nameof(ResetPlayers), RpcTarget.All);
             audioSource.clip = bossMusic;
             audioSource.Play();
         }

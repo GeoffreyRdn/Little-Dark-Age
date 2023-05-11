@@ -11,6 +11,9 @@ namespace Enemies
 
         public static List<GameObject> Enemies;
         public static int EnemiesRemaining = 0;
+        
+        public delegate void OnEnemiesSpawned(int nbEnemies);
+        public static OnEnemiesSpawned onEnemiesSpawned;
 
         private void Awake()
         {
@@ -35,6 +38,8 @@ namespace Enemies
                     EnemiesRemaining++;
                 }
             }
+            
+            onEnemiesSpawned?.Invoke(EnemiesRemaining);
         }
     }
 }

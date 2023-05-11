@@ -1,11 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Enemies;
 using Health;
 using Inventory;
 using Items;
 using NaughtyAttributes;
 using Photon.Pun;
+using TMPro;
 using UI;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -47,6 +49,11 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     [BoxGroup("Weapons")] [SerializeField] private GameObject spear;
     [BoxGroup("Weapons")] [SerializeField] private GameObject sword;
     [BoxGroup("Weapons")] [SerializeField] private GameObject shield;
+    
+    [BoxGroup("UI"), SerializeField] private GameObject winDungeonText;
+    [BoxGroup("UI"), SerializeField] private GameObject gameOverText;
+    [BoxGroup("UI"), SerializeField] private GameObject winBossText;
+    [BoxGroup("UI"), SerializeField] private TextMeshProUGUI nbEnemiesText;
 
     private float mouseYVelocity;
     
@@ -129,6 +136,7 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
         HealthController.onPlayerDeath += HandlePlayerDeath;
         HealthController.onDungeonComplete += HandleDungeonComplete;
         DamageBehavior.onPlayerDamaged += HandlePlayerDamaged;
+        EnemyInstantiation.onEnemiesSpawned += UpdateEnemiesRemainingText;
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
@@ -137,6 +145,7 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
         HealthController.onPlayerDeath -= HandlePlayerDeath;
         HealthController.onDungeonComplete -= HandleDungeonComplete;
         DamageBehavior.onPlayerDamaged -= HandlePlayerDamaged;
+        EnemyInstantiation.onEnemiesSpawned -= UpdateEnemiesRemainingText;
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
@@ -592,8 +601,7 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
 
             if (allDead)
             {
-                // TODO: gameover screen + return to lobby + reset action map
-                Debug.Log("ALL PLAYERS ARE DEAD");
+                pv.RPC(nameof(EnableOrDisableLoseMenu), RpcTarget.All, true);
                 StartCoroutine(HandleEndGame());
             }
             else
@@ -601,15 +609,18 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
                 Debug.Log("SOME PLAYERS ARE STILL ALIVE");
             }
         }
-
-        
     }
     
     private IEnumerator HandleEndGame()
     {
         yield return new WaitForSeconds(5);
+        pv.RPC(nameof(EnableOrDisableLoseMenu), RpcTarget.All, false);
         pv.RPC(nameof(ReturnToLobby), RpcTarget.MasterClient);
     }
+
+    [PunRPC]
+    private void EnableOrDisableLoseMenu(bool state)
+        => gameOverText.SetActive(state);
 
     [PunRPC]
     private void ReturnToLobby()
@@ -624,6 +635,7 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     private IEnumerator DelayLoadBossScene()
     {
         yield return new WaitForSeconds(5);
+        pv.RPC(nameof(DisableWinMenu), RpcTarget.All);
         LoadBossScene();
     }
 
@@ -635,11 +647,24 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
         }
     }
 
+    private void UpdateEnemiesRemainingText(int nbEnemies)
+        => pv.RPC(nameof(UpdateEnemiesRemainingTextRPC), RpcTarget.All, nbEnemies);
+
+    [PunRPC]
+    private void UpdateEnemiesRemainingTextRPC(int nbEnemies)
+    {
+        nbEnemiesText.text = nbEnemies + " Enemies Remaining";
+        nbEnemiesText.gameObject.SetActive(true);
+    }
+
+
     [PunRPC]
     private void EnableWinMenu()
-    {
-        // TODO : enable countdown prefab for each player
-    }
+        => winDungeonText.SetActive(true);
+    
+    [PunRPC]
+    private void DisableWinMenu()
+        => winDungeonText.SetActive(false); 
     
     private void CloseInventory()
     {

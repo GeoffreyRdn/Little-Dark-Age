@@ -2846,6 +2846,7 @@ MonoBehaviour:
   maxHealth: 100
   armor: 0
   healMultiplier: 1
+  enemiesRemainingText: {fileID: 0}
   playerTag: Player
 --- !u!195 &7095134074476670737
 NavMeshAgent:

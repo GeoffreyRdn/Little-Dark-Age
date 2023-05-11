@@ -3,6 +3,7 @@ using System.Collections;
 using Enemies;
 using NaughtyAttributes;
 using Photon.Pun;
+using TMPro;
 using UI;
 using UnityEngine;
 using UnityEngine.Events;
@@ -13,8 +14,10 @@ namespace Health {
 		[BoxGroup("Health"), SerializeField] private float maxHealth      = 100f;
 		[BoxGroup("Health"), SerializeField] private float armor          = 0f;
 		[BoxGroup("Health"), SerializeField] private float healMultiplier = 1f;
+		
+		[BoxGroup("UI"), SerializeField] private TextMeshProUGUI enemiesRemainingText;
 
-		[SerializeField] [Tag] private string playerTag;
+		[SerializeField] [NaughtyAttributes.Tag] private string playerTag;
 
 		public delegate void OnPlayerDeath(GameObject player);
 		public delegate void OnDungeonComplete();
@@ -94,6 +97,9 @@ namespace Health {
 			EnemyInstantiation.Enemies.Remove(gameObject);
 			PhotonNetwork.Destroy(gameObject);
 			EnemyInstantiation.EnemiesRemaining--;
+
+			enemiesRemainingText.text = EnemyInstantiation.EnemiesRemaining + " Enemies Remaining";
+			
 			Debug.Log("ENEMY KILLED , REMAINING : " + EnemyInstantiation.EnemiesRemaining);
 
 			if (EnemyInstantiation.EnemiesRemaining == 0)
