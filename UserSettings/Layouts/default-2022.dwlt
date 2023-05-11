@@ -235,7 +235,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 1
   m_Script: {fileID: 12006, guid: 0000000000000000e000000000000000, type: 0}
-  m_Name: ConsoleWindow
+  m_Name: ProjectBrowser
   m_EditorClassIdentifier: 
   m_Children: []
   m_Position:
@@ -320,7 +320,7 @@ MonoBehaviour:
   m_TextureFilterMode: 0
   m_TextureHideFlags: 61
   m_RenderIMGUI: 1
-  m_EnterPlayModeBehavior: 0
+  m_EnterPlayModeBehavior: 1
   m_UseMipMap: 0
   m_VSyncEnabled: 0
   m_Gizmos: 0
@@ -343,7 +343,7 @@ MonoBehaviour:
     m_HSlider: 0
     m_VSlider: 0
     m_IgnoreScrollWheelUntilClicked: 0
-    m_EnableMouseInput: 0
+    m_EnableMouseInput: 1
     m_EnableSliderZoomHorizontal: 0
     m_EnableSliderZoomVertical: 0
     m_UniformScale: 1
@@ -415,18 +415,18 @@ MonoBehaviour:
       m_ExpandedIDs: 2abac8ff76bac8ff66c6c8ff74c6c8ff5ccfc8fff0cfc8ff6ce9c9ffc0e9c9ffc4e9c9ffc8e9c9ffcce9c9ff54eac9ff58eac9ff5ceac9ff88eac9ff92eac9ffc4eac9ff4686caff9a86caff9e86caffa286caffa686caff2e87caff3287caff3687caff6287caff6c87caff9e87caffd44fccff24d0ccff30d0ccffded1ccffbececdff486ed1ff9078d2ff3079d2ff8279d2ffa894d2ff96f8ddffae74e0fffc74e0ffe280e0fff880e0ffe889e0ff8a8ae0ff788be0ff828ce0ff9895e0ff2088e3ffe291e3ff3292e3ff149ee3ff269ee3ff12a7e3ffa8a7e3ffbab2e3ffdcbbe3ff7eb1e5ffccb1e5ffaabde5ffb8bde5ffa0c6e5ff32c7e5ffb4f1e7fff8f1e7fffcf1e7ff04f2e7ff08f2e7ffacf2e7ffb0f2e7ffb4f2e7ff08f3e7ff12f3e7ff24f3e7ff8cf3e7ffd0f3e7ffd4f3e7ffdcf3e7ffe0f3e7ff84f4e7ff88f4e7ff8cf4e7ffe0f4e7ffeaf4e7fffcf4e7fff87be8ff7cf0ebffcaf0ebffa8fcebffb6fcebff9e05ecff3006ecffacf4ecffd4feecff22ffecff080bedff1e0bedff0e14edffb014edffdec3edff8ad3edffeae5edff44f1edff76faedff0208eeffa011eeff34b7eeffe6ffeffffa1ff0ff064bf0ff3851f2ffb6d4f2ff327cf3ff5688f3fffe16f4ffea96f7ff3897f7ff00a0f7ff0ea0f7fff8a8f7ff8aa9f7ff74fbf8ffc6fff8ff72d0f9ffe438fbff0cfefbff868efcffca99fcffa2eefcff2e0afdff660cfdff1816fdff225bfdff6215feffa615feffaa15feffb215feffb615feff5a16feff5e16feff6216feffb616feffc016feffd216feff3a17feff7e17feff8217feff8a17feff8e17feff3218feff3618feff3a18feff8e18feff9818feffaa18feff9477feffd469ffff186affff1c6affff246affff286affffca6affffce6affffd26affff266bffff306bffff426bffff68e6ffff04fbfffff4ffffff6c790000b499000032b7000052cf0000f2760200207802009a7f02003497020024a3020012ae020030c50200e8e8020090420300ac1405007e150500
       m_RenameOverlay:
         m_UserAcceptedRename: 0
-        m_Name: 
-        m_OriginalName: 
+        m_Name: Portcullis_Wood
+        m_OriginalName: Portcullis_Wood
         m_EditFieldRect:
           serializedVersion: 2
           x: 0
           y: 0
           width: 0
           height: 0
-        m_UserData: 0
+        m_UserData: -26238
         m_IsWaitingForDelay: 0
         m_IsRenaming: 0
-        m_OriginalEventType: 11
+        m_OriginalEventType: 0
         m_IsRenamingFilename: 0
         m_ClientGUIView: {fileID: 8}
       m_SearchString: 
@@ -1245,14 +1245,14 @@ MonoBehaviour:
     - {fileID: 1107499047954523898, guid: 99aa38e45187c2043be381107c9859ca, type: 2}
     - {fileID: -1652392615531439738, guid: c345b51a063ded347b304623c202f9bc, type: 2}
     m_ValueSerializationHelper:
-    - e00: 0.43333334
+    - e00: 0.70315623
       e01: 0
       e02: 0
-      e03: 63.36664
+      e03: -165.85269
       e10: 0
-      e11: 0.43333334
+      e11: 0.70315623
       e12: 0
-      e13: 227.33333
+      e13: 287.41092
       e20: 0
       e21: 0
       e22: 1
@@ -1309,6 +1309,38 @@ MonoBehaviour:
       e31: 0
       e32: 0
       e33: 1
+    - e00: 0.55836105
+      e01: 0
+      e02: 0
+      e03: 14.569429
+      e10: 0
+      e11: 0.55836105
+      e12: 0
+      e13: 183.28313
+      e20: 0
+      e21: 0
+      e22: 1
+      e23: 0
+      e30: 0
+      e31: 0
+      e32: 0
+      e33: 1
+    - e00: 0.5162353
+      e01: 0
+      e02: 0
+      e03: -10.811768
+      e10: 0
+      e11: 0.5162353
+      e12: 0
+      e13: 209.70636
+      e20: 0
+      e21: 0
+      e22: 1
+      e23: 0
+      e30: 0
+      e31: 0
+      e32: 0
+      e33: 1
   m_PreviewAnimator: {fileID: 0}
   m_AnimatorController: {fileID: 9100000, guid: c345b51a063ded347b304623c202f9bc, type: 2}
   m_BreadCrumbs:
@@ -1322,7 +1354,7 @@ MonoBehaviour:
   m_MiniTool: 0
   m_LockTracker:
     m_IsLocked: 0
-  m_CurrentEditor: 0
+  m_CurrentEditor: 1
   m_LayerEditor:
     m_SelectedLayerIndex: 0
 --- !u!114 &17
@@ -1467,7 +1499,7 @@ MonoBehaviour:
       m_Icon: {fileID: 0}
       m_ResourceFile: 
     m_NewAssetIndexInList: -1
-    m_ScrollPosition: {x: 0, y: 0}
+    m_ScrollPosition: {x: 0, y: 81.79999}
     m_GridSize: 64
   m_SkipHiddenPackages: 0
   m_DirectoriesAreaWidth: 207
