@@ -51,6 +51,21 @@ MonoBehaviour:
   - TransmitSpawnPoint
   - KillEnemy
   - EnableWinMenu
+  - SendAnimations
+  - SendDeath
+  - DamageTarget
+  - DamageEnemy
+  - DamagePlayer
+  - DisableLoadingScren
+  - EnableLoadingScren
+  - ResetPlayers
+  - DisableOrEnableAnimatorRPC
+  - EnableAnimator
+  - ReturnToLobby
+  - TransmitPlayerDamaged
+  - TransmitPlayerDeath
+  - KillPlayer
+  - TransmitHealth
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1

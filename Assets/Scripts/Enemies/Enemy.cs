@@ -1,6 +1,9 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Health;
 using NaughtyAttributes;
+using Photon.Pun;
 using UnityEngine;
 using UnityEngine.AI;
 using Random = UnityEngine.Random;
@@ -57,7 +60,8 @@ namespace Enemies
         #endregion
 
         private NavMeshAgent agent;
-        private GameObject[] players;
+        private List<GameObject> players;
+        private PhotonView photonView;
 
         private Vector3 destination;
         private bool hasDestination;
@@ -70,11 +74,14 @@ namespace Enemies
         {
             animator = GetComponentInChildren<Animator>();
             agent = GetComponent<NavMeshAgent>();
-            players = GameObject.FindGameObjectsWithTag(playerTag);
+            players = GameObject.FindGameObjectsWithTag(playerTag).ToList();
+            photonView = GetComponent<PhotonView>();
         }
         
         private void Update()
         {
+            if (!PhotonNetwork.IsMasterClient) return;
+            
             var state = GetState();
             if (state != AttackAnimation)
             {
@@ -93,6 +100,7 @@ namespace Enemies
 
             animator.CrossFade(state, 0, 0);
             currentState = state;
+            photonView.RPC(nameof(SendAnimations), RpcTarget.Others, currentState);
         }
 
         #endregion
@@ -102,16 +110,24 @@ namespace Enemies
         private void OnEnable()
         {
             HealthController.onPlayerDeath += HandlePlayerDeath;
+            DamageBehavior.onEnemyDamaged += HandleEnemyDamaged;
         }
 
         private void OnDisable()
         {
             HealthController.onPlayerDeath -= HandlePlayerDeath;
+            DamageBehavior.onEnemyDamaged -= HandleEnemyDamaged;
         }
 
         #endregion
 
         #region Methods Animations
+        
+        [PunRPC]
+        private void SendAnimations(int state)
+        {
+            if (gameObject != null) animator.CrossFade(state, 0, 0);
+        }
 
         private int GetState()
         {
@@ -181,8 +197,14 @@ namespace Enemies
 
             (GameObject playerInRange, float distance) = (null, 0);
             
-            foreach (GameObject player in players)
+            foreach (var player in players)
             {
+                if (player == null || player.GetComponent<PlayerController>().isDead)
+                {
+                    players.Remove(player);
+                    continue;
+                }
+                
                 if (InDetectionRange(player.transform))
                 {
                     var currentDistance = Vector3.Distance(player.transform.position, transform.position);
@@ -238,6 +260,12 @@ namespace Enemies
 
         private void Attack()
         {
+            if (target.GetComponent<PlayerController>().isDead)
+            {
+                target = null;
+                return;
+            }
+            
             Vector3 agentPosition = transform.position;
             Vector3 targetPosition = target.position;
             
@@ -257,23 +285,30 @@ namespace Enemies
 
         private void HandlePlayerDeath(GameObject playerDead)
         {
-            if (target != null && target.gameObject == playerDead)
+            int viewID = playerDead.GetComponent<PhotonView>().ViewID;
+            photonView.RPC(nameof(TransmitPlayerDeath), RpcTarget.All, viewID);
+        }
+
+        [PunRPC]
+        private void TransmitPlayerDeath(int viewID)
+        {
+            if (target != null && target.gameObject.GetComponent<PhotonView>().ViewID == viewID)
             {
-                GameObject[] remainingPlayers = new GameObject[players.Length - 1];
-                int index = 0;
-                
-                foreach (var player in players)
-                {
-                    if (player != playerDead)
-                    {
-                        remainingPlayers[index] = player;
-                        index++;
-                    }
-                }
-                
                 target = null;
+                List<GameObject> remainingPlayers = players
+                    .Where(player => player != null && 
+                                     !player.GetComponent<PlayerController>().isDead && 
+                                     player.GetComponent<PhotonView>().ViewID != viewID)
+                    .ToList();
                 players = remainingPlayers;
             }
+        }
+
+        private void HandleEnemyDamaged(GameObject enemyDamaged)
+        {
+            if (gameObject != enemyDamaged) return;
+
+            isHit = true;
         }
 
         #endregion

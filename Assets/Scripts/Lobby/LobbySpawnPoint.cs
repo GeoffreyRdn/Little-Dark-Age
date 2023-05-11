@@ -4,6 +4,7 @@ using UnityEngine;
 public class LobbySpawnPoint : MonoBehaviour
 {
     [SerializeField] private Vector3 spawnPoint;
+
     private void Start()
     {
         var player = PhotonNetwork.LocalPlayer.TagObject as GameObject;
@@ -13,7 +14,5 @@ public class LobbySpawnPoint : MonoBehaviour
         controller.enabled = false;
         controller.gameObject.transform.position = spawnPoint;
         controller.enabled = true;
-        
-        Debug.Log("Player " + player.name + " was tp to " + spawnPoint + " - current pos : " + player.transform.position) ;
     }
 }

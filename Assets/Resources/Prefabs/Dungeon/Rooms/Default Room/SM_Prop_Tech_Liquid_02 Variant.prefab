@@ -10,7 +10,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 100000, guid: b24400c3715b6484695f62fe3b27a9f1, type: 3}
       propertyPath: m_Name
-      value: SM_Prop_Tech_Liquid_02
+      value: SM_Prop_Tech_Liquid_02 Variant
+      objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: b24400c3715b6484695f62fe3b27a9f1, type: 3}
+      propertyPath: m_TagString
+      value: CanBeDeleted
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: b24400c3715b6484695f62fe3b27a9f1, type: 3}
       propertyPath: m_RootOrder

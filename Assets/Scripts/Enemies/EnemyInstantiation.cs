@@ -8,8 +8,14 @@ namespace Enemies
     public class EnemyInstantiation : MonoBehaviour
     {
         [SerializeField] private string enemyPath;
-        
+
+        public static List<GameObject> Enemies;
         public static int EnemiesRemaining = 0;
+
+        private void Awake()
+        {
+            Enemies = new List<GameObject>();
+        }
 
         public void SpawnEnemies(List<Rect> rooms)
         {
@@ -22,14 +28,13 @@ namespace Enemies
                 for (int i = 0; i < Random.Range(2, 5); i++)
                 {
                     Vector3 spawnPos = new Vector3(x+Random.Range(-1f, 1f), 0, z + Random.Range(-1f, 1f));
-                    var enemy = PhotonNetwork.Instantiate(enemyPath, spawnPos, Quaternion.identity);
+                    GameObject enemy = PhotonNetwork.InstantiateRoomObject(enemyPath, spawnPos, Quaternion.identity);
                     enemy.transform.parent = transform;
                     
+                    Enemies.Add(enemy);
                     EnemiesRemaining++;
                 }
             }
-            
-            Debug.Log("ENEMIES : " + EnemiesRemaining);
         }
     }
 }

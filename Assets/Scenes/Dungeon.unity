@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657874, g: 0.49641275, b: 0.5748172, a: 1}
+  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -155,110 +155,194 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 63736e8b0ed7ca749afc196608030d69, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  boardWidth: 80
-  boardHeight: 80
+  boardWidth: 55
+  boardHeight: 55
   minRoomSize: 10
-  maxRoomSize: 20
-  minHallwaySize: 2
-  maxHallwaySize: 3
-  wall: {fileID: 2121542299643369026, guid: e42893b29e2746748b2c2215aad8952e, type: 3}
+  maxRoomSize: 15
+  minHallwaySize: 1
+  maxHallwaySize: 1
+  basicWallGO: {fileID: 2121542299643369026, guid: e42893b29e2746748b2c2215aad8952e, type: 3}
+  wallTorchGO: {fileID: 343808969462547299, guid: 86ee8cefe331e8b4881deb868f110089, type: 3}
+  wallWindowGO: {fileID: 5010476966422055348, guid: 749f4f1ed437ced4b890825610813e41, type: 3}
   floorRoom: {fileID: 5122338818818721925, guid: 895d58724abcf624ca1c6d4e8d1a0ad4, type: 3}
   floorHallway: {fileID: 5122338818818721925, guid: 895d58724abcf624ca1c6d4e8d1a0ad4, type: 3}
-  kitchenRoom: []
-  bedroomRoom: []
-  chestRoom: []
-  skeletonRoom:
-  - gameObject: {fileID: 3506935191967020088, guid: 67932966a8af198498e0c52b26d7372c, type: 3}
-    count: 0
+  doorGO: {fileID: 1845907278752291708, guid: 0c3618f8175b6964fad4aa3dbbf57d71, type: 3}
+  wallWindowProba: 30
+  genericRoom:
+  - gameObject: {fileID: 2602599351492134008, guid: 19dc49a821dc9bf45b6cc735bd5c0878, type: 3}
+    rightGameObject: {fileID: 0}
+    leftGameObject: {fileID: 0}
+    bottomGameObject: {fileID: 0}
     radius: 0
-    position: 2
-  - gameObject: {fileID: 4086085499139853773, guid: 7e9b09746ef882b41ac57db072b3fed0, type: 3}
-    count: 0
+    position: 0
+    offset: {x: 0, y: 0, z: 0}
+    index: 1
+  - gameObject: {fileID: 5671251973577246070, guid: 67eb239ed3690d1418b8c87ca719fc98, type: 3}
+    rightGameObject: {fileID: 0}
+    leftGameObject: {fileID: 0}
+    bottomGameObject: {fileID: 0}
+    radius: 0
+    position: 0
+    offset: {x: 0, y: 0, z: 0}
+    index: 2
+  - gameObject: {fileID: 411547125317544793, guid: fda5b1198f444754380a5cee9318c1ad, type: 3}
+    rightGameObject: {fileID: 0}
+    leftGameObject: {fileID: 0}
+    bottomGameObject: {fileID: 0}
+    radius: 0
+    position: 0
+    offset: {x: 0, y: 0, z: 0}
+    index: 3
+  - gameObject: {fileID: 6800426217130147797, guid: 35774667f1bd78c4f92c6c469f4794f1, type: 3}
+    rightGameObject: {fileID: 0}
+    leftGameObject: {fileID: 0}
+    bottomGameObject: {fileID: 0}
+    radius: 0
+    position: 0
+    offset: {x: 0, y: 0, z: 0}
+    index: 4
+  - gameObject: {fileID: 2962067357118904655, guid: f4d2b93f75d585d40a9e231be32a8084, type: 3}
+    rightGameObject: {fileID: 0}
+    leftGameObject: {fileID: 0}
+    bottomGameObject: {fileID: 0}
+    radius: 0
+    position: 0
+    offset: {x: 0, y: 0, z: 0}
+    index: 5
+  - gameObject: {fileID: 1865981142644243621, guid: 6b5a5ba617542fb44b770a8ad5eea129, type: 3}
+    rightGameObject: {fileID: 0}
+    leftGameObject: {fileID: 0}
+    bottomGameObject: {fileID: 0}
+    radius: 0
+    position: 0
+    offset: {x: 0, y: 0, z: 0}
+    index: 6
+  kitchenRoom:
+  - gameObject: {fileID: 6863242599581651237, guid: ae2225dc6b3660f44a53f8430afa3bff, type: 3}
+    rightGameObject: {fileID: 5692475083677413914, guid: 168c591b139777549a37402a5cff22f4, type: 3}
+    leftGameObject: {fileID: 0}
+    bottomGameObject: {fileID: 0}
+    radius: 0
+    position: 1
+    offset: {x: 32.72, y: 1, z: -11.8}
+    index: 10
+  - gameObject: {fileID: 3032963841850782129, guid: e85ed22d8ab032a49b13e26fbdd24e7c, type: 3}
+    rightGameObject: {fileID: 8461306802137233078, guid: 6a9d742d6bf794b49af385950e298492, type: 3}
+    leftGameObject: {fileID: 0}
+    bottomGameObject: {fileID: 0}
+    radius: 0
+    position: 1
+    offset: {x: 36.9, y: 1, z: -11.6}
+    index: 11
+  - gameObject: {fileID: 3645323366575462331, guid: 28036c69afd8fcc45b14f42231199e79, type: 3}
+    rightGameObject: {fileID: 0}
+    leftGameObject: {fileID: 0}
+    bottomGameObject: {fileID: 0}
     radius: 1
-    position: 5
+    position: 2
+    offset: {x: 33, y: 0, z: -16}
+    index: 12
+  chestRoom:
+  - gameObject: {fileID: 6923945053230981401, guid: 7f1da74edf2213f488110a244530288c, type: 3}
+    rightGameObject: {fileID: 0}
+    leftGameObject: {fileID: 0}
+    bottomGameObject: {fileID: 0}
+    radius: 1
+    position: 2
+    offset: {x: 32.14, y: 1, z: -15.23}
+    index: 20
+  - gameObject: {fileID: 1934819618372737928, guid: edf55a1169ae0b04baeada0279e19a96, type: 3}
+    rightGameObject: {fileID: 0}
+    leftGameObject: {fileID: 0}
+    bottomGameObject: {fileID: 0}
+    radius: 0
+    position: 1
+    offset: {x: 36.86, y: 1.1, z: -7.64}
+    index: 21
+  skeletonRoom:
+  - gameObject: {fileID: 8846627966079741817, guid: c9bf81f97333acd46a5839a3632e93ee, type: 3}
+    rightGameObject: {fileID: 0}
+    leftGameObject: {fileID: 0}
+    bottomGameObject: {fileID: 0}
+    radius: 0
+    position: 1
+    offset: {x: 24, y: 1, z: -15.48}
+    index: 30
+  - gameObject: {fileID: 809246325334306752, guid: cd625983c29f34f41b3e2519b3e91904, type: 3}
+    rightGameObject: {fileID: 3437410362658251060, guid: 3596d821bc07be24fae53d450907db17, type: 3}
+    leftGameObject: {fileID: 5739314623852983109, guid: c448cb6e6da1f1043a911e546bdd5a0d, type: 3}
+    bottomGameObject: {fileID: 5193013705615799677, guid: 7e214f0905920794d8c26e54cffd2eb2, type: 3}
+    radius: 2
+    position: 2
+    offset: {x: 33.62, y: 1, z: -11}
+    index: 31
+  occupiedGO: {fileID: 424045812941590834, guid: 874033646873ce840b326da4b6178837, type: 3}
+  occupiedGO2: {fileID: 0}
+  objectInstantiationProbability: 30
+  isHost: 1
   parent: {fileID: 903032346}
   deletionTag: CanBeDeleted
   rooms:
   - serializedVersion: 2
-    x: 4
-    y: 4
-    width: 63
-    height: 5
+    x: 2
+    y: 6
+    width: 5
+    height: 10
   - serializedVersion: 2
-    x: 9
-    y: 14
-    width: 15
-    height: 5
+    x: 14
+    y: 8
+    width: 5
+    height: 10
   - serializedVersion: 2
-    x: 5
-    y: 24
-    width: 14
-    height: 6
+    x: 23
+    y: 1
+    width: 5
+    height: 12
   - serializedVersion: 2
-    x: 8
-    y: 36
+    x: 31
+    y: 6
+    width: 5
+    height: 12
+  - serializedVersion: 2
+    x: 41
+    y: 1
+    width: 8
+    height: 11
+  - serializedVersion: 2
+    x: 6
+    y: 23
     width: 12
     height: 5
   - serializedVersion: 2
-    x: 1
-    y: 46
-    width: 17
+    x: 5
+    y: 35
+    width: 16
     height: 5
   - serializedVersion: 2
-    x: 5
-    y: 59
-    width: 17
+    x: 9
+    y: 46
+    width: 12
     height: 7
   - serializedVersion: 2
-    x: 5
-    y: 72
-    width: 13
+    x: 29
+    y: 22
+    width: 16
     height: 6
   - serializedVersion: 2
-    x: 28
-    y: 15
-    width: 6
-    height: 34
-  - serializedVersion: 2
-    x: 39
-    y: 13
-    width: 5
-    height: 16
-  - serializedVersion: 2
-    x: 50
-    y: 13
-    width: 7
-    height: 15
-  - serializedVersion: 2
-    x: 68
-    y: 13
-    width: 11
-    height: 20
-  - serializedVersion: 2
-    x: 51
+    x: 25
     y: 40
-    width: 26
-    height: 7
-  - serializedVersion: 2
-    x: 28
-    y: 56
-    width: 7
+    width: 5
     height: 14
   - serializedVersion: 2
     x: 40
-    y: 56
-    width: 8
-    height: 19
-  - serializedVersion: 2
-    x: 58
-    y: 58
+    y: 37
     width: 14
-    height: 6
+    height: 5
   - serializedVersion: 2
-    x: 58
-    y: 71
+    x: 38
+    y: 46
     width: 16
-    height: 7
+    height: 5
 --- !u!4 &841107531
 Transform:
   m_ObjectHideFlags: 0

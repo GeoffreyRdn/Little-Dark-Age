@@ -9,9 +9,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7151125630650169605}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Broken Barels
-  m_TagString: Untagged
+  m_TagString: CanBeDeleted
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -45,6 +45,10 @@ PrefabInstance:
     - target: {fileID: 100000, guid: 0f17a233a6d421a458f783f4c6e2a1a6, type: 3}
       propertyPath: m_Name
       value: SM_Prop_Barrel_Shelf_Small_Broken_01 (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: 0f17a233a6d421a458f783f4c6e2a1a6, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 0f17a233a6d421a458f783f4c6e2a1a6, type: 3}
       propertyPath: m_RootOrder
@@ -112,6 +116,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: SM_Prop_Barrel_Shelf_Small_02
       objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: 0fdeefe76f50da547b4815025acf385c, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 0fdeefe76f50da547b4815025acf385c, type: 3}
       propertyPath: m_RootOrder
       value: -1
@@ -177,6 +185,10 @@ PrefabInstance:
     - target: {fileID: 100000, guid: f969c577d5aa8ff47b5b10939ed5d963, type: 3}
       propertyPath: m_Name
       value: SM_Prop_Barrel_Shelf_Small_Broken_02
+      objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: f969c577d5aa8ff47b5b10939ed5d963, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: f969c577d5aa8ff47b5b10939ed5d963, type: 3}
       propertyPath: m_RootOrder

@@ -1,4 +1,3 @@
-using System.Linq;
 using Photon.Pun;
 using Photon.Realtime;
 using UnityEditor;
@@ -9,14 +8,29 @@ public class PauseMenu : MonoBehaviourPunCallbacks
 {
     [SerializeField] private string lobbyScene;
     [SerializeField] private string mainMenuScene;
+    [SerializeField] private GameObject lobbyGO;
+
+    private void Start()
+    {
+        if (PhotonNetwork.IsMasterClient) lobbyGO.SetActive(true);
+        else lobbyGO.SetActive(false);
+    }
+
+    public override void OnMasterClientSwitched(Player newMasterClient)
+    {
+        base.OnMasterClientSwitched(newMasterClient);
+        if (PhotonNetwork.IsMasterClient) lobbyGO.SetActive(true);
+        else lobbyGO.SetActive(false);
+        
+    }
 
     public void Resume()
     {
         Debug.Log("Resume");
         InputManager.Instance.ClosePauseMenu();
-        OpenOrClosePauseMenu();
+        ClosePauseMenu();
             
-        Cursor.visible = true;
+        Cursor.visible = false;
     }
 
     public void ReturnToLobby()
@@ -33,9 +47,15 @@ public class PauseMenu : MonoBehaviourPunCallbacks
 
     public void ReturnToMainMenu()
     {
+        InputManager.Instance.CloseInventory();
+        InputManager.Instance.CloseShop();
+        InputManager.Instance.ClosePauseMenu();
+
         PhotonNetwork.Destroy(PhotonNetwork.LocalPlayer.TagObject as GameObject);
         PhotonNetwork.LocalPlayer.TagObject = null;
         Destroy(InputManager.Instance.gameObject);
+
+        Cursor.visible = true;
 
         PhotonNetwork.LeaveRoom();
         SceneManager.LoadScene(mainMenuScene);
@@ -57,4 +77,8 @@ public class PauseMenu : MonoBehaviourPunCallbacks
         Debug.Log("Opening Pause Menu -> " + !gameObject.activeInHierarchy);
         gameObject.SetActive(!gameObject.activeInHierarchy);
     }
+
+    private void ClosePauseMenu()
+        => gameObject.SetActive(false);
+
 }

@@ -1,4 +1,8 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using Cinemachine;
+using Health;
 using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.AI;
@@ -14,6 +18,10 @@ namespace Enemies
         
         [Tag] [SerializeField] private string playerTag;
 
+        
+        [BoxGroup("FX")] [SerializeField] private ParticleSystem sparkle;
+        [BoxGroup("FX")] [SerializeField] private ParticleSystem stageChangeFX;
+        
         [BoxGroup("Mask")] [SerializeField] private LayerMask playerMask;
         [BoxGroup("Mask")] [SerializeField] private LayerMask obstacleMask;
         [BoxGroup("Mask")] [SerializeField] private LayerMask wallMask;
@@ -26,6 +34,7 @@ namespace Enemies
         [BoxGroup("Settings")] [SerializeField] private float stopRange;
         [BoxGroup("Settings")] [SerializeField] private float sightAngle;
         
+        
         [BoxGroup("Settings")] [SerializeField] private float patrolSpeed;
         [BoxGroup("Settings")] [SerializeField] private float chaseSpeed;
         
@@ -37,20 +46,36 @@ namespace Enemies
 
         private bool isAttacking;
         private bool isHit;
+        private bool isRunning;
+        private bool isChangingStage;
 
+        
+        
+        
         #endregion
 
         #region Animations
 
         private static readonly int IdleAnimation = Animator.StringToHash("idle");
-        private static readonly int WalkAnimation = Animator.StringToHash("walk");
         private static readonly int RunAnimation = Animator.StringToHash("run");
         private static readonly int AttackAnimation = Animator.StringToHash("attack");
         private static readonly int HitAnimation = Animator.StringToHash("hit");
+        private static readonly int StageAnimation = Animator.StringToHash("stage change");
+        private static readonly int ComboAttackAnimation = Animator.StringToHash("melee_combo");
+        private static readonly int TurningAttackAnimation = Animator.StringToHash("melee_360");
+        private float cameraShakeMagnitude = 0.2f;
+        private float cameraShakeDuration = 0.1f;
+        private float cameraShakeInterval = 0.1f;
+        private float nextCameraShakeTime;
         
         private float lockedUntil;
         private int currentState;
-
+        private float initialHealth;
+        private float health;
+        private HealthController healthController;
+        private bool stage1Enabled = false;
+        private bool stage2Enabled = false;
+        
         private Animator animator;
 
         #endregion
@@ -67,6 +92,10 @@ namespace Enemies
 
         private void Start()
         {
+            healthController = GetComponent<HealthController>();
+            Debug.Log("health = " + healthController.Health);
+            initialHealth = healthController.MaxHealth;
+            
             animator = GetComponentInChildren<Animator>();
             agent = GetComponent<NavMeshAgent>();
             players = GameObject.FindGameObjectsWithTag(playerTag);
@@ -74,8 +103,10 @@ namespace Enemies
         
         private void Update()
         {
+            health = healthController.Health;
+            
             var state = GetState();
-            if (state != AttackAnimation)
+            if (state != AttackAnimation && state != TurningAttackAnimation && state != ComboAttackAnimation)
             {
                 UpdateTarget();
 
@@ -84,41 +115,163 @@ namespace Enemies
                     if (InAttackRange()) Attack();
                     else Chase();
                 }
-
-                else Patrol();
             }
             
             if (state == currentState) return;
 
             animator.CrossFade(state, 0, 0);
             currentState = state;
+            
+            //Sword FX
+            var emissionModule = sparkle.emission;
+            var rateOverTime = emissionModule.rateOverTime;
+            if (isAttacking)
+            {
+                rateOverTime.constant = 50;
+                emissionModule.rateOverTime = rateOverTime;
+            }
+            else
+            {
+                rateOverTime.constant = 1.5f;
+                emissionModule.rateOverTime = rateOverTime;
+            }
+
+            if (isRunning)
+            {
+                if (Time.time >= nextCameraShakeTime)
+                {
+                    nextCameraShakeTime = Time.time + cameraShakeInterval;
+                }
+            }
+
+            if (isHit)
+            {
+                health -= 25;
+            }
+
+            if (!stage1Enabled)
+            {
+                //stage 1
+                if (health <= initialHealth * 0.50f)
+                {
+
+                    chaseSpeed *= 1.25f;
+                    Debug.Log("changing stage");
+                    StageChange1();
+                    stage1Enabled = true;
+                }
+            }
+
+            //stage 2
+            if (!stage2Enabled)
+            {
+                //stage 1
+                if (health <= initialHealth * 0.50f)
+                {
+                    chaseSpeed *= 1.25f;
+                    Debug.Log("changing stage 2222222");
+                    StageChange1();
+                    stage2Enabled = true;
+                }
+            }
+            
+            if (health <= 0)
+            {
+                //DEATH
+            }
         }
 
         #endregion
 
-        #region Methods Anim
+        #region StageChange
 
+        private void StageChange1()
+        {
+            StageChangeAnimation();
+            Debug.Log("StageChange1");
+        }
+
+
+        private void StageChangeAnimation()
+        {
+            Vector3 agentPosition = transform.position;
+            Vector3 targetPosition = target.position;
+            
+            agent.SetDestination(agentPosition);
+            transform.LookAt(new Vector3(targetPosition.x, agentPosition.y, targetPosition.z));
+            isChangingStage = true;
+        }
+
+        #endregion
+        
+        #region Methods Anim
+        
         private int GetState()
         {
+            
             if (currentState == AttackAnimation) isAttacking = false;
+            if (currentState == ComboAttackAnimation) isAttacking = false;
+            if (currentState == TurningAttackAnimation) isAttacking = false;
+            if (currentState == StageAnimation) isChangingStage= false;
             if (currentState == HitAnimation) isHit = false;
+            if (currentState == RunAnimation) isRunning = true;
 
             if (Time.time < lockedUntil) return currentState;
-            
-            if (isAttacking) return LockState(AttackAnimation, 1.5f);
+
+            if (isAttacking)
+            {
+                //different attack types
+                int randomAttack = Random.Range(1, 4);
+                switch (randomAttack)
+                {
+                    case 1:
+                        return LockState(AttackAnimation, 1.5f);
+                    case 2:
+                        return LockState(TurningAttackAnimation, 2.2f);
+                    case 3:
+                        return LockState(ComboAttackAnimation, 4f);
+                }
+            }
+
+            if (isChangingStage)
+            {
+                Debug.Log("stage animation launched");
+                isChangingStage = false;
+                return LockState(StageAnimation, 2.8f);
+            }
             if (isHit) return LockState(HitAnimation, .7f);
             
             return agent.velocity.magnitude < .15f 
-                ? IdleAnimation 
-                : Math.Abs(agent.speed - patrolSpeed) < .1f 
-                    ? WalkAnimation 
-                    : RunAnimation;
+                ? IdleAnimation
+                : RunAnimation;
 
             int LockState(int s, float t)
             {
                 lockedUntil = Time.time + t;
                 return s;
             }
+        }
+        
+        
+
+        private void ShakeCamera()
+        {
+            
+            // Get all the cameras in the scene
+            GameObject[] cameras = GameObject.FindGameObjectsWithTag("virtualCamera");
+
+            // Shake each camera individually
+            foreach (GameObject camera in cameras)
+            {
+                CinemachineImpulseSource impulse = camera.GetComponent<CinemachineImpulseSource>();
+                
+                StartCoroutine(ShakeCameraCoroutine(impulse));
+            }
+        }
+
+        private IEnumerator ShakeCameraCoroutine(CinemachineImpulseSource impulse)
+        {
+                yield return null;
         }
         
         #endregion
@@ -170,6 +323,7 @@ namespace Enemies
             {
                 if (InDetectionRange(player.transform))
                 {
+                    
                     var currentDistance = Vector3.Distance(player.transform.position, transform.position);
                     
                     // the AI will follow the closest player in detection range
@@ -184,34 +338,6 @@ namespace Enemies
             target = playerInRange != null ? playerInRange.transform : null;
         }
         
-        private void SearchForDestination()
-        {
-            Vector3 position = transform.position;
-            Vector3 route;
-            
-            do
-            {
-                float rndX = Random.Range(-destinationRange, destinationRange);
-                float rndZ = Random.Range(-destinationRange, destinationRange);
-                destination = new Vector3(position.x + rndX, position.y, position.z + rndZ);
-                route = destination - position;
-            } // ensure it does not cross any wall (to avoid pointing outside) and not pointing to an obstacle
-            while (Physics.Raycast(position, route.normalized, route.magnitude, wallMask) ||
-                   Physics.CheckSphere(destination, 0.5f, obstacleMask));
-
-            hasDestination = true;
-        }
-
-        private void Patrol()
-        {
-            agent.speed = patrolSpeed;
-            
-            if (!hasDestination) SearchForDestination();
-            if (hasDestination) agent.SetDestination(destination);
-
-            // AI has reached the destination
-            if (agent.pathStatus == NavMeshPathStatus.PathComplete && agent.remainingDistance == 0) hasDestination = false;
-        }
 
         private void Chase()
         {
