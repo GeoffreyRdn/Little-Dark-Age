@@ -10,6 +10,7 @@ namespace Dungeon
             GetRooms(dungeon, generation, wallWindowProba);
             GetHallways(dungeon, generation);
         }
+        
         private void GetRooms(SubDungeon dungeon, Generation generation, float wallWindowProba)
         {
             if (dungeon == null) return;
@@ -71,8 +72,6 @@ namespace Dungeon
 
                         // creating walls around the hallways
 
-                        int nbWalls = 0;
-                        
                         for (int k = i - 1; k <= i + 1; k++)
                         {
                             for (int l = j - 1; l <= j + 1; l++)
@@ -80,13 +79,9 @@ namespace Dungeon
                                 if (generation.DungeonBoard[k, l] == TileType.Void)
                                 {
                                     generation.DungeonBoard[k, l] = TileType.WallTorch;
-                                    nbWalls++;
                                 }
                             }
                         }
-
-                        // if (nbWalls == 1 && generation.DungeonBoard[i, j] == TileType.Hallway)
-                        //     generation.DungeonBoard[i, j] = TileType.Door;
                     }
                 }
             }

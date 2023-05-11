@@ -13,23 +13,22 @@ namespace Dungeon
     {
         [SerializeField] private GameObject enemiesHolder;
         [SerializeField] [Tag] private string environmentTag;
+        [SerializeField] private bool isHost;
         
         private Generation generation;
         private PhotonView photonView;
         private Vector3 spawnPoint;
         
         private NavMeshSurface surface;
-
-        private void Awake()
+        
+        public void Start()
         {
             generation = GetComponent<Generation>();
             photonView = GetComponent<PhotonView>();
-        }
-
-        private void Start()
-        {
-            if (PhotonNetwork.IsMasterClient)
+            
+            if (PhotonNetwork.IsMasterClient || isHost)
             {
+                Debug.Log("STARTING GENERATION");
                 generation.GenerateDungeon();
                 Debug.Log("Generation DONE");  
                 

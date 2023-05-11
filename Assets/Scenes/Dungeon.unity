@@ -162,9 +162,9 @@ MonoBehaviour:
   minHallwaySize: 1
   maxHallwaySize: 1
   basicWallGO: {fileID: 2121542299643369026, guid: e42893b29e2746748b2c2215aad8952e, type: 3}
-  wallTorchGO: {fileID: 343808969462547299, guid: 86ee8cefe331e8b4881deb868f110089, type: 3}
+  wallTorchGO: {fileID: 2121542299643369026, guid: e42893b29e2746748b2c2215aad8952e, type: 3}
   wallWindowGO: {fileID: 5010476966422055348, guid: 749f4f1ed437ced4b890825610813e41, type: 3}
-  doorGO: {fileID: 0}
+  doorGO: {fileID: 1845907278752291708, guid: 0c3618f8175b6964fad4aa3dbbf57d71, type: 3}
   floorRoom: {fileID: 5122338818818721925, guid: 895d58724abcf624ca1c6d4e8d1a0ad4, type: 3}
   floorHallway: {fileID: 5122338818818721925, guid: 895d58724abcf624ca1c6d4e8d1a0ad4, type: 3}
   wallWindowProba: 30
@@ -277,59 +277,46 @@ MonoBehaviour:
     offset: {x: 33.62, y: 1, z: -11}
     index: 31
   occupiedGO: {fileID: 424045812941590834, guid: 874033646873ce840b326da4b6178837, type: 3}
+  occupiedGO2: {fileID: 424045812941590834, guid: 65146f574b2ecd549a630a4ad5b58d74, type: 3}
   objectInstantiationProbability: 30
+  isHost: 0
   parent: {fileID: 903032346}
   deletionTag: CanBeDeleted
   rooms:
   - serializedVersion: 2
-    x: 5
-    y: 1
-    width: 5
-    height: 15
-  - serializedVersion: 2
-    x: 12
-    y: 2
-    width: 5
-    height: 13
-  - serializedVersion: 2
-    x: 23
+    x: 9
     y: 5
-    width: 5
-    height: 14
-  - serializedVersion: 2
-    x: 41
-    y: 5
-    width: 13
-    height: 5
-  - serializedVersion: 2
-    x: 35
-    y: 13
-    width: 15
-    height: 5
-  - serializedVersion: 2
-    x: 1
-    y: 25
-    width: 10
-    height: 5
+    width: 37
+    height: 6
   - serializedVersion: 2
     x: 3
-    y: 35
-    width: 14
-    height: 5
-  - serializedVersion: 2
-    x: 6
-    y: 44
-    width: 11
-    height: 7
-  - serializedVersion: 2
-    x: 28
-    y: 24
-    width: 22
+    y: 16
+    width: 21
     height: 9
   - serializedVersion: 2
-    x: 22
-    y: 44
-    width: 29
+    x: 10
+    y: 31
+    width: 18
+    height: 6
+  - serializedVersion: 2
+    x: 2
+    y: 41
+    width: 20
+    height: 9
+  - serializedVersion: 2
+    x: 31
+    y: 13
+    width: 18
+    height: 5
+  - serializedVersion: 2
+    x: 32
+    y: 23
+    width: 16
+    height: 8
+  - serializedVersion: 2
+    x: 32
+    y: 41
+    width: 20
     height: 9
 --- !u!4 &841107531
 Transform:
@@ -372,6 +359,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enemiesHolder: {fileID: 1843006744}
   environmentTag: Environment
+  isHost: 0
 --- !u!114 &841107535
 MonoBehaviour:
   m_ObjectHideFlags: 0
