@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Cinemachine;
 using Health;
 using NaughtyAttributes;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 using Random = UnityEngine.Random;
@@ -21,6 +22,13 @@ namespace Enemies
         
         [BoxGroup("FX")] [SerializeField] private ParticleSystem sparkle;
         [BoxGroup("FX")] [SerializeField] private ParticleSystem stageChangeFX;
+        
+        [BoxGroup("SoundFX")] [SerializeField] private AudioSource source;
+        [BoxGroup("SoundFX")] [SerializeField] private AudioClip attack1;
+        [BoxGroup("SoundFX")] [SerializeField] private AudioClip attack2;
+        [BoxGroup("SoundFX")] [SerializeField] private AudioClip takeoff;
+        [BoxGroup("SoundFX")] [SerializeField] private AudioClip deathSound;
+        [BoxGroup("SoundFX")] [SerializeField] private AudioClip swordSwoosh;
         
         [BoxGroup("Mask")] [SerializeField] private LayerMask playerMask;
         [BoxGroup("Mask")] [SerializeField] private LayerMask obstacleMask;
@@ -48,6 +56,7 @@ namespace Enemies
         private bool isHit;
         private bool isRunning;
         private bool isChangingStage;
+        private float lastLifeLevel;
 
         
         
@@ -165,11 +174,10 @@ namespace Enemies
             //stage 2
             if (!stage2Enabled)
             {
-                //stage 1
-                if (health <= initialHealth * 0.50f)
+                if (health <= initialHealth * 0.25f)
                 {
                     chaseSpeed *= 1.25f;
-                    Debug.Log("changing stage 2222222");
+                    Debug.Log("changing stage 2");
                     StageChange1();
                     stage2Enabled = true;
                 }
@@ -178,6 +186,14 @@ namespace Enemies
             if (health <= 0)
             {
                 //DEATH
+                source.PlayOneShot(deathSound);
+                
+            }
+
+            if (health <= lastLifeLevel)
+            {
+                source.PlayOneShot(attack2);
+                lastLifeLevel = health;
             }
         }
 
@@ -196,7 +212,7 @@ namespace Enemies
         {
             Vector3 agentPosition = transform.position;
             Vector3 targetPosition = target.position;
-            
+            source.PlayOneShot(takeoff);
             agent.SetDestination(agentPosition);
             transform.LookAt(new Vector3(targetPosition.x, agentPosition.y, targetPosition.z));
             isChangingStage = true;
@@ -231,6 +247,17 @@ namespace Enemies
                     case 3:
                         return LockState(ComboAttackAnimation, 4f);
                 }
+                source.PlayOneShot(sw);
+                int randomSound = Random.Range(1, 3);
+                switch (randomSound)
+                {
+                    case 1:
+                        source.PlayOneShot(attack1, 100);
+                        break;
+                    case 2:
+                        source.PlayOneShot(attack2);
+                        break;
+                }
             }
 
             if (isChangingStage)
@@ -251,8 +278,7 @@ namespace Enemies
                 return s;
             }
         }
-        
-        
+
 
         private void ShakeCamera()
         {
