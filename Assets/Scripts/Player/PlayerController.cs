@@ -137,6 +137,7 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
         HealthController.onDungeonComplete += HandleDungeonComplete;
         DamageBehavior.onPlayerDamaged += HandlePlayerDamaged;
         EnemyInstantiation.onEnemiesSpawned += UpdateEnemiesRemainingText;
+        HealthController.onEnemyDeath += UpdateEnemiesRemainingText;
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
@@ -146,6 +147,7 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
         HealthController.onDungeonComplete -= HandleDungeonComplete;
         DamageBehavior.onPlayerDamaged -= HandlePlayerDamaged;
         EnemyInstantiation.onEnemiesSpawned -= UpdateEnemiesRemainingText;
+        HealthController.onEnemyDeath -= UpdateEnemiesRemainingText;
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
@@ -647,7 +649,7 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
         }
     }
 
-    private void UpdateEnemiesRemainingText(int nbEnemies)
+    public void UpdateEnemiesRemainingText(int nbEnemies)
         => pv.RPC(nameof(UpdateEnemiesRemainingTextRPC), RpcTarget.All, nbEnemies);
 
     [PunRPC]

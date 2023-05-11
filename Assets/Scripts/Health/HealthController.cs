@@ -20,10 +20,12 @@ namespace Health {
 		[SerializeField] [NaughtyAttributes.Tag] private string playerTag;
 
 		public delegate void OnPlayerDeath(GameObject player);
+		public delegate void OnEnemyDeath(int enemiesRemaining);
 		public delegate void OnDungeonComplete();
 		
 
 		public static OnPlayerDeath onPlayerDeath;
+		public static OnEnemyDeath onEnemyDeath;
 		public static OnDungeonComplete onDungeonComplete;
 
 		public float Health         => health;
@@ -71,16 +73,17 @@ namespace Health {
 			=> health = maxHealth;
 
 		private void Kill() {
-			Debug.Log("Killing target");
 
 			if (gameObject.CompareTag(playerTag))
 			{
+				Debug.Log("KILLING PLAYER");
 				onPlayerDeath?.Invoke(gameObject);
 				photonView.RPC(nameof(KillPlayer), RpcTarget.All);
 			}
 			
 			else
 			{
+				Debug.Log("CALLING KILL ENEMY");
 				photonView.RPC(nameof(KillEnemy), RpcTarget.MasterClient);
 			}
 		}
@@ -93,13 +96,12 @@ namespace Health {
 		private IEnumerator KillEnemy()
 		{
 			yield return new WaitForSeconds(.2f);
-			
-			EnemyInstantiation.Enemies.Remove(gameObject);
-			PhotonNetwork.Destroy(gameObject);
-			EnemyInstantiation.EnemiesRemaining--;
 
-			enemiesRemainingText.text = EnemyInstantiation.EnemiesRemaining + " Enemies Remaining";
-			
+			EnemyInstantiation.Enemies.Remove(gameObject);
+			EnemyInstantiation.EnemiesRemaining--;
+			PhotonNetwork.Destroy(gameObject);
+			onEnemyDeath?.Invoke(EnemyInstantiation.EnemiesRemaining);
+
 			Debug.Log("ENEMY KILLED , REMAINING : " + EnemyInstantiation.EnemiesRemaining);
 
 			if (EnemyInstantiation.EnemiesRemaining == 0)

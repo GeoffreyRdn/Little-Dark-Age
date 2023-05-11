@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 1845907278752291711}
   - component: {fileID: 8009804172941405632}
   - component: {fileID: 1875538050124917283}
-  - component: {fileID: 7547473776844115809}
+  - component: {fileID: 821997555798521409}
   m_Layer: 7
   m_Name: Gate Door
   m_TagString: CanBeDeleted
@@ -35,7 +35,7 @@ Transform:
   - {fileID: 4205755079808448157}
   - {fileID: 5318754620566173325}
   m_Father: {fileID: 0}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &8009804172941405632
 BoxCollider:
@@ -71,7 +71,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerTag: Player
---- !u!114 &7547473776844115809
+--- !u!114 &821997555798521409
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

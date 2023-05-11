@@ -59,6 +59,19 @@ namespace Enemies
 
         #endregion
 
+        #region Sounds
+
+
+        [SerializeField, BoxGroup("Audio")] private AudioClip walkSound;
+        [SerializeField, BoxGroup("Audio")] private AudioClip runSound;
+        [SerializeField, BoxGroup("Audio")] private AudioClip attackSound;
+        [SerializeField, BoxGroup("Audio")] private AudioClip deathSound;
+        [SerializeField, BoxGroup("Audio")] private AudioClip hurtSound;
+        
+        private AudioSource audioSource;
+
+        #endregion
+        
         private NavMeshAgent agent;
         private List<GameObject> players;
         private PhotonView photonView;
@@ -76,6 +89,7 @@ namespace Enemies
             agent = GetComponent<NavMeshAgent>();
             players = GameObject.FindGameObjectsWithTag(playerTag).ToList();
             photonView = GetComponent<PhotonView>();
+            audioSource = GetComponent<AudioSource>();
         }
         
         private void Update()
@@ -100,6 +114,19 @@ namespace Enemies
 
             animator.CrossFade(state, 0, 0);
             currentState = state;
+            
+            AudioClip sound = walkSound;
+            bool repeat = true;
+
+            if (state == AttackAnimation) (sound, repeat) = (attackSound, false);
+            else if (state == HitAnimation) (sound, repeat) = (hurtSound, false);
+            else if (state == RunAnimation) sound = runSound;
+
+            audioSource.clip = sound;
+            
+            if (repeat) audioSource.Play();
+            else audioSource.PlayOneShot(sound);
+            
             photonView.RPC(nameof(SendAnimations), RpcTarget.Others, currentState);
         }
 
@@ -126,7 +153,24 @@ namespace Enemies
         [PunRPC]
         private void SendAnimations(int state)
         {
-            if (gameObject != null) animator.CrossFade(state, 0, 0);
+            if (gameObject == null) return;
+            
+            animator.CrossFade(state, 0, 0);
+            currentState = state;
+            
+            AudioClip sound = walkSound;
+            bool repeat = true;
+
+            if (state == AttackAnimation) (sound, repeat) = (attackSound, false);
+            else if (state == HitAnimation) (sound, repeat) = (hurtSound, false);
+            else if (state == RunAnimation) sound = runSound;
+
+            audioSource.clip = sound;
+            
+            Debug.Log("CLIP : " + sound);
+            
+            if (repeat) audioSource.Play();
+            else audioSource.PlayOneShot(sound);
         }
 
         private int GetState()
