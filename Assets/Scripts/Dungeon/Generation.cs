@@ -11,6 +11,8 @@ namespace Dungeon
 {
     public class Generation : MonoBehaviour
     {
+        #region Enums
+        
         internal enum RoomAvailability
         {
             Available,
@@ -25,6 +27,8 @@ namespace Dungeon
             Bottom
         }
         
+        #endregion
+        
         #region Variables
         
         [BoxGroup("Dungeon Settings")] [Range(50,200)] [SerializeField] private int boardWidth;
@@ -36,9 +40,13 @@ namespace Dungeon
         [BoxGroup("Dungeon Settings")] [Range(1,5)] [SerializeField] internal int minHallwaySize;
         [BoxGroup("Dungeon Settings")] [Range(1,5)] [SerializeField] internal int maxHallwaySize;
 
-        [BoxGroup("Prefabs")] [SerializeField] private GameObject wall;
+        [BoxGroup("Prefabs")] [SerializeField] private GameObject basicWallGO;
+        [BoxGroup("Prefabs")] [SerializeField] private GameObject wallTorchGO;
+        [BoxGroup("Prefabs")] [SerializeField] private GameObject wallWindowGO;
         [BoxGroup("Prefabs")] [SerializeField] private GameObject floorRoom;
         [BoxGroup("Prefabs")] [SerializeField] private GameObject floorHallway;
+        [BoxGroup("Prefabs")] [SerializeField] private GameObject doorGO;
+        [BoxGroup("Prefabs")] [SerializeField] private float wallWindowProba = 30;
         
         
         [SerializeField] private List<DungeonObject> genericRoom;
@@ -46,8 +54,10 @@ namespace Dungeon
         [SerializeField] private List<DungeonObject> chestRoom;
         [SerializeField] private List<DungeonObject> skeletonRoom;
 
-        [SerializeField] private GameObject occupiedGO;
-        [SerializeField] private float objectInstantiationProbability;
+        [BoxGroup("Debug"), SerializeField] private GameObject occupiedGO;
+        [BoxGroup("Debug"), SerializeField] private GameObject occupiedGO2;
+        [BoxGroup("Debug"), SerializeField] private float objectInstantiationProbability;
+        [BoxGroup("Debug"), SerializeField] private bool isHost;
         
         
         [BoxGroup("Parents")] [SerializeField] private Transform parent;
@@ -59,7 +69,7 @@ namespace Dungeon
         internal RoomAvailability[,] roomAvailability;
 
         // getting all the rooms for the AI
-        public List<Rect> rooms;
+        [HideInInspector] public List<Rect> rooms;
 
         #endregion
 
@@ -77,13 +87,21 @@ namespace Dungeon
         [Button]
         public void GenerateDungeon()
         {
+            #if UNITY_EDITOR
+            ClearDungeon();
+            #endif
+
+            if (!PhotonNetwork.IsConnectedAndReady && !isHost)
+            {
+                Debug.Log("NOT AN HOST");
+                DrawBoard();
+                DrawObjects();
+                return;
+            }
+            
             DungeonBoard = new TileType[boardWidth, boardHeight];
             ObjectsBoard = new int [boardWidth, boardHeight];
             rooms = new List<Rect>();
-            
-            #if UNITY_EDITOR
-                ClearDungeon();
-            #endif
 
             // init the dungeon
             SubDungeon dungeon = new SubDungeon(new Rect(0, 0, boardWidth, boardHeight),
@@ -94,7 +112,7 @@ namespace Dungeon
             dungeon.GetRoom();
 
             // retrieving the data from the dungeon and putting it into the array
-            GetComponent<GetDungeon>().GetData(dungeon, this);
+            GetComponent<GetDungeon>().GetData(dungeon, this, wallWindowProba);
 
             // instantiating the dungeon
             DrawBoard();
@@ -114,7 +132,7 @@ namespace Dungeon
         
         #region Dungeon Instantiation
 
-        private void InstantiateWall(int i, int j)
+        private void InstantiateWall(int i, int j, GameObject wall)
         {
 
             // ROOM UP
@@ -142,6 +160,33 @@ namespace Dungeon
             }
         }
         
+        private void InstantiateDoor(int i, int j, GameObject doorPrefab)
+        {
+            // ROOM UP
+            if (DungeonBoard[i, j + 1] == TileType.Room)
+            {
+                Instantiate(doorPrefab, new Vector3(i*4,0, (j+1)*4), Quaternion.identity, parent);
+            }
+
+            // ROOM DOWN
+            else if (DungeonBoard[i, j - 1] == TileType.Room)
+            {
+                Instantiate(doorPrefab, new Vector3(i*4,0, (j-1)*4), Quaternion.Euler(0,180,0), parent);
+            }
+            
+            // LEFT ROOM
+            else if (DungeonBoard[i - 1, j] == TileType.Room)
+            {
+                Instantiate(doorPrefab, new Vector3((i-1)*4,0, j*4), Quaternion.Euler(0,-90,0), parent);
+            }
+
+            // ROOM RIGHT
+            else if (DungeonBoard[i + 1, j] == TileType.Room)
+            {
+                Instantiate(doorPrefab, new Vector3((i+1)*4,0, j*4), Quaternion.Euler(0,90,0), parent);
+            }
+        }
+        
         private void InstantiateFloor(int i, int j)
         {
             Instantiate(floorRoom, new Vector3(i*4,0, j*4), Quaternion.identity, parent);
@@ -150,6 +195,14 @@ namespace Dungeon
         private void InstantiateCorridor(int i, int j)
         {
             Instantiate(floorHallway, new Vector3(i*4,0, j*4), Quaternion.identity, parent);
+
+            for (int k = i-1; k < i+2; k++)
+            {
+                for (int l = j-1; l < j+2; l++)
+                {
+                    if (DungeonBoard[k, l] == TileType.Room) InstantiateDoor(i, j, doorGO);
+                }
+            }
         }
         
         public void DrawBoard()
@@ -161,7 +214,13 @@ namespace Dungeon
                     switch (DungeonBoard[i, j])
                     {
                         case TileType.Wall:
-                            InstantiateWall(i,j);
+                            InstantiateWall(i,j, basicWallGO);
+                            break;
+                        case TileType.WallTorch:
+                            InstantiateWall(i, j, wallTorchGO);
+                            break;
+                        case TileType.WallWindow:
+                            InstantiateWall(i, j, wallWindowGO);
                             break;
                         case TileType.Room:
                             InstantiateFloor(i, j);
@@ -336,6 +395,7 @@ namespace Dungeon
             var corridorEntrance = GetRoomOrientation(room);
             var sidePrefabList = kitchenRoom.Where(x => x.position == ObjectPosition.Side).ToList();
 
+            Debug.Log("DRAWING KITCHEN HOST");
             switch (corridorEntrance)
             {
                 case CorridorDirection.Left:
@@ -346,11 +406,13 @@ namespace Dungeon
                         
                         if (DungeonBoard[(int) room.xMax - 1, i] != TileType.Hallway)
                         {
-                            if (PhotonNetwork.IsMasterClient)
+                            if ((PhotonNetwork.IsConnectedAndReady && PhotonNetwork.IsMasterClient) || isHost)
                             {
                                 Random random = new Random();
                                 var sidePrefab = sidePrefabList[random.Next(0, sidePrefabList.Count)];
                                 var sideOffset = sidePrefab.offset;
+                                ObjectsBoard[(int) (room.xMax - 2), i] = sidePrefab.index;
+
 
                                 var position = new Vector3((int) (room.xMax - 2), 0, i);
                                 Instantiate(sidePrefab.rightGameObject, position * 4 + sideOffset, Quaternion.identity, parent);
@@ -362,13 +424,15 @@ namespace Dungeon
                                 var prefab = kitchenRoom.
                                     FirstOrDefault(x=> x.index == ObjectsBoard[(int) (room.xMax - 2), i]);
                                 if (prefab != null)
-                                    Instantiate(prefab.gameObject, new Vector3((int) (room.xMax - 2), 0, i) * 4,
+                                    Instantiate(prefab.rightGameObject, 
+                                        new Vector3((int) (room.xMax - 2), 0, i) * 4 + prefab.offset, 
                                         Quaternion.identity, parent);
                             }
                         }
                     }
 
                     break;
+                
                 case CorridorDirection.Right:
                     
                     for (int i = (int) (room.yMin + 1); i < (room.yMax - 1); i++)
@@ -377,17 +441,32 @@ namespace Dungeon
 
                         if (DungeonBoard[(int) room.xMin, i] != TileType.Hallway)
                         {
-                            Random random = new Random();
-                            var sidePrefab = sidePrefabList[random.Next(0, sidePrefabList.Count)];
-                            var sideOffset = sidePrefab.offset;
+                            if ((PhotonNetwork.IsConnectedAndReady && PhotonNetwork.IsMasterClient) || isHost)
+                            {
+                                Random random = new Random();
+                                var sidePrefab = sidePrefabList[random.Next(0, sidePrefabList.Count)];
+                                var sideOffset = sidePrefab.offset;
+                                ObjectsBoard[(int) (room.xMin + 1), i] = sidePrefab.index;
 
-                            var position = new Vector3((int) (room.xMin + 1), 0, i);
-                            Instantiate(sidePrefab.rightGameObject, position * 4 + sideOffset, Quaternion.identity, parent);
-                            UpdateObjectsRadius(position, RoomAvailability.Occupied, sidePrefab.radius);
+                                var position = new Vector3((int) (room.xMin + 1), 0, i);
+                                Instantiate(sidePrefab.rightGameObject, position * 4 + sideOffset, Quaternion.identity, parent);
+                                UpdateObjectsRadius(position, RoomAvailability.Occupied, sidePrefab.radius);
+                            }
+
+                            else
+                            {
+                                var prefab = kitchenRoom.
+                                    FirstOrDefault(x=> x.index == ObjectsBoard[(int) (room.xMin + 1), i]);
+                                if (prefab != null)
+                                    Instantiate(prefab.rightGameObject, 
+                                        new Vector3((int) (room.xMin + 1), 0, i) * 4 + prefab.offset, 
+                                        Quaternion.identity, parent);
+                            }
                         }
                     }
                 
                     break;
+                
                 case CorridorDirection.Top:
                     
                     for (int i = (int) (room.xMin + 1); i < (room.xMax - 1); i++)
@@ -396,13 +475,27 @@ namespace Dungeon
 
                         if (DungeonBoard[i, (int) room.yMin] != TileType.Hallway)
                         {
-                            Random random = new Random();
-                            var sidePrefab = sidePrefabList[random.Next(0, sidePrefabList.Count)];
-                            var sideOffset = sidePrefab.offset;
+                            if ((PhotonNetwork.IsConnectedAndReady && PhotonNetwork.IsMasterClient) || isHost)
+                            {
+                                Random random = new Random();
+                                var sidePrefab = sidePrefabList[random.Next(0, sidePrefabList.Count)];
+                                var sideOffset = sidePrefab.offset;
+                                ObjectsBoard[i, (int) (room.yMin + 1)] = sidePrefab.index;
                             
-                            var position = new Vector3(i, 0, (int) (room.yMin + 1));
-                            Instantiate(sidePrefab.gameObject, position * 4 + sideOffset, Quaternion.identity, parent);
-                            UpdateObjectsRadius(position, RoomAvailability.Occupied, sidePrefab.radius);
+                                var position = new Vector3(i, 0, (int) (room.yMin + 1));
+                                Instantiate(sidePrefab.gameObject, position * 4 + sideOffset, Quaternion.identity, parent);
+                                UpdateObjectsRadius(position, RoomAvailability.Occupied, sidePrefab.radius);
+                            }
+                            
+                            else
+                            {
+                                var prefab = kitchenRoom.
+                                    FirstOrDefault(x=> x.index == ObjectsBoard[i, (int) (room.yMin + 1)]);
+                                if (prefab != null)
+                                    Instantiate(prefab.gameObject, 
+                                        new Vector3(i, 0, (int) (room.yMin + 1)) * 4 + prefab.offset, 
+                                        Quaternion.identity, parent);
+                            }
                         }
                     }
                     
@@ -416,17 +509,34 @@ namespace Dungeon
                         
                         if (DungeonBoard[i, (int) room.yMax - 1] != TileType.Hallway)
                         {
-                            Random random = new Random();
-                            var sidePrefab = sidePrefabList[random.Next(0, sidePrefabList.Count)];
-                            var sideOffset = sidePrefab.offset;
+
+                            if ((PhotonNetwork.IsConnectedAndReady && PhotonNetwork.IsMasterClient) || isHost)
+                            {
+                                Random random = new Random();
+                                var sidePrefab = sidePrefabList[random.Next(0, sidePrefabList.Count)];
+                                var sideOffset = sidePrefab.offset;
+                                ObjectsBoard[i, (int) (room.yMax - 2)] = sidePrefab.index;
+
                             
-                            var position = new Vector3(i, 0, (int) (room.yMax - 2));
-                            Instantiate(sidePrefab.gameObject, position * 4 + sideOffset, Quaternion.identity, parent);
-                            UpdateObjectsRadius(position, RoomAvailability.Occupied, sidePrefab.radius);
+                                var position = new Vector3(i, 0, (int) (room.yMax - 2));
+                                Instantiate(sidePrefab.gameObject, position * 4 + sideOffset, Quaternion.identity, parent);
+                                UpdateObjectsRadius(position, RoomAvailability.Occupied, sidePrefab.radius);
+                            }
+                            
+                            else
+                            {
+                                var prefab = kitchenRoom.
+                                    FirstOrDefault(x=> x.index == ObjectsBoard[i, (int) (room.yMax - 2)]);
+                                if (prefab != null)
+                                    Instantiate(prefab.gameObject, 
+                                        new Vector3(i, 0, (int) (room.yMax - 2)) * 4 + prefab.offset, 
+                                        Quaternion.identity, parent);
+                            }
                         }
                     }
                     break;
             }
+
 
             var middlePrefab = kitchenRoom.Where(x => x.position == ObjectPosition.Middle).ToList()[0];
             var middleOffset = middlePrefab.offset;
@@ -439,27 +549,8 @@ namespace Dungeon
 
         private void DrawGenericRoom(Rect room)
         {
-            if (!PhotonNetwork.IsMasterClient)
-            {
-                for (int i = 0; i < boardWidth; i++)
-                {
-                    for (int j = 0; j < boardHeight; j++)
-                    {
-                        if (ObjectsBoard[i, j] != 0)
-                        {
-                            DungeonObject dungeonObject =
-                                genericRoom.FirstOrDefault(x => x.index == ObjectsBoard[i, j]);
-                            if (dungeonObject != default)
-                            {
-                                Instantiate(dungeonObject.gameObject, new Vector3(i, 0, j) * 4, Quaternion.identity,
-                                    parent);
-                            }
-                        }
-                    }
-                }
-                return;
-            }
-            
+            if (PhotonNetwork.IsConnectedAndReady && !PhotonNetwork.IsMasterClient || !isHost) return;
+
             for (int i = (int) room.xMin + 2; i < room.xMax - 2; i++)
             {
                 for (int j = (int) room.yMin + 2; j < room.yMax - 2; j++)
@@ -565,7 +656,33 @@ namespace Dungeon
                         break;
                 }
             }
+
+            if (PhotonNetwork.IsConnectedAndReady && !PhotonNetwork.IsMasterClient || !isHost) DrawObjectsNonHost();
         }
+
+
+        private void DrawObjectsNonHost()
+        {
+            for (int i = 0; i < boardWidth; i++)
+            {
+                for (int j = 0; j < boardHeight; j++)
+                {
+                    if (ObjectsBoard[i, j] == 0) continue;
+
+                    var position = new Vector3(i, 0, j);
+
+                    DungeonObject dungeonObject = genericRoom.FirstOrDefault(x => x.index == ObjectsBoard[i, j]);
+                    if (dungeonObject != default)
+                        Instantiate(dungeonObject.gameObject, position * 4, Quaternion.identity, parent);
+
+                    dungeonObject = skeletonRoom.FirstOrDefault(x => x.index == ObjectsBoard[i, j]);
+                    if (dungeonObject != default)
+                        Instantiate(dungeonObject.gameObject, position * 4 + dungeonObject.offset, Quaternion.identity,
+                            parent);
+                }
+            }
+        }
+        
         
         #endregion
     }

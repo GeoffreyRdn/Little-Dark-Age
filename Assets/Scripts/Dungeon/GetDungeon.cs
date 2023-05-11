@@ -5,12 +5,12 @@ namespace Dungeon
     public class GetDungeon : MonoBehaviour
     {
         #region Methods
-        internal void GetData(SubDungeon dungeon, Generation generation)
+        internal void GetData(SubDungeon dungeon, Generation generation, float wallWindowProba)
         {
-            GetRooms(dungeon, generation);
+            GetRooms(dungeon, generation, wallWindowProba);
             GetHallways(dungeon, generation);
         }
-        private void GetRooms(SubDungeon dungeon, Generation generation)
+        private void GetRooms(SubDungeon dungeon, Generation generation, float wallWindowProba)
         {
             if (dungeon == null) return;
             
@@ -31,7 +31,9 @@ namespace Dungeon
                                 if (generation.DungeonBoard[k, l] != TileType.Room && 
                                     generation.DungeonBoard[k, l] != TileType.Hallway)
                                 {
-                                    generation.DungeonBoard[k, l] = TileType.Wall;
+                                    generation.DungeonBoard[k, l] = (Random.Range(0,100) < wallWindowProba) 
+                                        ? TileType.WallWindow 
+                                        : TileType.Wall;
                                 }
                             }
                         }
@@ -42,8 +44,8 @@ namespace Dungeon
             }
             else
             {
-                GetRooms(dungeon.LeftChild, generation);
-                GetRooms(dungeon.RightChild, generation);
+                GetRooms(dungeon.LeftChild, generation, wallWindowProba);
+                GetRooms(dungeon.RightChild, generation, wallWindowProba);
             }
         }
         private void GetHallways(SubDungeon dungeon, Generation generation)
@@ -73,7 +75,7 @@ namespace Dungeon
                             for (int l = j - 1; l <= j + 1; l++)
                             {
                                 if (generation.DungeonBoard[k, l] == TileType.Void)
-                                    generation.DungeonBoard[k, l] = TileType.Wall;
+                                    generation.DungeonBoard[k, l] = TileType.WallTorch;
                             }
                         }
                     }
