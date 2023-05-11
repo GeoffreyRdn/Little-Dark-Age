@@ -138,6 +138,7 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     {
         HealthController.onPlayerDeath += HandlePlayerDeath;
         HealthController.onDungeonComplete += HandleDungeonComplete;
+        HealthController.onBossDeath += HandleWin;
         DamageBehavior.onPlayerDamaged += HandlePlayerDamaged;
         EnemyInstantiation.onEnemiesSpawned += UpdateEnemiesRemainingText;
         HealthController.onEnemyDeath += UpdateEnemiesRemainingText;
@@ -148,6 +149,7 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     {
         HealthController.onPlayerDeath -= HandlePlayerDeath;
         HealthController.onDungeonComplete -= HandleDungeonComplete;
+        HealthController.onBossDeath -= HandleWin;
         DamageBehavior.onPlayerDamaged -= HandlePlayerDamaged;
         EnemyInstantiation.onEnemiesSpawned -= UpdateEnemiesRemainingText;
         HealthController.onEnemyDeath -= UpdateEnemiesRemainingText;
@@ -637,15 +639,28 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
 
     private void HandleDungeonComplete()
     {
-        pv.RPC(nameof(EnableWinMenu), RpcTarget.AllBuffered);
+        pv.RPC(nameof(EnableWinDungeonMenu), RpcTarget.AllBuffered);
         StartCoroutine(DelayLoadBossScene());
     }
 
     private IEnumerator DelayLoadBossScene()
     {
         yield return new WaitForSeconds(5);
-        pv.RPC(nameof(DisableWinMenu), RpcTarget.All);
+        pv.RPC(nameof(DisableWinDungeonMenu), RpcTarget.All);
         LoadBossScene();
+    }
+
+    private IEnumerator DelayReturnToLobby()
+    {
+        yield return new WaitForSeconds(5);
+        pv.RPC(nameof(DisableWinMenu), RpcTarget.All);
+        pv.RPC(nameof(ReturnToLobby), RpcTarget.MasterClient);
+    }
+
+    private void HandleWin()
+    {
+        pv.RPC(nameof(EnableWinMenu), RpcTarget.AllBuffered);
+        StartCoroutine(DelayReturnToLobby());
     }
 
     private void HandlePlayerDamaged(GameObject player)
@@ -669,7 +684,7 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
 
 
     [PunRPC]
-    private void EnableWinMenu()
+    private void EnableWinDungeonMenu()
     {
         var player = ((GameObject) PhotonNetwork.LocalPlayer.TagObject).GetComponent<PlayerController>();
         player.audioSource.PlayOneShot(victorySound);
@@ -678,8 +693,21 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
     }
 
     [PunRPC]
-    private void DisableWinMenu()
+    private void EnableWinMenu()
+    {
+        var player = ((GameObject) PhotonNetwork.LocalPlayer.TagObject).GetComponent<PlayerController>();
+        player.audioSource.PlayOneShot(victorySound);
+        player.winBossText.SetActive(true);
+        player.nbEnemiesText.gameObject.SetActive(false);
+    }
+
+    [PunRPC]
+    private void DisableWinDungeonMenu()
         => winDungeonText.SetActive(false); 
+    
+    [PunRPC]
+    private void DisableWinMenu()
+        => winBossText.SetActive(false); 
     
     private void CloseInventory()
     {

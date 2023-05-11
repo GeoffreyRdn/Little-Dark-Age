@@ -72,6 +72,8 @@ MonoBehaviour:
   - TransmitAnimation
   - SendAnimation
   - RemoveNbEnemies
+  - DisableWinDungeonMenu
+  - EnableWinDungeonMenu
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1

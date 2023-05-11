@@ -65,8 +65,8 @@ public class DamageBehavior : MonoBehaviour
 
             else
             {
-                onEnemyDamaged?.Invoke(target);
                 target.GetComponent<HealthController>().Damage(weaponDamage);
+                onEnemyDamaged?.Invoke(target);
             }
         }
     }

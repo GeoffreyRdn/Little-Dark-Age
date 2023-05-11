@@ -1,9 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Cinemachine;
 using Health;
 using NaughtyAttributes;
+using Photon.Pun;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
@@ -23,7 +25,6 @@ namespace Enemies
         [BoxGroup("FX")] [SerializeField] private ParticleSystem sparkle;
         [BoxGroup("FX")] [SerializeField] private ParticleSystem stageChangeFX;
         
-        [BoxGroup("SoundFX")] [SerializeField] private AudioSource source;
         [BoxGroup("SoundFX")] [SerializeField] private AudioClip attack1;
         [BoxGroup("SoundFX")] [SerializeField] private AudioClip attack2;
         [BoxGroup("SoundFX")] [SerializeField] private AudioClip takeoff;
@@ -58,9 +59,6 @@ namespace Enemies
         private bool isChangingStage;
         private float lastLifeLevel;
 
-        
-        
-        
         #endregion
 
         #region Animations
@@ -72,6 +70,7 @@ namespace Enemies
         private static readonly int StageAnimation = Animator.StringToHash("stage change");
         private static readonly int ComboAttackAnimation = Animator.StringToHash("melee_combo");
         private static readonly int TurningAttackAnimation = Animator.StringToHash("melee_360");
+        private static readonly int DeathAnimation = Animator.StringToHash("death");
         private float cameraShakeMagnitude = 0.2f;
         private float cameraShakeDuration = 0.1f;
         private float cameraShakeInterval = 0.1f;
@@ -80,39 +79,146 @@ namespace Enemies
         private float lockedUntil;
         private int currentState;
         private float initialHealth;
-        private float health;
+        // private float health;
         private HealthController healthController;
         private bool stage1Enabled = false;
         private bool stage2Enabled = false;
+        private bool isDead;
+        private AudioSource source;
+
         
         private Animator animator;
 
         #endregion
 
         private NavMeshAgent agent;
-        private GameObject[] players;
+        private List<GameObject> players;
         
         private Vector3 destination;
         private bool hasDestination;
+        private PhotonView photonView;
         
         #endregion
 
+        #region Events
+        
+        private void OnEnable()
+        {
+            HealthController.onPlayerDeath += HandlePlayerDeath;
+            HealthController.onBossDeath += HandleBossDeath;
+            DamageBehavior.onEnemyDamaged += HandleEnemyDamaged;
+        }
+
+        private void OnDisable()
+        {
+            HealthController.onPlayerDeath -= HandlePlayerDeath;
+            HealthController.onBossDeath -= HandleBossDeath;
+            DamageBehavior.onEnemyDamaged -= HandleEnemyDamaged;
+        }
+        
+        private void HandleEnemyDamaged(GameObject enemyDamaged)
+        {
+            if (gameObject == enemyDamaged) isHit = true;
+            StartCoroutine(HandleBossChangeStage());
+        }
+
+        private IEnumerator HandleBossChangeStage()
+        {
+            // TIME TO UPDATE HEALTH
+            yield return new WaitForSeconds(.2f);
+
+            var health = healthController.Health;
+            
+            //stage 1
+            if (!stage1Enabled && health <= initialHealth * 0.50f)
+            {
+
+                chaseSpeed *= 1.25f;
+                Debug.Log("changing stage");
+                StageChange1();
+                stage1Enabled = true;
+            }
+            
+            //stage 2
+            if (!stage2Enabled && health <= initialHealth * 0.25f)
+            {
+                chaseSpeed *= 1.25f;
+                Debug.Log("changing stage 2");
+                StageChange1();
+                stage2Enabled = true;
+            }
+
+            if (health <= lastLifeLevel)
+            {
+                source.PlayOneShot(attack2);
+                lastLifeLevel = health;
+            }
+        }
+
+        private void HandleBossDeath()
+        {
+            isDead = true;
+            source.clip = deathSound;
+            source.Play();
+            StartCoroutine(DestroyBoss());
+        }
+
+        private IEnumerator DestroyBoss()
+        {
+            yield return new WaitForSeconds(1);
+            PhotonNetwork.Destroy(gameObject);
+        }
+        
+        private void HandlePlayerDeath(GameObject playerDead)
+        {
+            int viewID = playerDead.GetComponent<PhotonView>().ViewID;
+            photonView.RPC(nameof(TransmitPlayerDeath), RpcTarget.All, viewID);
+        }
+
+        [PunRPC]
+        private void TransmitPlayerDeath(int viewID)
+        {
+            if (target != null && target.gameObject.GetComponent<PhotonView>().ViewID == viewID)
+            {
+                target = null;
+            }
+            
+            List<GameObject> remainingPlayers = players
+                .Where(player => player != null && 
+                                 !player.GetComponent<PlayerController>().isDead && 
+                                 player.GetComponent<PhotonView>().ViewID != viewID)
+                .ToList();
+            players = remainingPlayers;
+        }
+        
+        #endregion
+        
         #region Start - Update
 
         private void Start()
         {
+            source = GetComponent<AudioSource>();
             healthController = GetComponent<HealthController>();
-            Debug.Log("health = " + healthController.Health);
             initialHealth = healthController.MaxHealth;
-            
+            Debug.Log("BOSS HEALTH " + healthController.Health);
+
+            photonView = GetComponent<PhotonView>();
             animator = GetComponentInChildren<Animator>();
             agent = GetComponent<NavMeshAgent>();
-            players = GameObject.FindGameObjectsWithTag(playerTag);
+            players = GameObject.FindGameObjectsWithTag(playerTag).ToList();
         }
         
         private void Update()
         {
-            health = healthController.Health;
+            if (isDead)
+            {
+                if (currentState != DeathAnimation)
+                {
+                    currentState = DeathAnimation;
+                    animator.CrossFade(DeathAnimation, 0, 0);
+                }
+                return;
+            }
             
             var state = GetState();
             if (state != AttackAnimation && state != TurningAttackAnimation && state != ComboAttackAnimation)
@@ -134,66 +240,16 @@ namespace Enemies
             //Sword FX
             var emissionModule = sparkle.emission;
             var rateOverTime = emissionModule.rateOverTime;
-            if (isAttacking)
-            {
-                rateOverTime.constant = 50;
-                emissionModule.rateOverTime = rateOverTime;
-            }
-            else
-            {
-                rateOverTime.constant = 1.5f;
-                emissionModule.rateOverTime = rateOverTime;
-            }
 
-            if (isRunning)
-            {
-                if (Time.time >= nextCameraShakeTime)
-                {
-                    nextCameraShakeTime = Time.time + cameraShakeInterval;
-                }
-            }
-
-            if (isHit)
-            {
-                health -= 25;
-            }
-
-            if (!stage1Enabled)
-            {
-                //stage 1
-                if (health <= initialHealth * 0.50f)
-                {
-
-                    chaseSpeed *= 1.25f;
-                    Debug.Log("changing stage");
-                    StageChange1();
-                    stage1Enabled = true;
-                }
-            }
-
-            //stage 2
-            if (!stage2Enabled)
-            {
-                if (health <= initialHealth * 0.25f)
-                {
-                    chaseSpeed *= 1.25f;
-                    Debug.Log("changing stage 2");
-                    StageChange1();
-                    stage2Enabled = true;
-                }
-            }
+            bool attacking = currentState == AttackAnimation || currentState == ComboAttackAnimation ||
+                             currentState == TurningAttackAnimation;
             
-            if (health <= 0)
-            {
-                //DEATH
-                source.PlayOneShot(deathSound);
-                
-            }
+            rateOverTime.constant = attacking ? 50 : 1.5f;
+            emissionModule.rateOverTime = rateOverTime;
 
-            if (health <= lastLifeLevel)
+            if (currentState == RunAnimation && Time.time >= nextCameraShakeTime)
             {
-                source.PlayOneShot(attack2);
-                lastLifeLevel = health;
+                nextCameraShakeTime = Time.time + cameraShakeInterval;
             }
         }
 
@@ -224,10 +280,9 @@ namespace Enemies
         
         private int GetState()
         {
-            
-            if (currentState == AttackAnimation) isAttacking = false;
-            if (currentState == ComboAttackAnimation) isAttacking = false;
-            if (currentState == TurningAttackAnimation) isAttacking = false;
+            if (currentState == AttackAnimation || currentState == ComboAttackAnimation || currentState == TurningAttackAnimation)
+                isAttacking = false;
+
             if (currentState == StageAnimation) isChangingStage= false;
             if (currentState == HitAnimation) isHit = false;
             if (currentState == RunAnimation) isRunning = true;

@@ -7,6 +7,7 @@ using TMPro;
 using UI;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.SceneManagement;
 
 namespace Health {
 	public class HealthController: MonoBehaviour {
@@ -21,11 +22,13 @@ namespace Health {
 
 		public delegate void OnPlayerDeath(GameObject player);
 		public delegate void OnEnemyDeath(int enemiesRemaining);
+		public delegate void OnBossDeath();
 		public delegate void OnDungeonComplete();
 		
 
 		public static OnPlayerDeath onPlayerDeath;
 		public static OnEnemyDeath onEnemyDeath;
+		public static OnBossDeath onBossDeath;
 		public static OnDungeonComplete onDungeonComplete;
 
 		public float Health         => health;
@@ -87,7 +90,7 @@ namespace Health {
 				photonView.RPC(nameof(KillEnemy), RpcTarget.MasterClient);
 			}
 		}
-
+		
 		[PunRPC]
 		private void KillPlayer()
 			=> gameObject.GetComponent<PlayerController>().isDead = true;
@@ -97,6 +100,15 @@ namespace Health {
 		{
 			yield return new WaitForSeconds(.2f);
 
+			Debug.Log("KILLING: " + gameObject.name);
+				
+			if (SceneManager.GetActiveScene().name == "Boss Room")
+			{
+				Debug.Log("Killing the boss");
+				onBossDeath?.Invoke();
+				yield break;
+			}
+			
 			EnemyInstantiation.Enemies.Remove(gameObject);
 			EnemyInstantiation.EnemiesRemaining--;
 			PhotonNetwork.Destroy(gameObject);
