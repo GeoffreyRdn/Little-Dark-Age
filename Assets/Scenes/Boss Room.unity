@@ -17218,6 +17218,22 @@ PrefabInstance:
       propertyPath: takeoff
       value: 
       objectReference: {fileID: 8300000, guid: 29bb01feb5d58614ea773faa82d3e8d3, type: 3}
+    - target: {fileID: 6219267553956500612, guid: 7685d08d5dacd6f4c93e0f5ec29753e4, type: 3}
+      propertyPath: MaxDistance
+      value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 6219267553956500612, guid: 7685d08d5dacd6f4c93e0f5ec29753e4, type: 3}
+      propertyPath: rolloffCustomCurve.m_Curve.Array.data[1].time
+      value: 0.7136948
+      objectReference: {fileID: 0}
+    - target: {fileID: 6219267553956500612, guid: 7685d08d5dacd6f4c93e0f5ec29753e4, type: 3}
+      propertyPath: rolloffCustomCurve.m_Curve.Array.data[0].value
+      value: 0.8138958
+      objectReference: {fileID: 0}
+    - target: {fileID: 6219267553956500612, guid: 7685d08d5dacd6f4c93e0f5ec29753e4, type: 3}
+      propertyPath: rolloffCustomCurve.m_Curve.Array.data[1].value
+      value: 0.4619335
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

@@ -179,17 +179,14 @@ namespace Enemies
         [PunRPC]
         private void TransmitPlayerDeath(int viewID)
         {
-            if (target != null && target.gameObject.GetComponent<PhotonView>().ViewID == viewID)
-            {
-                target = null;
-            }
-            
+            target = null;
             List<GameObject> remainingPlayers = players
                 .Where(player => player != null && 
                                  !player.GetComponent<PlayerController>().isDead && 
                                  player.GetComponent<PhotonView>().ViewID != viewID)
                 .ToList();
             players = remainingPlayers;
+            UpdateTarget();
         }
         
         #endregion
@@ -331,7 +328,6 @@ namespace Enemies
 
             if (isAttacking)
             {
-                                
                 Debug.Log("PLAYING SWOOSH");
                 audioSource.PlayOneShot(swordSwoosh);
                 photonView.RPC(nameof(SendAttackSwooshAudio), RpcTarget.Others);
@@ -453,9 +449,14 @@ namespace Enemies
             
             foreach (GameObject player in players)
             {
+                if (player.GetComponent<PlayerController>().isDead)
+                {
+                    players.Remove(player);
+                    continue;
+                }
+                
                 if (InDetectionRange(player.transform))
                 {
-                    
                     var currentDistance = Vector3.Distance(player.transform.position, transform.position);
                     
                     // the AI will follow the closest player in detection range

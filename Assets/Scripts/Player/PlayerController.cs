@@ -236,7 +236,7 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
         if (InputManager.Instance.PlayerOpenShop()) OpenShopMenu();
 
 
-        if (InputManager.Instance.BossTeleport()) LoadBossScene();
+        if (InputManager.Instance.BossTeleport() && PhotonNetwork.IsMasterClient) LoadBossScene();
         
         
         mouseYVelocity = InputManager.Instance.OnRotate();
@@ -703,12 +703,20 @@ public class PlayerController : MonoBehaviour, IPunInstantiateMagicCallback
 
     [PunRPC]
     private void DisableWinDungeonMenu()
-        => winDungeonText.SetActive(false); 
-    
+    {
+        var player = ((GameObject) PhotonNetwork.LocalPlayer.TagObject).GetComponent<PlayerController>();
+        player.winBossText.SetActive(false);
+        player.nbEnemiesText.gameObject.SetActive(false);
+    }
+
     [PunRPC]
     private void DisableWinMenu()
-        => winBossText.SetActive(false); 
-    
+    {
+        var player = ((GameObject) PhotonNetwork.LocalPlayer.TagObject).GetComponent<PlayerController>();
+        player.winBossText.SetActive(false);
+        player.nbEnemiesText.gameObject.SetActive(false);
+    }
+
     private void CloseInventory()
     {
         // change action map
