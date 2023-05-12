@@ -449,7 +449,7 @@ namespace Enemies
                     x => ((GameObject) x.TagObject).GetComponent<PhotonView>().ViewID ==
                          target.GetComponent<PhotonView>().ViewID);
 
-                if (player != null)
+                if (player != default)
                 {
                     GameObject playerGO = (GameObject) player.TagObject;
                     if (playerGO.GetComponent<HealthController>().Health <= 0 ||
