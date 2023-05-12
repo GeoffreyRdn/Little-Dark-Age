@@ -39,7 +39,7 @@ Transform:
   - {fileID: 2226331126779967250}
   - {fileID: 5370958896091680788}
   m_Father: {fileID: 0}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &4124885688842974671
 MonoBehaviour:
@@ -56,9 +56,9 @@ MonoBehaviour:
   playerTag: Player
   sparkle: {fileID: 564214888314708079}
   stageChangeFX: {fileID: 0}
-  attack1: {fileID: 8300000, guid: 4ce2ff1a964352643aaa4478b18de0b8, type: 3}
+  attack1: {fileID: 8300000, guid: af81fd1ac55ccfe4391b9606739f2b12, type: 3}
   attack2: {fileID: 8300000, guid: af81fd1ac55ccfe4391b9606739f2b12, type: 3}
-  takeoff: {fileID: 0}
+  takeoff: {fileID: 8300000, guid: 29bb01feb5d58614ea773faa82d3e8d3, type: 3}
   deathSound: {fileID: 8300000, guid: 3627703cbce6890428167c0f19f74788, type: 3}
   swordSwoosh: {fileID: 0}
   playerMask:
@@ -182,16 +182,16 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
-  m_Volume: 0.7
+  m_Volume: 0.602
   m_Pitch: 1
   Loop: 0
   Mute: 0
   Spatialize: 0
   SpatializePostEffects: 0
-  Priority: 128
+  Priority: 191
   DopplerLevel: 1
   MinDistance: 1
-  MaxDistance: 10
+  MaxDistance: 15
   Pan2D: 0
   rolloffMode: 2
   BypassEffects: 0
@@ -202,7 +202,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 1.0462223
+      value: 0.8138958
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -210,8 +210,8 @@ AudioSource:
       inWeight: 0
       outWeight: 0
     - serializedVersion: 3
-      time: 0.842479
-      value: 0.67529714
+      time: 0.7136948
+      value: 0.4619335
       inSlope: -1.0872946
       outSlope: -1.0872946
       tangentMode: 0
