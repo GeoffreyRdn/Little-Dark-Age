@@ -84,9 +84,8 @@ namespace Enemies
         private bool stage1Enabled = false;
         private bool stage2Enabled = false;
         private bool isDead;
-        private AudioSource source;
-
         
+        private AudioSource audioSource;
         private Animator animator;
 
         #endregion
@@ -150,7 +149,9 @@ namespace Enemies
 
             if (health <= lastLifeLevel)
             {
-                source.PlayOneShot(attack2);
+                Debug.Log("PLAYING ATTACK2 SOUND");
+                audioSource.PlayOneShot(attack2);
+                photonView.RPC(nameof(SendAttack2Audio), RpcTarget.Others);
                 lastLifeLevel = health;
             }
         }
@@ -158,8 +159,8 @@ namespace Enemies
         private void HandleBossDeath()
         {
             isDead = true;
-            source.clip = deathSound;
-            source.Play();
+            audioSource.PlayOneShot(deathSound);
+            photonView.RPC(nameof(SendDeathAudio), RpcTarget.Others);
             StartCoroutine(DestroyBoss());
         }
 
@@ -197,7 +198,7 @@ namespace Enemies
 
         private void Start()
         {
-            source = GetComponent<AudioSource>();
+            audioSource = GetComponent<AudioSource>();
             healthController = GetComponent<HealthController>();
             initialHealth = healthController.MaxHealth;
             Debug.Log("BOSS HEALTH " + healthController.Health);
@@ -236,16 +237,17 @@ namespace Enemies
 
             animator.CrossFade(state, 0, 0);
             currentState = state;
+            photonView.RPC(nameof(SendAnimations), RpcTarget.Others, state);
             
             //Sword FX
-            var emissionModule = sparkle.emission;
+            /*var emissionModule = sparkle.emission;
             var rateOverTime = emissionModule.rateOverTime;
 
             bool attacking = currentState == AttackAnimation || currentState == ComboAttackAnimation ||
                              currentState == TurningAttackAnimation;
             
             rateOverTime.constant = attacking ? 50 : 1.5f;
-            emissionModule.rateOverTime = rateOverTime;
+            emissionModule.rateOverTime = rateOverTime;*/
 
             if (currentState == RunAnimation && Time.time >= nextCameraShakeTime)
             {
@@ -268,7 +270,11 @@ namespace Enemies
         {
             Vector3 agentPosition = transform.position;
             Vector3 targetPosition = target.position;
-            source.PlayOneShot(takeoff);
+            
+            Debug.Log("PLAYING TAKEOFF SOUND");
+            audioSource.PlayOneShot(takeoff);
+            photonView.RPC(nameof(SendTakeOffAudio), RpcTarget.Others);
+
             agent.SetDestination(agentPosition);
             transform.LookAt(new Vector3(targetPosition.x, agentPosition.y, targetPosition.z));
             isChangingStage = true;
@@ -278,6 +284,40 @@ namespace Enemies
         
         #region Methods Anim
         
+        [PunRPC]
+        private void SendAnimations(int state)
+        {
+            if (gameObject == null) return;
+            
+            animator.CrossFade(state, 0, 0);
+            currentState = state;
+        }
+
+        [PunRPC]
+        private void SendAttack1Audio()
+            => audioSource.PlayOneShot(attack1);
+
+        
+        [PunRPC]
+        private void SendAttack2Audio()
+            => audioSource.PlayOneShot(attack2);
+
+        
+        [PunRPC]
+        private void SendAttackSwooshAudio()
+            => audioSource.PlayOneShot(swordSwoosh);
+
+        
+        [PunRPC]
+        private void SendDeathAudio()
+            => audioSource.PlayOneShot(deathSound);
+
+        
+        [PunRPC]
+        private void SendTakeOffAudio()
+            => audioSource.PlayOneShot(takeoff);
+        
+
         private int GetState()
         {
             if (currentState == AttackAnimation || currentState == ComboAttackAnimation || currentState == TurningAttackAnimation)
@@ -291,6 +331,28 @@ namespace Enemies
 
             if (isAttacking)
             {
+                                
+                Debug.Log("PLAYING SWOOSH");
+                audioSource.PlayOneShot(swordSwoosh);
+                photonView.RPC(nameof(SendAttackSwooshAudio), RpcTarget.Others);
+                int randomSound = Random.Range(1, 3);
+                
+                switch (randomSound)
+                {
+                    case 1:
+                        Debug.Log("PLAYING ATTACK1");
+                        audioSource.PlayOneShot(attack1, 100);
+                        photonView.RPC(nameof(SendAttack1Audio), RpcTarget.Others);
+
+                        break;
+                    case 2:
+                        Debug.Log("PLAYING ATTACK2");
+                        audioSource.PlayOneShot(attack2);
+                        photonView.RPC(nameof(SendAttack2Audio), RpcTarget.Others);
+
+                        break;
+                }
+                
                 //different attack types
                 int randomAttack = Random.Range(1, 4);
                 switch (randomAttack)
@@ -301,17 +363,6 @@ namespace Enemies
                         return LockState(TurningAttackAnimation, 2.2f);
                     case 3:
                         return LockState(ComboAttackAnimation, 4f);
-                }
-                source.PlayOneShot(swordSwoosh);
-                int randomSound = Random.Range(1, 3);
-                switch (randomSound)
-                {
-                    case 1:
-                        source.PlayOneShot(attack1, 100);
-                        break;
-                    case 2:
-                        source.PlayOneShot(attack2);
-                        break;
                 }
             }
 

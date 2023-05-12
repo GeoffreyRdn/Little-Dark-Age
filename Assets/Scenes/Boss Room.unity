@@ -17204,28 +17204,20 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3948095059196706463, guid: 7685d08d5dacd6f4c93e0f5ec29753e4, type: 3}
       propertyPath: sceneViewId
-      value: 894
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 4122710155918658908, guid: 7685d08d5dacd6f4c93e0f5ec29753e4, type: 3}
       propertyPath: m_Name
       value: Boss
       objectReference: {fileID: 0}
     - target: {fileID: 4124885688842974671, guid: 7685d08d5dacd6f4c93e0f5ec29753e4, type: 3}
-      propertyPath: source
+      propertyPath: attack1
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 8300000, guid: 84a744165da78914c94342192b4a17f3, type: 3}
     - target: {fileID: 4124885688842974671, guid: 7685d08d5dacd6f4c93e0f5ec29753e4, type: 3}
-      propertyPath: sparkle
+      propertyPath: takeoff
       value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 8322077723823793689, guid: 7685d08d5dacd6f4c93e0f5ec29753e4, type: 3}
-      propertyPath: health
-      value: 150
-      objectReference: {fileID: 0}
-    - target: {fileID: 8322077723823793689, guid: 7685d08d5dacd6f4c93e0f5ec29753e4, type: 3}
-      propertyPath: maxHealth
-      value: 150
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 8300000, guid: 29bb01feb5d58614ea773faa82d3e8d3, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

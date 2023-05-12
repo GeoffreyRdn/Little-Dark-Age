@@ -14,9 +14,9 @@ GameObject:
   - component: {fileID: 4122710155918658909}
   - component: {fileID: 9136843929497436617}
   - component: {fileID: 4334368199479109991}
+  - component: {fileID: 6219267553956500612}
   - component: {fileID: 3948095059196706463}
   - component: {fileID: 1251726219775642341}
-  - component: {fileID: 6219267553956500612}
   m_Layer: 8
   m_Name: Boss
   m_TagString: Enemy
@@ -39,7 +39,7 @@ Transform:
   - {fileID: 2226331126779967250}
   - {fileID: 5370958896091680788}
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &4124885688842974671
 MonoBehaviour:
@@ -54,9 +54,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerTag: Player
-  sparkle: {fileID: 0}
+  sparkle: {fileID: 564214888314708079}
   stageChangeFX: {fileID: 0}
-  source: {fileID: 0}
   attack1: {fileID: 8300000, guid: 4ce2ff1a964352643aaa4478b18de0b8, type: 3}
   attack2: {fileID: 8300000, guid: af81fd1ac55ccfe4391b9606739f2b12, type: 3}
   takeoff: {fileID: 0}
@@ -171,46 +170,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &3948095059196706463
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4122710155918658908}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ObservedComponentsFoldoutOpen: 1
-  Group: 0
-  prefixField: -1
-  Synchronization: 3
-  OwnershipTransfer: 0
-  observableSearch: 2
-  ObservedComponents:
-  - {fileID: 1251726219775642341}
-  - {fileID: 399947343677379854}
-  sceneViewId: 0
-  InstantiationId: 0
-  isRuntimeInstantiated: 0
---- !u!114 &1251726219775642341
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4122710155918658908}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 627855c7f81362d41938ffe0b1475957, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SynchronizePosition: 1
-  m_SynchronizeRotation: 1
-  m_SynchronizeScale: 0
-  m_UseLocal: 0
 --- !u!82 &6219267553956500612
 AudioSource:
   m_ObjectHideFlags: 0
@@ -325,6 +284,46 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &3948095059196706463
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4122710155918658908}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ObservedComponentsFoldoutOpen: 1
+  Group: 0
+  prefixField: -1
+  Synchronization: 3
+  OwnershipTransfer: 0
+  observableSearch: 2
+  ObservedComponents:
+  - {fileID: 1251726219775642341}
+  - {fileID: 399947343677379854}
+  sceneViewId: 0
+  InstantiationId: 0
+  isRuntimeInstantiated: 0
+--- !u!114 &1251726219775642341
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4122710155918658908}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 627855c7f81362d41938ffe0b1475957, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SynchronizePosition: 1
+  m_SynchronizeRotation: 1
+  m_SynchronizeScale: 0
+  m_UseLocal: 0
 --- !u!1001 &252812765197333666
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -527,6 +526,11 @@ PrefabInstance:
 --- !u!4 &362058741138858952 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4632422161026528, guid: 4b9da6523ac0df74aa7ee1002c6defba, type: 3}
+  m_PrefabInstance: {fileID: 366550412212547112}
+  m_PrefabAsset: {fileID: 0}
+--- !u!198 &564214888314708079 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 198793746485055047, guid: 4b9da6523ac0df74aa7ee1002c6defba, type: 3}
   m_PrefabInstance: {fileID: 366550412212547112}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2230465235321315294
