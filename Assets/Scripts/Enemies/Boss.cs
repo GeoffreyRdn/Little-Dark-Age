@@ -467,7 +467,7 @@ namespace Enemies
             foreach (Player playerPhoton in PhotonNetwork.PlayerList)
             {
                 GameObject player = playerPhoton.TagObject as GameObject;
-                if (player == null || player.GetComponent<PlayerController>().isDead || player.GetComponent<PlayerController>().isDead) 
+                if (player == null || player.GetComponent<PlayerController>().isDead || player.GetComponent<HealthController>().Health <= 0) 
                     continue;
 
                 if (InDetectionRange(player.transform))
