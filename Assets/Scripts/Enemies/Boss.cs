@@ -6,6 +6,7 @@ using Cinemachine;
 using Health;
 using NaughtyAttributes;
 using Photon.Pun;
+using Photon.Realtime;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
@@ -337,7 +338,7 @@ namespace Enemies
                 {
                     case 1:
                         Debug.Log("PLAYING ATTACK1");
-                        audioSource.PlayOneShot(attack1, 100);
+                        audioSource.PlayOneShot(attack1);
                         photonView.RPC(nameof(SendAttack1Audio), RpcTarget.Others);
 
                         break;
@@ -442,19 +443,33 @@ namespace Enemies
 
         private void UpdateTarget()
         {
-            // the AI is already following a player
-            if (target != null && InFollowRange()) return;
-
-            (GameObject playerInRange, float distance) = (null, 0);
-            
-            foreach (GameObject player in players)
+            if (target != null)
             {
-                if (player.GetComponent<PlayerController>().isDead)
+                Player player = PhotonNetwork.PlayerList.FirstOrDefault(
+                    x => ((GameObject) x.TagObject).GetComponent<PhotonView>().ViewID ==
+                         target.GetComponent<PhotonView>().ViewID);
+
+                if (player != null)
                 {
-                    players.Remove(player);
-                    continue;
+                    GameObject playerGO = (GameObject) player.TagObject;
+                    if (playerGO.GetComponent<HealthController>().Health <= 0 ||
+                        playerGO.GetComponent<PlayerController>().isDead)
+                    {
+                        target = null;
+                    }
                 }
                 
+                if (target != null && InFollowRange()) return;
+            }
+            
+            (GameObject playerInRange, float distance) = (null, 0);
+            
+            foreach (Player playerPhoton in PhotonNetwork.PlayerList)
+            {
+                GameObject player = playerPhoton.TagObject as GameObject;
+                if (player == null || player.GetComponent<PlayerController>().isDead || player.GetComponent<PlayerController>().isDead) 
+                    continue;
+
                 if (InDetectionRange(player.transform))
                 {
                     var currentDistance = Vector3.Distance(player.transform.position, transform.position);

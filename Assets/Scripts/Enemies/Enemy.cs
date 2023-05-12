@@ -4,6 +4,7 @@ using System.Linq;
 using Health;
 using NaughtyAttributes;
 using Photon.Pun;
+using Photon.Realtime;
 using UnityEngine;
 using UnityEngine.AI;
 using Random = UnityEngine.Random;
@@ -235,19 +236,39 @@ namespace Enemies
 
         private void UpdateTarget()
         {
-            // the AI is already following a player
-            if (target != null && InFollowRange()) return;
+            if (target != null)
+            {
+                Player player = PhotonNetwork.PlayerList.FirstOrDefault(
+                    x => ((GameObject) x.TagObject).GetComponent<PhotonView>().ViewID ==
+                         target.GetComponent<PhotonView>().ViewID);
+
+                if (player != null)
+                {
+                    GameObject playerGO = (GameObject) player.TagObject;
+                    if (playerGO.GetComponent<HealthController>().Health <= 0 ||
+                        playerGO.GetComponent<PlayerController>().isDead)
+                    {
+                        target = null;
+                    }
+                }
+                
+                if (target != null && InFollowRange()) return;
+            }
+
 
             (GameObject playerInRange, float distance) = (null, 0);
             
-            foreach (var player in players)
+            foreach (Player playerPhoton in PhotonNetwork.PlayerList)
             {
-                if (player == null || player.GetComponent<PlayerController>().isDead)
-                {
-                    players.Remove(player);
-                    continue;
-                }
+                GameObject player = playerPhoton.TagObject as GameObject;
                 
+                if (player == null || player.GetComponent<PlayerController>().isDead || player.GetComponent<PlayerController>().isDead) 
+                    continue;
+                
+                var pc = player.GetComponent<PlayerController>();
+                var hc = player.GetComponent<HealthController>();
+                if (player == null || pc.isDead || hc.Health <= 0) continue;
+
                 if (InDetectionRange(player.transform))
                 {
                     var currentDistance = Vector3.Distance(player.transform.position, transform.position);

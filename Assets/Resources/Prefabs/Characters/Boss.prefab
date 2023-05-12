@@ -39,7 +39,7 @@ Transform:
   - {fileID: 2226331126779967250}
   - {fileID: 5370958896091680788}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &4124885688842974671
 MonoBehaviour:
@@ -56,7 +56,7 @@ MonoBehaviour:
   playerTag: Player
   sparkle: {fileID: 564214888314708079}
   stageChangeFX: {fileID: 0}
-  attack1: {fileID: 8300000, guid: af81fd1ac55ccfe4391b9606739f2b12, type: 3}
+  attack1: {fileID: 8300000, guid: 84a744165da78914c94342192b4a17f3, type: 3}
   attack2: {fileID: 8300000, guid: af81fd1ac55ccfe4391b9606739f2b12, type: 3}
   takeoff: {fileID: 8300000, guid: 29bb01feb5d58614ea773faa82d3e8d3, type: 3}
   deathSound: {fileID: 8300000, guid: 3627703cbce6890428167c0f19f74788, type: 3}
@@ -182,13 +182,13 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
-  m_Volume: 0.602
+  m_Volume: 0.5
   m_Pitch: 1
   Loop: 0
   Mute: 0
   Spatialize: 0
   SpatializePostEffects: 0
-  Priority: 191
+  Priority: 190
   DopplerLevel: 1
   MinDistance: 1
   MaxDistance: 15
@@ -202,7 +202,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0.8138958
+      value: 0.66217005
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -210,8 +210,8 @@ AudioSource:
       inWeight: 0
       outWeight: 0
     - serializedVersion: 3
-      time: 0.7136948
-      value: 0.4619335
+      time: 0.6911576
+      value: 0.36710012
       inSlope: -1.0872946
       outSlope: -1.0872946
       tangentMode: 0
@@ -243,8 +243,8 @@ AudioSource:
       inWeight: 0.33333334
       outWeight: 0.33333334
     - serializedVersion: 3
-      time: 0.82239974
-      value: 0.9631115
+      time: 0.8449217
+      value: 0.90147364
       inSlope: -0.9748619
       outSlope: -0.9748619
       tangentMode: 0
